@@ -10,7 +10,7 @@ FILENAME = os.path.join(DIRNAME, 'queries/valid_queries.sql')
 
 
 def execute_query(url: str, query: str) -> t.List[t.Dict[str, t.Any]]:
-    engine = sqlalchemy.create_engine(url + 'test_database')
+    engine = sqlalchemy.create_engine(url + 'postgres')
     conn = engine.connect()
     str_query = str(query).replace('%', '%%')
     res = conn.execute(str_query)
