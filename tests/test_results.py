@@ -3,7 +3,7 @@ import typing as t
 import os
 from termcolor import colored
 
-import sarus_sql as sql
+import pyqrlew as qrl
 
 DIRNAME = os.path.join(os.getcwd(), os.path.dirname(__file__))
 FILENAME = os.path.join(DIRNAME, 'queries/valid_queries.sql')
@@ -17,7 +17,7 @@ def execute_query(url: str, query: str) -> t.List[t.Dict[str, t.Any]]:
     return [dict(row) for row in res.fetchall()]
 
 
-def check_query(dataset: sql.Dataset, url: str, query: str) -> None:
+def check_query(dataset: qrl.Dataset, url: str, query: str) -> None:
     result = execute_query(url, query)
     rel = dataset.sql(query)
     new_query = rel.render()

@@ -1,7 +1,7 @@
 import pytest
 import os
 import sqlalchemy
-import sarus_sql as sql
+import pyqrlew as qrl
 from ressources.names import (
     DATASET_FILENAME,
     SCHEMA_FILENAME,
@@ -18,8 +18,8 @@ def postgres_url():
     try:
         engine.connect()
     except sqlalchemy.exc.OperationalError:
-        return "postgresql+psycopg2://postgres:1234@postgres:5432/"
-    return "postgresql+psycopg2://postgres:1234@localhost:5432/"
+        return "postgresql+psycopg2://postgres:pyqrlew-test@postgres:5432/"
+    return "postgresql+psycopg2://postgres:pyqrlew-test@localhost:5432/"
 
 @pytest.fixture(scope='session', autouse=True)
 def dataset():
@@ -32,5 +32,5 @@ def dataset():
     with open(SIZE_FILENAME, "r") as f:
         size = f.read()
 
-    return sql.Dataset(dataset, schema, size)
+    return qrl.Dataset(dataset, schema, size)
 
