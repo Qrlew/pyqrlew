@@ -1,0 +1,515 @@
+{
+  "@type": "sarus_data_spec/sarus_data_spec.Size",
+  "dataset": "526655fe8889f9de1c84cb761624df68",
+  "name": "Transformed_sizes",
+  "properties": {},
+  "statistics": {
+    "name": "Union",
+    "properties": {},
+    "union": {
+      "fields": [
+        {
+          "name": "census",
+          "statistics": {
+            "name": "Struct",
+            "properties": {},
+            "struct": {
+              "fields": [
+                {
+                  "name": "age",
+                  "statistics": {
+                    "name": "Optional",
+                    "optional": {
+                      "multiplicity": 43.06589126586914,
+                      "name": "",
+                      "size": "275",
+                      "statistics": {
+                        "integer": {
+                          "distribution": {
+                            "integer": {
+                              "max": "9223372036854775807",
+                              "min": "-9223372036854775808",
+                              "points": []
+                            },
+                            "properties": {}
+                          },
+                          "multiplicity": 31.21906852722168,
+                          "size": "1"
+                        },
+                        "name": "Integer",
+                        "properties": {}
+                      }
+                    },
+                    "properties": {}
+                  }
+                },
+                {
+                  "name": "capital_gain",
+                  "statistics": {
+                    "integer": {
+                      "distribution": {
+                        "integer": {
+                          "max": "9223372036854775807",
+                          "min": "-9223372036854775808",
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "multiplicity": 43.06589126586914,
+                      "size": "275"
+                    },
+                    "name": "Integer",
+                    "properties": {}
+                  }
+                },
+                {
+                  "name": "capital_loss",
+                  "statistics": {
+                    "integer": {
+                      "distribution": {
+                        "integer": {
+                          "max": "9223372036854775807",
+                          "min": "-9223372036854775808",
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "multiplicity": 43.06589126586914,
+                      "size": "275"
+                    },
+                    "name": "Integer",
+                    "properties": {}
+                  }
+                },
+                {
+                  "name": "education",
+                  "statistics": {
+                    "name": "Text",
+                    "properties": {},
+                    "text": {
+                      "distribution": {
+                        "integer": {
+                          "max": "9223372036854775807",
+                          "min": "-9223372036854775808",
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "example": "",
+                      "multiplicity": 43.06589126586914,
+                      "size": "275"
+                    }
+                  }
+                },
+                {
+                  "name": "education_num",
+                  "statistics": {
+                    "integer": {
+                      "distribution": {
+                        "integer": {
+                          "max": "9223372036854775807",
+                          "min": "-9223372036854775808",
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "multiplicity": 43.06589126586914,
+                      "size": "275"
+                    },
+                    "name": "Integer",
+                    "properties": {}
+                  }
+                },
+                {
+                  "name": "fnlwgt",
+                  "statistics": {
+                    "name": "Text",
+                    "properties": {},
+                    "text": {
+                      "distribution": {
+                        "integer": {
+                          "max": "9223372036854775807",
+                          "min": "-9223372036854775808",
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "example": "",
+                      "multiplicity": 43.06589126586914,
+                      "size": "275"
+                    }
+                  }
+                },
+                {
+                  "name": "hours_per_week",
+                  "statistics": {
+                    "integer": {
+                      "distribution": {
+                        "integer": {
+                          "max": "9223372036854775807",
+                          "min": "-9223372036854775808",
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "multiplicity": 43.06589126586914,
+                      "size": "275"
+                    },
+                    "name": "Integer",
+                    "properties": {}
+                  }
+                },
+                {
+                  "name": "income",
+                  "statistics": {
+                    "name": "Text",
+                    "properties": {},
+                    "text": {
+                      "distribution": {
+                        "integer": {
+                          "max": "9223372036854775807",
+                          "min": "-9223372036854775808",
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "example": "",
+                      "multiplicity": 43.06589126586914,
+                      "size": "275"
+                    }
+                  }
+                },
+                {
+                  "name": "marital_status",
+                  "statistics": {
+                    "name": "Optional",
+                    "optional": {
+                      "multiplicity": 43.06589126586914,
+                      "name": "",
+                      "size": "275",
+                      "statistics": {
+                        "name": "Text",
+                        "properties": {},
+                        "text": {
+                          "distribution": {
+                            "integer": {
+                              "max": "9223372036854775807",
+                              "min": "-9223372036854775808",
+                              "points": []
+                            },
+                            "properties": {}
+                          },
+                          "example": "",
+                          "multiplicity": 72.73754119873047,
+                          "size": "249"
+                        }
+                      }
+                    },
+                    "properties": {}
+                  }
+                },
+                {
+                  "name": "native_country",
+                  "statistics": {
+                    "name": "Text",
+                    "properties": {},
+                    "text": {
+                      "distribution": {
+                        "integer": {
+                          "max": "9223372036854775807",
+                          "min": "-9223372036854775808",
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "example": "",
+                      "multiplicity": 43.06589126586914,
+                      "size": "275"
+                    }
+                  }
+                },
+                {
+                  "name": "occupation",
+                  "statistics": {
+                    "name": "Text",
+                    "properties": {},
+                    "text": {
+                      "distribution": {
+                        "integer": {
+                          "max": "9223372036854775807",
+                          "min": "-9223372036854775808",
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "example": "",
+                      "multiplicity": 43.06589126586914,
+                      "size": "275"
+                    }
+                  }
+                },
+                {
+                  "name": "race",
+                  "statistics": {
+                    "name": "Text",
+                    "properties": {},
+                    "text": {
+                      "distribution": {
+                        "integer": {
+                          "max": "9223372036854775807",
+                          "min": "-9223372036854775808",
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "example": "",
+                      "multiplicity": 43.06589126586914,
+                      "size": "275"
+                    }
+                  }
+                },
+                {
+                  "name": "relationship",
+                  "statistics": {
+                    "name": "Text",
+                    "properties": {},
+                    "text": {
+                      "distribution": {
+                        "integer": {
+                          "max": "9223372036854775807",
+                          "min": "-9223372036854775808",
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "example": "",
+                      "multiplicity": 43.06589126586914,
+                      "size": "275"
+                    }
+                  }
+                },
+                {
+                  "name": "sex",
+                  "statistics": {
+                    "name": "Text",
+                    "properties": {},
+                    "text": {
+                      "distribution": {
+                        "integer": {
+                          "max": "9223372036854775807",
+                          "min": "-9223372036854775808",
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "example": "",
+                      "multiplicity": 43.06589126586914,
+                      "size": "275"
+                    }
+                  }
+                },
+                {
+                  "name": "workclass",
+                  "statistics": {
+                    "name": "Text",
+                    "properties": {},
+                    "text": {
+                      "distribution": {
+                        "integer": {
+                          "max": "9223372036854775807",
+                          "min": "-9223372036854775808",
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "example": "",
+                      "multiplicity": 43.06589126586914,
+                      "size": "275"
+                    }
+                  }
+                }
+              ],
+              "multiplicity": 43.06589126586914,
+              "name": "",
+              "size": "275"
+            }
+          }
+        },
+        {
+          "name": "beacon",
+          "statistics": {
+            "name": "Struct",
+            "properties": {},
+            "struct": {
+              "fields": [
+                {
+                  "name": "Beacon\u540d",
+                  "statistics": {
+                    "name": "Text",
+                    "properties": {},
+                    "text": {
+                      "distribution": {
+                        "integer": {
+                          "max": "9223372036854775807",
+                          "min": "-9223372036854775808",
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "example": "",
+                      "multiplicity": 33.172420501708984,
+                      "size": "1"
+                    }
+                  }
+                },
+                {
+                  "name": "RSSI",
+                  "statistics": {
+                    "integer": {
+                      "distribution": {
+                        "integer": {
+                          "max": "9223372036854775807",
+                          "min": "-9223372036854775808",
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "multiplicity": 33.172420501708984,
+                      "size": "1"
+                    },
+                    "name": "Integer",
+                    "properties": {}
+                  }
+                },
+                {
+                  "name": "UserId",
+                  "statistics": {
+                    "name": "Text",
+                    "properties": {},
+                    "text": {
+                      "distribution": {
+                        "integer": {
+                          "max": "9223372036854775807",
+                          "min": "-9223372036854775808",
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "example": "",
+                      "multiplicity": 33.172420501708984,
+                      "size": "1"
+                    }
+                  }
+                },
+                {
+                  "name": "\u30d5\u30ed\u30a2\u540d",
+                  "statistics": {
+                    "name": "Text",
+                    "properties": {},
+                    "text": {
+                      "distribution": {
+                        "integer": {
+                          "max": "9223372036854775807",
+                          "min": "-9223372036854775808",
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "example": "",
+                      "multiplicity": 33.172420501708984,
+                      "size": "1"
+                    }
+                  }
+                },
+                {
+                  "name": "\u30de\u30c3\u30d7\u306eX\u5ea7\u6a19",
+                  "statistics": {
+                    "integer": {
+                      "distribution": {
+                        "integer": {
+                          "max": "9223372036854775807",
+                          "min": "-9223372036854775808",
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "multiplicity": 33.172420501708984,
+                      "size": "1"
+                    },
+                    "name": "Integer",
+                    "properties": {}
+                  }
+                },
+                {
+                  "name": "\u30de\u30c3\u30d7\u306eY\u5ea7\u6a19",
+                  "statistics": {
+                    "integer": {
+                      "distribution": {
+                        "integer": {
+                          "max": "9223372036854775807",
+                          "min": "-9223372036854775808",
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "multiplicity": 33.172420501708984,
+                      "size": "1"
+                    },
+                    "name": "Integer",
+                    "properties": {}
+                  }
+                },
+                {
+                  "name": "\u6240\u5c5e\u90e8\u7f72",
+                  "statistics": {
+                    "name": "Text",
+                    "properties": {},
+                    "text": {
+                      "distribution": {
+                        "integer": {
+                          "max": "9223372036854775807",
+                          "min": "-9223372036854775808",
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "example": "",
+                      "multiplicity": 33.172420501708984,
+                      "size": "1"
+                    }
+                  }
+                },
+                {
+                  "name": "\u691c\u77e5\u65e5\u6642",
+                  "statistics": {
+                    "datetime": {
+                      "distribution": {
+                        "integer": {
+                          "max": "9223372036854775807",
+                          "min": "-9223372036854775808",
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "multiplicity": 33.172420501708984,
+                      "size": "1"
+                    },
+                    "name": "Datetime",
+                    "properties": {}
+                  }
+                }
+              ],
+              "multiplicity": 33.172420501708984,
+              "name": "",
+              "size": "1"
+            }
+          }
+        }
+      ],
+      "multiplicity": 7.578755855560303,
+      "name": "",
+      "size": "275"
+    }
+  },
+  "uuid": "a2b0279e6310e192021e5f8726e0ad3f"
+}

@@ -1,0 +1,14 @@
+[package]
+name = "pyqrlew"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "pyqrlew"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.18", features = ["abi3-py38"] }
+qrlew = "0.1"
+qrlew-sarus = "0.1"

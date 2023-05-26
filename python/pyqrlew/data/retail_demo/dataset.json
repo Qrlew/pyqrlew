@@ -1,0 +1,20 @@
+{
+    "@type": "sarus_data_spec/sarus_data_spec.Dataset",
+    "uuid": "476edb9a9d4542986b40b7b0ca485a88",
+    "name": "Transformed",
+    "spec": {
+        "transformed": {
+        "transform": "b5bcf7dd7285658a083556fe94e3f42d",
+        "arguments": [
+            "8a5f4206f9db04071ec8fb06c7535c88"
+        ],
+        "named_arguments": {
+            "attributes_budget": "f8b2fe1ffc40b3a92c8a18e1f0aa5112"
+        }
+        }
+    },
+    "properties": {
+        "slugname": "jp_retail_demo"
+    },
+    "doc": ""
+}

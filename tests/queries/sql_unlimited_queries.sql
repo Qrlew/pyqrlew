@@ -1,0 +1,18 @@
+SELECT AVG(grouped_sum_age) FROM (SELECT SUM(income) AS grouped_sum_age FROM pums_table GROUP BY age) AS subquery;
+SELECT AVG(grouped_sum_age) FROM (SELECT SUM(table1.income) AS grouped_sum_age FROM pums_table AS table1 GROUP BY age) AS subquery;
+SELECT SUM(log_income), SUM(sqrt_income), SUM(inv_income) FROM (SELECT LOG(income) AS log_income, SQRT(income) AS sqrt_income, 1/income AS inv_income FROM pums_table WHERE income < 40000) AS subquery;
+SELECT COUNT(*) FROM pums_table TABLESAMPLE BERNOULLI (1) REPEATABLE (200);
+WITH my_table1 AS ( SELECT age, married, COUNT(*) AS count_all FROM pums_table GROUP BY age, married ORDER BY age, married ), my_table2 AS ( SELECT 2 * age AS two_age, married, count_all FROM my_table1 ) SELECT two_age, COUNT(*) FROM my_table2 GROUP BY two_age LIMIT 15;
+SELECT sex, COUNT(DISTINCT age) AS my_count, SUM(DISTINCT age) AS my_age, VARIANCE(DISTINCT age) AS my_var, STDDEV (DISTINCT age) AS my_stddev FROM pums_table GROUP BY sex;
+SELECT COUNT(DISTINCT age) AS my_count, SUM(DISTINCT age) AS my_age, VARIANCE(DISTINCT age) AS my_var, STDDEV (DISTINCT age) AS my_stddev FROM pums_table;
+SELECT SUM(s1), SUM(s2) FROM (SELECT SUM(DISTINCT income) AS s1, SUM(DISTINCT age) AS s2 FROM pums_table GROUP BY sex HAVING COUNT(*) > 5) AS sq;
+SELECT SUM(DISTINCT age) FROM pums_table;
+SELECT DISTINCT SUM(age) FROM pums_table;
+SELECT COUNT(DISTINCT age), SUM(DISTINCT age), AVG(DISTINCT age), VARIANCE(DISTINCT age), STDDEV(DISTINCT age) FROM pums_table;
+SELECT sex, COUNT(DISTINCT age), AVG(DISTINCT age), SUM(DISTINCT age), AVG(DISTINCT age), VARIANCE(DISTINCT age), STDDEV(DISTINCT age) FROM pums_table GROUP BY sex;
+SELECT sex, SUM(age), VARIANCE(age), SUM(DISTINCT age), VARIANCE(DISTINCT age), SUM(DISTINCT income), VARIANCE(DISTINCT income) FROM pums_table GROUP BY sex;
+SELECT SUM(age), VARIANCE(age), SUM(DISTINCT age), VARIANCE(DISTINCT age), SUM(DISTINCT income), VARIANCE(DISTINCT income) FROM pums_table GROUP BY sex;
+SELECT SUM(DISTINCT age) AS my_sum FROM pums_table WHERE sex = 'Female' HAVING COUNT(*) > 5;
+SELECT COUNT(*), SUM(DISTINCT age) AS my_sum FROM pums_table GROUP BY CEIL(income / 100);
+SELECT income, COUNT(*), SUM(DISTINCT age) AS my_sum FROM pums_table GROUP BY income ORDER BY income, my_sum LIMIT 5;
+WITH my_table1 AS (SELECT * FROM pums_table), my_table2 AS (SELECT * FROM pums_table) SELECT COUNT(*), SUM(DISTINCT my_table1.age), SUM(DISTINCT my_table2.age) FROM my_table1 JOIN my_table2 ON my_table1.pid = my_table2.pid;
