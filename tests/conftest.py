@@ -13,12 +13,12 @@ FILENAME = os.path.join(DIRNAME, 'queries/valid_queries.sql')
 
 @pytest.fixture(scope='session', autouse=True)
 def postgres_url():
-    url = "postgresql+psycopg2://postgres:1234@localhost:5432/"
+    url = "postgresql+psycopg2://postgres:pyqrlew-test@localhost:5432/"
     engine = sqlalchemy.engine.create_engine(url, echo=True, future=True)
     try:
         engine.connect()
     except sqlalchemy.exc.OperationalError:
-        return "postgresql+psycopg2://postgres:pyqrlew-test@postgres:5432/"
+        return "postgresql+psycopg2://postgres:pyqrlew-test@localhost:5432/"
     return "postgresql+psycopg2://postgres:pyqrlew-test@localhost:5432/"
 
 @pytest.fixture(scope='session', autouse=True)
