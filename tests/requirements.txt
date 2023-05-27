@@ -1,5 +1,6 @@
-maturin==1.0.0
-psycopg2-binary==2.9.6
-pytest==7.3.1
-SQLAlchemy==2.0.15
-termcolor==2.3.0
+maturin==1.0
+psycopg2-binary==2.9
+pytest==7.3
+pandas==2.0
+SQLAlchemy==2.0
+termcolor==2.3
