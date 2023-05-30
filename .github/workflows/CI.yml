@@ -36,8 +36,6 @@ jobs:
                 # Provide the password for postgres
                 env:
                     POSTGRES_PASSWORD: pyqrlew-test
-                    POSTGRES_USER: postgres
-                    POSTGRES_DB: postgres
                 # Set health checks to wait until postgres has started
                 options: >-
                     --health-cmd pg_isready
@@ -55,10 +53,9 @@ jobs:
               uses: Swatinem/rust-cache@v2
               with:
                   key: test-v3
-            - name: Add data to database
-              env:
-                DATABASE_URL: postgresql://postgres:$POSTGRES_PASSWORD@localhost:5432/postgres
-              run: psql "$DATABASE_URL" -f ./tests/ressources/install_db/install_postgres.sql
+            - run: psql postgresql://postgres:$POSTGRES_PASSWORD@localhost:5432/postgres -f ./tests/ressources/install_db/
+install_postgres.sql
+            - run: psql postgresql://postgres:$POSTGRES_PASSWORD@localhost:5432/postgres -c "SELECT COUNT(*) FROM census;"
             - name: set up python
               uses: actions/setup-python@v4
               with:
