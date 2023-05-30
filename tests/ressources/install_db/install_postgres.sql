@@ -1,6 +1,3 @@
-DROP DATABASE IF EXISTS postgres;
-CREATE DATABASE postgres;
-\c postgres;
 -- Install census table
 CREATE TABLE "census" ("age" integer, "workclass" varchar(20), "fnlwgt" varchar(20), "education" varchar(20), "education_num" integer, "marital_status" varchar(30), "occupation" varchar(20), "relationship" varchar(20), "race" varchar(20), "sex" varchar(20), "capital_gain" integer, "capital_loss" integer, "hours_per_week" integer, "native_country" varchar(30), "income" varchar(20));
 \copy "census" ("age", "workclass", "fnlwgt", "education", "education_num", "marital_status", "occupation", "relationship", "race", "sex", "capital_gain", "capital_loss", "hours_per_week", "native_country", "income") FROM 'tests/ressources/install_db/extract_census.csv' CSV DELIMITER ',' HEADER;
