@@ -55,7 +55,7 @@ jobs:
                   key: test-v3
             - run: psql postgresql://postgres:$POSTGRES_PASSWORD@localhost:5432/postgres -f ./tests/ressources/install_db/
 install_postgres.sql
-            - run: psql postgresql://postgres:$POSTGRES_PASSWORD@localhost:5432/postgres -c "SELECT COUNT(*) FROM census;"
+            - run: psql postgresql://postgres:$POSTGRES_PASSWORD@localhost:5432/postgres -c "SELECT COUNT(*) FROM census"
             - name: set up python
               uses: actions/setup-python@v4
               with:
