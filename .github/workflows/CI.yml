@@ -59,7 +59,7 @@ jobs:
                 env:
                 DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
                 run: psql "$DATABASE_URL" -f ./tests/ressources/install_db/install_postgres.sql
-                run: psql "$DATABASE_URL" -c "SELECT COUNT(*) FROM census"
+            - run: psql "$DATABASE_URL" -c "SELECT COUNT(*) FROM census"
             - name: set up python
               uses: actions/setup-python@v4
               with:
