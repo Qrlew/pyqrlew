@@ -53,6 +53,10 @@ jobs:
               uses: Swatinem/rust-cache@v2
               with:
                   key: test-v3
+            - name: Add data to database
+                env:
+                DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+                run: psql "$DATABASE_URL" -f ./tests/ressources/install_db/install_postgres.sql
             - name: set up python
               uses: actions/setup-python@v4
               with:
@@ -62,7 +66,6 @@ jobs:
               env:
                   RUST_BACKTRACE: 1
             - run: pip freeze
-            - run: psql -h "localhost" -U "postgres"  -f ./tests/ressources/install_db/install_postgres.sql
             - run: pytest
 
     linux:
