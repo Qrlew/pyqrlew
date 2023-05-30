@@ -19,7 +19,7 @@ def postgres_url():
         engine.connect()
     except sqlalchemy.exc.OperationalError:
         return "postgresql+psycopg2://postgres:pyqrlew-test@localhost:5432/"
-    return "postgresql+psycopg2://postgres:pyqrlew-test@localhost:5432/"
+    return url
 
 @pytest.fixture(scope='session', autouse=True)
 def dataset():

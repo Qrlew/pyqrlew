@@ -37,7 +37,7 @@ jobs:
                 env:
                     POSTGRES_PASSWORD: pyqrlew-test
                     POSTGRES_USER: postgres
-                    POSTGRES_DB: postgres
+                    POSTGRES_DB: pyqrlew-test
                 # Set health checks to wait until postgres has started
                 options: >-
                     --health-cmd pg_isready
@@ -59,6 +59,7 @@ jobs:
                 env:
                 DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
                 run: psql "$DATABASE_URL" -f ./tests/ressources/install_db/install_postgres.sql
+                run: psql "$DATABASE_URL" -c "SELECT COUNT(*) FROM census"
             - name: set up python
               uses: actions/setup-python@v4
               with:
