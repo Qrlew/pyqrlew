@@ -14,7 +14,8 @@ def execute_query(url: str, query: str) -> t.List[t.Dict[str, t.Any]]:
     conn = engine.connect()
     str_query = sqlalchemy.text(query)
     res = conn.execute(str_query)
-    return [dict(row) for row in res.fetchall()]
+    names = res.keys()
+    return [{name:col for name, col in zip(names, row)} for row in res]
 
 
 def check_query(dataset: qrl.Dataset, url: str, query: str) -> None:
@@ -34,11 +35,9 @@ def check_query(dataset: qrl.Dataset, url: str, query: str) -> None:
 
 
 def test_results(postgres_url, dataset):
-    pass
-    # Reactivate the tests when they work again
-    # with open(FILENAME, 'r') as f:
-    #     for query in f:
-    #         if query.startswith('--'):
-    #             continue
-    #         print('\n\n', colored(query, 'blue'))
-    #         check_query(dataset, postgres_url, query)
+    with open(FILENAME, 'r') as f:
+        for query in f:
+            if query.startswith('--'):
+                continue
+            print('\n\n', colored(query, 'blue'))
+            check_query(dataset, postgres_url, query)
