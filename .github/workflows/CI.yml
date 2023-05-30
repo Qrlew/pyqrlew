@@ -57,7 +57,7 @@ jobs:
                   key: test-v3
             - name: Add data to database
               env:
-                DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+                DATABASE_URL: postgresql://postgres:$POSTGRES_PASSWORD@localhost:5432/postgres
               run: psql "$DATABASE_URL" -f ./tests/ressources/install_db/install_postgres.sql
             - name: set up python
               uses: actions/setup-python@v4
