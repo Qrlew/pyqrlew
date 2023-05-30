@@ -62,7 +62,7 @@ jobs:
               env:
                   RUST_BACKTRACE: 1
             - run: pip freeze
-            - run: psql -h "postgres" -U "postgres"  -f ./tests/ressources/install_db/install_postgres.sql
+            - run: psql -h "localhost" -U "postgres"  -f ./tests/ressources/install_db/install_postgres.sql
             - run: pytest
 
     linux:
