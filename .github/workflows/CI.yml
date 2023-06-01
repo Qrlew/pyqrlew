@@ -53,6 +53,8 @@ jobs:
               uses: Swatinem/rust-cache@v2
               with:
                   key: test-v3
+            - run: psql postgresql://postgres:pyqrlew-test@localhost:5432/postgres -f ./tests/ressources/install_db/install_postgres.sql
+            - run: psql postgresql://postgres:pyqrlew-test@localhost:5432/postgres -c "SELECT COUNT(*) FROM census"
             - name: set up python
               uses: actions/setup-python@v4
               with:
@@ -63,7 +65,7 @@ jobs:
                   RUST_BACKTRACE: 1
             - run: pip freeze
             - run: pytest
-    
+
     linux:
         runs-on: ubuntu-latest
         if: startsWith(github.ref, 'refs/tags/')
