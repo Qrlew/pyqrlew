@@ -951,9 +951,9 @@ dependencies = [
 
 [[package]]
 name = "qrlew"
-version = "0.1.3"
+version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e35cff194f99a0630fe4498d19a5ede969145ce6cbe7aba17804dd71ebe8436e"
+checksum = "23b02ede106600e60bda0d5375bb110b019f918a2a7b77e235ab2d70ccdf8b48"
 dependencies = [
  "base64",
  "chrono",

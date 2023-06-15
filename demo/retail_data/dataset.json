@@ -1,0 +1,18 @@
+{
+  "@type": "sarus_data_spec/sarus_data_spec.Dataset",
+  "doc": "",
+  "name": "Transformed",
+  "properties": {},
+  "spec": {
+    "transformed": {
+      "arguments": [
+        "f9bb239110edad02dcf8b30402e57ef5"
+      ],
+      "named_arguments": {
+        "attributes_budget": "18510f7912c9ed27e46682cbb0a25c6a"
+      },
+      "transform": "b5bcf7dd7285658a083556fe94e3f42d"
+    }
+  },
+  "uuid": "9d28f5f743dede1f6b5b8baaa5d017b9"
+}
