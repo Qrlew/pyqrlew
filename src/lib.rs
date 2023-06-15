@@ -57,13 +57,13 @@ struct Dataset(data_spec::Dataset);
 #[pymethods]
 impl Dataset {
     #[new]
-    fn new(dataset: &str, schema: &str, size: &str) -> Result<Self> {
+    pub fn new(dataset: &str, schema: &str, size: &str) -> Result<Self> {
         Ok(Dataset(data_spec::Dataset::parse_from_dataset_schema_size(
             dataset, schema, size,
         )?))
     }
 
-    fn relations(&self) -> Vec<(Vec<String>, Relation)> {
+    pub fn relations(&self) -> Vec<(Vec<String>, Relation)> {
         self.0
             .relations()
             .into_iter()
@@ -71,14 +71,14 @@ impl Dataset {
             .collect()
     }
 
-    fn sql(&self, query: &str) -> Result<Relation> {
+    pub fn sql(&self, query: &str) -> Result<Relation> {
         let query = sql::relation::parse(query)?;
         let relations = self.0.relations();
         let query_with_relations = query.with(&relations);
         Ok(Relation(Rc::new(query_with_relations.try_into()?)))
     }
 
-    fn __str__(&self) -> String {
+    pub fn __str__(&self) -> String {
         format!("{}", self.0)
     }
 
@@ -92,36 +92,36 @@ struct Relation(Rc<relation::Relation>);
 
 #[pymethods]
 impl Relation {
-    fn parse(&self, query: &str, dataset: &Dataset) -> Result<Self> {
+    pub fn parse(&self, query: &str, dataset: &Dataset) -> Result<Self> {
         dataset.sql(query)
     }
 
-    fn __str__(&self) -> String {
+    pub fn __str__(&self) -> String {
         let relation = &*(self.0);
         format!("{}", relation)
     }
 
-    fn dot(&self) -> Result<String> {
+    pub fn dot(&self) -> Result<String> {
         let mut out: Vec<u8> = vec![];
         (*self.0).dot(&mut out, &[]).unwrap();
         Ok(String::from_utf8(out).unwrap())
     }
 
-    fn schema(&self) -> String {
+    pub fn schema(&self) -> String {
         (*self.0).schema().to_string()
     }
 
-    fn protect(&self, dataset: &Dataset, protected_entity: &str) -> Result<Self> {
+    pub fn protect(&self, dataset: &Dataset, protected_entity: &str) -> Result<Self> {
         let pe = parse_protected_entity(protected_entity);
         Ok(Relation(Rc::new(protect((*(self.0)).clone(), dataset, &pe))))
     }
 
-    fn dp_compilation(&self, dataset: &Dataset, protected_entity: &str, epsilon: f64, delta: f64) -> Result<Self> {
+    pub fn dp_compilation(&self, dataset: &Dataset, protected_entity: &str, epsilon: f64, delta: f64) -> Result<Self> {
         let pe = parse_protected_entity(protected_entity);
         Ok(Relation(Rc::new(dp_compilation((*(self.0)).clone(), dataset, &pe, epsilon, delta))))
     }
 
-    fn render(&self) -> String {
+    pub fn render(&self) -> String {
         let relation = &*(self.0);
         let ast_query: ast::Query = relation.into();
         format!("{}", ast_query)

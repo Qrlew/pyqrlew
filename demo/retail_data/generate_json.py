@@ -73,15 +73,15 @@ with WorkerContext() as context:
     schema = ds_with_budget.bounds().statistics().protobuf()
 
     dataset_ = str(ds_with_budget)
-    with open("retail/dataset.json", "w") as f:
+    with open("demo/retail_data/dataset.json", "w") as f:
         f.write(dataset_)
 
     size_ = str(ds_with_budget.size())
-    with open("retail/size.json", "w") as f:
+    with open("demo/retail_data/size.json", "w") as f:
         f.write(size_)
 
     stats = str(ds_with_budget.schema())
-    with open("retail/schema.json", "w") as f:
+    with open("demo/retail_data/schema.json", "w") as f:
         f.write(stats)
     print(stats)
 
