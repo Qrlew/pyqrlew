@@ -1,0 +1,357 @@
+{
+  "@type": "sarus_data_spec/sarus_data_spec.Size",
+  "dataset": "9d28f5f743dede1f6b5b8baaa5d017b9",
+  "name": "Transformed_sizes",
+  "properties": {},
+  "statistics": {
+    "name": "Union",
+    "properties": {},
+    "union": {
+      "fields": [
+        {
+          "name": "features",
+          "statistics": {
+            "name": "Struct",
+            "properties": {},
+            "struct": {
+              "fields": [
+                {
+                  "name": "cpi",
+                  "statistics": {
+                    "name": "Float64",
+                    "optional": {
+                      "multiplicity": 1.0,
+                      "name": "",
+                      "size": "927",
+                      "statistics": {
+                        "float": {
+                          "distribution": {
+                            "double": {
+                              "max": 1.7976931348623157e+308,
+                              "min": -1.7976931348623157e+308,
+                              "points": []
+                            },
+                            "properties": {}
+                          },
+                          "multiplicity": 1.0,
+                          "size": "855"
+                        },
+                        "name": "Float",
+                        "properties": {}
+                      }
+                    },
+                    "properties": {}
+                  }
+                },
+                {
+                  "name": "date",
+                  "statistics": {
+                    "datetime": {
+                      "distribution": {
+                        "integer": {
+                          "max": "9223372036854775807",
+                          "min": "-9223372036854775808",
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "multiplicity": 1.0,
+                      "size": "927"
+                    },
+                    "name": "Datetime",
+                    "properties": {}
+                  }
+                },
+                {
+                  "name": "fuel_price",
+                  "statistics": {
+                    "float": {
+                      "distribution": {
+                        "double": {
+                          "max": 1.7976931348623157e+308,
+                          "min": -1.7976931348623157e+308,
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "multiplicity": 1.0,
+                      "size": "927"
+                    },
+                    "name": "Float",
+                    "properties": {}
+                  }
+                },
+                {
+                  "name": "id",
+                  "statistics": {
+                    "name": "Text",
+                    "properties": {},
+                    "text": {
+                      "distribution": {
+                        "integer": {
+                          "max": "9223372036854775807",
+                          "min": "-9223372036854775808",
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "example": "",
+                      "multiplicity": 1.0,
+                      "size": "927"
+                    }
+                  }
+                },
+                {
+                  "name": "isholiday",
+                  "statistics": {
+                    "boolean": {
+                      "distribution": {
+                        "boolean": {
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "multiplicity": 1.0,
+                      "size": "927"
+                    },
+                    "name": "Boolean",
+                    "properties": {}
+                  }
+                },
+                {
+                  "name": "store",
+                  "statistics": {
+                    "id": {
+                      "multiplicity": 1.0,
+                      "size": "927"
+                    },
+                    "name": "Id",
+                    "properties": {}
+                  }
+                },
+                {
+                  "name": "temperature",
+                  "statistics": {
+                    "float": {
+                      "distribution": {
+                        "double": {
+                          "max": 1.7976931348623157e+308,
+                          "min": -1.7976931348623157e+308,
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "multiplicity": 1.0,
+                      "size": "927"
+                    },
+                    "name": "Float",
+                    "properties": {}
+                  }
+                },
+                {
+                  "name": "unemployment",
+                  "statistics": {
+                    "name": "Float64",
+                    "optional": {
+                      "multiplicity": 1.0,
+                      "name": "",
+                      "size": "927",
+                      "statistics": {
+                        "float": {
+                          "distribution": {
+                            "double": {
+                              "max": 1.7976931348623157e+308,
+                              "min": -1.7976931348623157e+308,
+                              "points": []
+                            },
+                            "properties": {}
+                          },
+                          "multiplicity": 1.0,
+                          "size": "847"
+                        },
+                        "name": "Float",
+                        "properties": {}
+                      }
+                    },
+                    "properties": {}
+                  }
+                }
+              ],
+              "multiplicity": 1.0,
+              "name": "",
+              "size": "927"
+            }
+          }
+        },
+        {
+          "name": "sales",
+          "statistics": {
+            "name": "Struct",
+            "properties": {},
+            "struct": {
+              "fields": [
+                {
+                  "name": "date",
+                  "statistics": {
+                    "datetime": {
+                      "distribution": {
+                        "integer": {
+                          "max": "9223372036854775807",
+                          "min": "-9223372036854775808",
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "multiplicity": 1.0,
+                      "size": "706"
+                    },
+                    "name": "Datetime",
+                    "properties": {}
+                  }
+                },
+                {
+                  "name": "id",
+                  "statistics": {
+                    "name": "Text",
+                    "properties": {},
+                    "text": {
+                      "distribution": {
+                        "integer": {
+                          "max": "9223372036854775807",
+                          "min": "-9223372036854775808",
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "example": "",
+                      "multiplicity": 1.0,
+                      "size": "706"
+                    }
+                  }
+                },
+                {
+                  "name": "isholiday",
+                  "statistics": {
+                    "boolean": {
+                      "distribution": {
+                        "boolean": {
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "multiplicity": 1.0,
+                      "size": "706"
+                    },
+                    "name": "Boolean",
+                    "properties": {}
+                  }
+                },
+                {
+                  "name": "store",
+                  "statistics": {
+                    "id": {
+                      "multiplicity": 1.0,
+                      "size": "706"
+                    },
+                    "name": "Id",
+                    "properties": {}
+                  }
+                },
+                {
+                  "name": "weekly_sales",
+                  "statistics": {
+                    "float": {
+                      "distribution": {
+                        "double": {
+                          "max": 1.7976931348623157e+308,
+                          "min": -1.7976931348623157e+308,
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "multiplicity": 1.0,
+                      "size": "706"
+                    },
+                    "name": "Float",
+                    "properties": {}
+                  }
+                }
+              ],
+              "multiplicity": 1.0,
+              "name": "",
+              "size": "706"
+            }
+          }
+        },
+        {
+          "name": "stores",
+          "statistics": {
+            "name": "Struct",
+            "properties": {},
+            "struct": {
+              "fields": [
+                {
+                  "name": "size",
+                  "statistics": {
+                    "integer": {
+                      "distribution": {
+                        "integer": {
+                          "max": "9223372036854775807",
+                          "min": "-9223372036854775808",
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "multiplicity": 1.0,
+                      "size": "1"
+                    },
+                    "name": "Integer",
+                    "properties": {}
+                  }
+                },
+                {
+                  "name": "store",
+                  "statistics": {
+                    "id": {
+                      "multiplicity": 1.0,
+                      "size": "1"
+                    },
+                    "name": "Id",
+                    "properties": {}
+                  }
+                },
+                {
+                  "name": "type",
+                  "statistics": {
+                    "name": "Text",
+                    "properties": {},
+                    "text": {
+                      "distribution": {
+                        "integer": {
+                          "max": "9223372036854775807",
+                          "min": "-9223372036854775808",
+                          "points": []
+                        },
+                        "properties": {}
+                      },
+                      "example": "",
+                      "multiplicity": 1.0,
+                      "size": "1"
+                    }
+                  }
+                }
+              ],
+              "multiplicity": 1.0,
+              "name": "",
+              "size": "1"
+            }
+          }
+        }
+      ],
+      "multiplicity": 1.0,
+      "name": "",
+      "size": "1633"
+    }
+  },
+  "uuid": "784ecd2d67dbcb8dca4c114753a700a3"
+}

@@ -946,13 +946,14 @@ dependencies = [
  "pyo3",
  "qrlew",
  "qrlew-sarus",
+ "serde_json",
 ]
 
 [[package]]
 name = "qrlew"
-version = "0.1.1"
+version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4a3cdc65a1dde95348dec96cf6e9aa9fc47693510f7397913482247e9c5956d7"
+checksum = "23b02ede106600e60bda0d5375bb110b019f918a2a7b77e235ab2d70ccdf8b48"
 dependencies = [
  "base64",
  "chrono",
