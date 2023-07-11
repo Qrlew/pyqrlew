@@ -7,7 +7,7 @@ name = "pyqrlew"
 description = "A library to manipulate SQL queries, designed with privacy application in mind."
 readme = "README.md"
 requires-python = ">=3.8"
-license = "LICENCE"
+license = {file = "LICENSE"}
 authors = [
     {name = "Nicolas Grislain", email = "ng@sarus.tech"},
 ]
@@ -19,6 +19,23 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
+
+dependencies = [
+  "SQLAlchemy ~= 2.0",
+  "psycopg2 ~= 2.0"
+]
+
+[project.optional-dependencies]
+test = [
+  "pytest ~= 7.0",
+  "mypy ~= 1.0"
+]
+
+[project.urls]
+homepage = "https://qrlew.github.io"
+documentation = "https://pyqrlew.readthedocs.io"
+repository = "https://github.com/Qrlew/pyqrlew"
+changelog = "github.com/me/spam/blob/master/CHANGELOG.md"
 
 [tool.maturin]
 python-source = "python"
