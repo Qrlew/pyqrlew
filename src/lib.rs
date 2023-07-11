@@ -1,7 +1,7 @@
 use pyo3::exceptions::{PyException, PyRuntimeError};
 use pyo3::prelude::*;
 use qrlew::relation::Variant;
-use qrlew::{builder::With, expr, relation, sql, sqlparser::ast};
+use qrlew::{builder::With, expr, relation, sql, ast};
 use qrlew_sarus::{data_spec, protobuf};
 use serde_json::{from_str, Value};
 use std::{error, rc::Rc, result};

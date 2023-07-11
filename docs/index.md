@@ -22,6 +22,10 @@ Differential Privacy (DP) guaranrtees are hard to obtain without destroying too 
 ### Differential Privacy compiler
 [Qrlew](https://qrlew.github.io/) can compile SQL queries into Differentially Private ones. The process is inspired by Wilson et al. 2020. The complexity of the compilation process makes [Qrlew](https://qrlew.github.io/) IR very useful at delivering clean, readable and reliable code.
 
+## Contributing
+
+To contribute to this code, follow the [instructions](contributing)
+
 
 # Indices and tables
 
