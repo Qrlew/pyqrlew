@@ -22,7 +22,7 @@ classifiers = [
 
 dependencies = [
   "SQLAlchemy ~= 2.0",
-  "psycopg2 ~= 2.0"
+  "psycopg2-binary ~= 2.0"
 ]
 
 [project.optional-dependencies]
