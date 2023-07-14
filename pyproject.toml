@@ -7,35 +7,40 @@ name = "pyqrlew"
 description = "A library to manipulate SQL queries, designed with privacy application in mind."
 readme = "README.md"
 requires-python = ">=3.8"
-license = {file = "LICENSE"}
-authors = [
-    {name = "Nicolas Grislain", email = "ng@sarus.tech"},
-]
+license = { file = "LICENSE" }
+authors = [{ name = "Nicolas Grislain", email = "ng@sarus.tech" }]
 keywords = [
-    "SQL", "Privecy", "Differential Privacy", "AST", "Intermediate Representation", "Rust"
+  "SQL",
+  "Privecy",
+  "Differential Privacy",
+  "AST",
+  "Intermediate Representation",
+  "Rust",
 ]
 classifiers = [
-    "Programming Language :: Rust",
-    "Programming Language :: Python :: Implementation :: CPython",
-    "Programming Language :: Python :: Implementation :: PyPy",
+  "Programming Language :: Rust",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
 ]
 
 dependencies = [
   "SQLAlchemy ~= 2.0",
-  "psycopg2-binary ~= 2.0"
+  "psycopg[binary, pool] ~= 3.0",
+  "pymysql ~= 1.0",
+  "datasets@git+https://github.com/Qrlew/datasets.git#egg=main",
 ]
 
 [project.optional-dependencies]
 test = [
   "pytest ~= 7.0",
-  "mypy ~= 1.0"
+  "mypy ~= 1.0",
 ]
 
 [project.urls]
 homepage = "https://qrlew.github.io"
 documentation = "https://pyqrlew.readthedocs.io"
 repository = "https://github.com/Qrlew/pyqrlew"
-changelog = "github.com/me/spam/blob/master/CHANGELOG.md"
+changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
 
 [tool.maturin]
 python-source = "python"

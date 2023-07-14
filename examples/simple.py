@@ -1,17 +1,23 @@
 from importlib.resources import files
+import logging
 import pyqrlew as qrl
+from pyqrlew.io import PostgreSQL
 
-with files(qrl).joinpath('data/retail_demo/dataset.json').open('r') as f:
-    dataset = f.read()
+logging.basicConfig(level=logging.DEBUG)
 
-with files(qrl).joinpath('data/retail_demo/schema.json').open('r') as f:
-    schema = f.read()
+PostgreSQL().with_financial().with_imdb().with_hepatitis()
 
-with files(qrl).joinpath('data/retail_demo/size.json').open('r') as f:
-    size = f.read()
+# with files(qrl).joinpath('data/retail_demo/dataset.json').open('r') as f:
+#     dataset = f.read()
 
-t = qrl.Dataset(dataset, schema, size)
+# with files(qrl).joinpath('data/retail_demo/schema.json').open('r') as f:
+#     schema = f.read()
 
-print(t.relations())
+# with files(qrl).joinpath('data/retail_demo/size.json').open('r') as f:
+#     size = f.read()
 
-print(t.sql("select * from campaign_descriptions").dot())
+# t = qrl.Dataset(dataset, schema, size)
+
+# print(t.relations())
+
+# print(t.sql("select * from campaign_descriptions").dot())
