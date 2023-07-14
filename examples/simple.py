@@ -5,7 +5,8 @@ from pyqrlew.io import PostgreSQL
 
 logging.basicConfig(level=logging.DEBUG)
 
-PostgreSQL().with_financial().with_imdb().with_hepatitis()
+db = PostgreSQL()
+db.financial()
 
 # with files(qrl).joinpath('data/retail_demo/dataset.json').open('r') as f:
 #     dataset = f.read()
