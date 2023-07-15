@@ -105,12 +105,13 @@ def table(tab: Table) -> dict:
             'name': 'Struct',
             'properties': {},
             'struct': {
-                'fields': []#[column(tab.columns[name]) for name in tab.columns]
+                'fields': [column(col) for col in tab.columns]
             },
         }
     }
 
 def column(col: Column) -> dict:
+    print(col.type)
     return {
         'name': col.name,
         'type': {
