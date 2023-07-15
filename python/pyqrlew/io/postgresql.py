@@ -1,11 +1,12 @@
 import shutil
 from pathlib import Path
 import importlib.resources as pkg_resources
+import json
 import logging
 from sqlalchemy import MetaData, Engine, exists, select, column, table, text
 from datasets import sources
 from datasets.databases import PostgreSQL as EmptyPostgreSQL
-from pyqrlew.io.database import dataset, schema
+from pyqrlew.io.database import dataset_schema_size
 
 NAME: str = 'pyqrlew-db'
 class PostgreSQL(EmptyPostgreSQL):
@@ -35,4 +36,5 @@ class PostgreSQL(EmptyPostgreSQL):
         self.load_financial()
         metadata = MetaData()
         metadata.reflect(self.engine(), schema='financial')
-        schema(metadata, dataset(metadata))
+        dataset, schema, size = dataset_schema_size(metadata)
+        print(json.dumps(schema, indent=2))
