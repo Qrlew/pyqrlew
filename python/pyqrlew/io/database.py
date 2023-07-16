@@ -1,6 +1,7 @@
 from uuid import uuid4 as generate_uuid
 from typing import Optional
 from sqlalchemy import Engine, MetaData, Table, Column
+from sqlalchemy import types
 
 def dataset_schema_size(metadata: MetaData) -> tuple[dict, dict, Optional[dict]]:
     """Return a (dataset, schema) pair or (dataset, schema, size) triplet """
@@ -35,18 +36,19 @@ def schema(metadata: MetaData, dataset: dict) -> dict:
         'dataset': dataset['uuid'],
         'name': metadata.schema,
         'type': {
+            'name': '',
             'struct': {
                 'fields': [
                     {
                         'name': 'data',
                         'type': {
                             'name': 'Union',
+                            'union': {
+                                "fields": [table(metadata.tables[name]) for name in metadata.tables]
+                            },
                             'properties': {
                                 'public_fields': '[]'
                             },
-                            'union': {
-                                "fields": [table(metadata.tables[name]) for name in metadata.tables]
-                            }
                         }
                     },
                     {
@@ -83,7 +85,6 @@ def schema(metadata: MetaData, dataset: dict) -> dict:
                     },
                 ],
             },
-            'name': '',
             'properties': {}
         },
         'protected': {
@@ -103,20 +104,35 @@ def table(tab: Table) -> dict:
         'name': tab.name,
         'type': {
             'name': 'Struct',
-            'properties': {},
             'struct': {
                 'fields': [column(col) for col in tab.columns]
             },
+            'properties': {},
         }
     }
 
 def column(col: Column) -> dict:
     print(col.type)
-    return {
-        'name': col.name,
-        'type': {
-            'name': 'Type',
-            'properties': {},
-            'type': {}
+    if isinstance(col.type, types.Integer) or isinstance(col.type, types.BigInteger):
+        return {
+            'name': col.name,
+            'integer': {
+                'name': 'Integer',
+                "integer": {
+                    "base": "INT64",
+                    "min": "-9223372036854775808",
+                    "max": "9223372036854775807",
+                    "possible_values": []
+                },
+                'properties': {},
+            }
         }
-    }
+    else:
+        return {
+            'name': col.name,
+            'type': {
+                'name': 'Type',
+                'type': {},
+                'properties': {},
+            }
+        }
