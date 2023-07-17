@@ -37,19 +37,19 @@ class PostgreSQL(EmptyPostgreSQL):
         self.load_financial()
         metadata = MetaData()
         metadata.reflect(self.engine(), schema='financial')
-        dataset, schema, size = dataset_schema_size(metadata)
-        return qrl.Dataset(json.dumps(dataset), json.dumps(schema), '{}')
+        dataset, schema, size = dataset_schema_size('financial', metadata)
+        return qrl.Dataset(json.dumps(dataset), json.dumps(schema), json.dumps(size))
     
     def hepatitis(self) -> qrl.Dataset:
         self.load_hepatitis()
         metadata = MetaData()
         metadata.reflect(self.engine(), schema='hepatitis_std')
-        dataset, schema, size = dataset_schema_size(metadata)
-        return qrl.Dataset(json.dumps(dataset), json.dumps(schema), '{}')
+        dataset, schema, size = dataset_schema_size('hepatitis_std', metadata)
+        return qrl.Dataset(json.dumps(dataset), json.dumps(schema), json.dumps(size))
 
     def imdb(self) -> qrl.Dataset:
         self.load_imdb()
         metadata = MetaData()
         metadata.reflect(self.engine(), schema='imdb_ijs')
-        dataset, schema, size = dataset_schema_size(metadata)
-        return qrl.Dataset(json.dumps(dataset), json.dumps(schema), '{}')
+        dataset, schema, size = dataset_schema_size('imdb_ijs', metadata)
+        return qrl.Dataset(json.dumps(dataset), json.dumps(schema), json.dumps(size))
