@@ -37,20 +37,14 @@ class PostgreSQL(EmptyPostgreSQL):
     def financial(self) -> qrl.Dataset:
         self.load_financial()
         dataset, schema, size = dataset_schema_size('financial', self.engine())
-        print('schema')
-        print(schema)
         return qrl.Dataset(json.dumps(dataset), json.dumps(schema), json.dumps(size))
     
     def hepatitis(self) -> qrl.Dataset:
         self.load_hepatitis()
         dataset, schema, size = dataset_schema_size('hepatitis_std', self.engine())
-        print('schema')
-        print(schema)
         return qrl.Dataset(json.dumps(dataset), json.dumps(schema), json.dumps(size))
 
     def imdb(self) -> qrl.Dataset:
         self.load_imdb()
         dataset, schema, size = dataset_schema_size('imdb_ijs', self.engine())
-        print('schema')
-        print(schema)
         return qrl.Dataset(json.dumps(dataset), json.dumps(schema), json.dumps(size))
