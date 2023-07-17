@@ -8,8 +8,8 @@ logging.basicConfig(level=logging.DEBUG)
 db = PostgreSQL()
 
 print(db.financial())
-print(db.hepatitis())
-print(db.imdb())
+db.hepatitis()
+db.imdb()
 
 # with files(qrl).joinpath('data/retail_demo/dataset.json').open('r') as f:
 #     dataset = f.read()
