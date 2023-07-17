@@ -116,13 +116,60 @@ def column(col: Column) -> dict:
     if isinstance(col.type, types.Integer) or isinstance(col.type, types.BigInteger):
         return {
             'name': col.name,
-            'integer': {
+            'type': {
                 'name': 'Integer',
-                "integer": {
-                    "base": "INT64",
-                    "min": "-9223372036854775808",
-                    "max": "9223372036854775807",
-                    "possible_values": []
+                'integer': {
+                    'base': 'INT64',
+                    'min': '-9223372036854775808',
+                    'max': '9223372036854775807',
+                    'possible_values': []
+                },
+                'properties': {},
+            }
+        }
+    elif isinstance(col.type, types.Float) or isinstance(col.type, types.Numeric):
+        return {
+            'name': col.name,
+            'type': {
+                'name': 'Float64',
+                'float': {
+                    'base': 'FLOAT64',
+                    'min': '-1.7976931348623157e+308',
+                    'max': '1.7976931348623157e+308',
+                    'possible_values': []
+                },
+                'properties': {},
+            }
+        }
+    elif isinstance(col.type, types.String) or isinstance(col.type, types.Text) or isinstance(col.type, types.Unicode) or isinstance(col.type, types.UnicodeText):
+        return {
+            'name': col.name,
+            'type': {
+                'name': 'Text UTF-8',
+                'text': {
+                    'encoding': 'UTF-8'
+                },
+                'properties': {},
+            }
+        }
+    elif isinstance(col.type, types.Boolean):
+        return {
+            'name': col.name,
+            'type': {
+                'name': 'Boolean',
+                'boolean': {},
+                'properties': {},
+            }
+        }
+    elif isinstance(col.type, types.Date) or isinstance(col.type, types.DateTime) or isinstance(col.type, types.Time):
+        return {
+            'name': col.name,
+            'type': {
+                'name': 'Datetime',
+                'datetime': {
+                    'format': '%Y-%m-%d %H:%M:%S',
+                    'min': '01-01-01 00:00:00',
+                    'max': '9999-12-31 00:00:00',
                 },
                 'properties': {},
             }
