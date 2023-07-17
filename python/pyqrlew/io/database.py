@@ -34,7 +34,7 @@ def schema(metadata: MetaData, dataset: dict) -> dict:
         '@type': 'sarus_data_spec/sarus_data_spec.Schema',
         'uuid': generate_uuid().hex,
         'dataset': dataset['uuid'],
-        'name': metadata.schema,
+        'name': metadata.schema or '',
         'type': {
             'name': '',
             'struct': {

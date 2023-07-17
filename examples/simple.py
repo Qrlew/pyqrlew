@@ -6,7 +6,10 @@ from pyqrlew.io import PostgreSQL
 logging.basicConfig(level=logging.DEBUG)
 
 db = PostgreSQL()
-db.financial()
+
+print(db.financial())
+print(db.hepatitis())
+print(db.imdb())
 
 # with files(qrl).joinpath('data/retail_demo/dataset.json').open('r') as f:
 #     dataset = f.read()
@@ -16,6 +19,10 @@ db.financial()
 
 # with files(qrl).joinpath('data/retail_demo/size.json').open('r') as f:
 #     size = f.read()
+
+# print(dataset)
+# print(schema)
+# print(size)
 
 # t = qrl.Dataset(dataset, schema, size)
 
