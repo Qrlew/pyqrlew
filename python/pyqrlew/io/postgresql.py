@@ -10,6 +10,7 @@ from pyqrlew.io.database import dataset_schema_size
 import pyqrlew as qrl
 
 NAME: str = 'pyqrlew-db'
+
 class PostgreSQL(EmptyPostgreSQL):
     def __init__(self) -> None:
         super().__init__(NAME)
@@ -35,21 +36,21 @@ class PostgreSQL(EmptyPostgreSQL):
 
     def financial(self) -> qrl.Dataset:
         self.load_financial()
-        metadata = MetaData()
-        metadata.reflect(self.engine(), schema='financial')
-        dataset, schema, size = dataset_schema_size('financial', metadata)
+        dataset, schema, size = dataset_schema_size('financial', self.engine())
+        print('schema')
+        print(schema)
         return qrl.Dataset(json.dumps(dataset), json.dumps(schema), json.dumps(size))
     
     def hepatitis(self) -> qrl.Dataset:
         self.load_hepatitis()
-        metadata = MetaData()
-        metadata.reflect(self.engine(), schema='hepatitis_std')
-        dataset, schema, size = dataset_schema_size('hepatitis_std', metadata)
+        dataset, schema, size = dataset_schema_size('hepatitis_std', self.engine())
+        print('schema')
+        print(schema)
         return qrl.Dataset(json.dumps(dataset), json.dumps(schema), json.dumps(size))
 
     def imdb(self) -> qrl.Dataset:
         self.load_imdb()
-        metadata = MetaData()
-        metadata.reflect(self.engine(), schema='imdb_ijs')
-        dataset, schema, size = dataset_schema_size('imdb_ijs', metadata)
+        dataset, schema, size = dataset_schema_size('imdb_ijs', self.engine())
+        print('schema')
+        print(schema)
         return qrl.Dataset(json.dumps(dataset), json.dumps(schema), json.dumps(size))

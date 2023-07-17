@@ -552,6 +552,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "itertools"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b1c173a5686ce8bfa551b3563d0c2170bf24ca44da99c7ca4bfdab5418c3fe57"
+dependencies = [
+ "either",
+]
+
+[[package]]
 name = "itoa"
 version = "1.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -960,7 +969,7 @@ dependencies = [
  "colored",
  "dot",
  "env_logger",
- "itertools",
+ "itertools 0.10.5",
  "log",
  "paste",
  "postgres",
@@ -973,16 +982,16 @@ dependencies = [
 
 [[package]]
 name = "qrlew-sarus"
-version = "0.2.0"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3655237024c069c26cc4779d988045e55907c7b80c8caa659633b803db669b2f"
+checksum = "53055cfd1efb7aeeb2ad31ddefe40d661cf778fa44b92e8ddaa8b55930b38e52"
 dependencies = [
  "anyhow",
  "chrono",
  "colored",
  "env_logger",
  "glob",
- "itertools",
+ "itertools 0.11.0",
  "log",
  "paste",
  "protobuf",

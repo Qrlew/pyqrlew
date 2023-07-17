@@ -1,15 +1,17 @@
 from uuid import uuid4 as generate_uuid
 from typing import Optional
 from sqlalchemy import Engine, MetaData, Table, Column
-from sqlalchemy import types
+from sqlalchemy import types, select, func
 
-def dataset_schema_size(name: str, metadata: MetaData) -> tuple[dict, dict, Optional[dict]]:
+def dataset_schema_size(name: str, engine: Engine, schema_name: Optional[str]=None) -> tuple[dict, dict, Optional[dict]]:
     """Return a (dataset, schema) pair or (dataset, schema, size) triplet """
-    ds = dataset(name, metadata)
+    md = MetaData()
+    md.reflect(engine, schema=schema_name or name)
+    ds = dataset(name, md)
     return (
         ds,
-        schema(name, metadata, ds),
-        size(name, metadata, ds)
+        schema(name, md, ds),
+        size(name, engine, ds, schema_name)
     )
 
 def dataset(name: str, metadata: MetaData) -> dict:
@@ -184,7 +186,9 @@ def column(col: Column) -> dict:
             }
         }
 
-def size(name: str, metadata: MetaData, dataset: dict) -> dict:
+def size(name: str, engine: Engine, dataset: dict, schema_name: Optional[str]=None) -> dict:
+    md = MetaData()
+    md.reflect(engine, schema=schema_name or name)
     return {
         '@type': 'sarus_data_spec/sarus_data_spec.Size',
         'uuid': generate_uuid().hex,
@@ -193,15 +197,17 @@ def size(name: str, metadata: MetaData, dataset: dict) -> dict:
         'statistics': {
             'name': 'Union',
             'union': {
-                "fields": [table_size(metadata.tables[name]) for name in metadata.tables]
+                "fields": [table_size(engine, md.tables[name]) for name in md.tables]
             },
             'properties': {}
         },
         'properties': {}
     }
 
-def table_size(tab: Table) -> dict:
-    size = 100
+def table_size(engine: Engine, tab: Table) -> dict:
+    with engine.connect() as conn:
+        result = conn.execute(select(func.count()).select_from(tab))
+        size = result.scalar()
     multiplicity = 1.0
     return {
         'name': tab.name,
@@ -210,15 +216,13 @@ def table_size(tab: Table) -> dict:
             'size': str(size),
             'multiplicity': multiplicity,
             'struct': {
-                'fields': [column_size(col) for col in tab.columns]
+                'fields': [column_size(col, size, multiplicity) for col in tab.columns]
             },
             'properties': {},
         }
     }
 
-def column_size(col: Column) -> dict:
-    size = 100
-    multiplicity = 1.0
+def column_size(col: Column, size: int, multiplicity: float) -> dict:
     if isinstance(col.type, types.Integer) or isinstance(col.type, types.BigInteger):
         return {
             'name': col.name,

@@ -7,22 +7,12 @@ logging.basicConfig(level=logging.DEBUG)
 
 db = PostgreSQL()
 
-print(db.financial())
-db.hepatitis()
-db.imdb()
+ds = db.financial()
+# ds = db.imdb()
+# ds = db.hepatitis()
 
-# with files(qrl).joinpath('data/retail_demo/dataset.json').open('r') as f:
-#     dataset = f.read()
-
-# with files(qrl).joinpath('data/retail_demo/schema.json').open('r') as f:
-#     schema = f.read()
-
-# with files(qrl).joinpath('data/retail_demo/size.json').open('r') as f:
-#     size = f.read()
-
-# print(dataset)
-# print(schema)
-# print(size)
+print(ds)
+print(ds.relations())
 
 # t = qrl.Dataset(dataset, schema, size)
 
