@@ -7,9 +7,10 @@ logging.basicConfig(level=logging.DEBUG)
 
 db = PostgreSQL()
 
-ds = db.financial()
+ds = db.extract()
+# ds = db.financial()
 # ds = db.imdb()
 # ds = db.hepatitis()
 
 print(ds.relations())
-print(ds.sql("select * from client").dot())
+print(ds.sql("select * from census").dot())

@@ -1,4 +1,4 @@
-import sqlalchemy
+from sqlalchemy import Engine, Connection, text
 import typing as t
 import os
 from termcolor import colored
@@ -8,12 +8,12 @@ import pyqrlew as qrl
 DIRNAME = os.path.join(os.getcwd(), os.path.dirname(__file__))
 FILENAME = os.path.join(DIRNAME, 'queries/valid_queries.sql')
 
-
 def execute_query(
-    connection: sqlalchemy.engine.Connection,
+    connection: Connection,
     query: str
 ) -> t.List[t.Dict[str, t.Any]]:
-    str_query = sqlalchemy.text(query)
+    connection.execute(text("SET search_path TO extract"))
+    str_query = text(query)
     res = connection.execute(str_query)
     names = res.keys()
     return [
@@ -24,7 +24,7 @@ def execute_query(
 
 def check_query(
     dataset: qrl.Dataset,
-    connection: sqlalchemy.engine.Connection,
+    connection: Connection,
     query: str
 ) -> None:
     result = execute_query(connection, query)
@@ -42,12 +42,11 @@ def check_query(
     return
 
 
-def test_results(postgres_url, dataset):
-    engine = sqlalchemy.create_engine(postgres_url + 'postgres')
+def test_results(database):
+    engine = database.engine()
     with engine.connect() as conn:
         with open(FILENAME, 'r') as f:
             for query in f:
-                if query.startswith('--'):
-                    continue
-                print('\n\n', colored(query, 'blue'))
-                check_query(dataset, conn, query)
+                if not query.startswith('--'):
+                    print('\n\n', colored(query, 'blue'))
+                    check_query(database.extract(), conn, query)
