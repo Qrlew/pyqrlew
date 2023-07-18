@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2023-07-18
+### Changed
+- Updated `qrlew-datasets`
+
 ## [0.2.0] - 2023-07-18
 ### Changed
 - Remove data and db from pyqrlew. They are now in the qrlew-dataset package.
