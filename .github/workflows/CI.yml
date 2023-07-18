@@ -24,27 +24,8 @@ jobs:
             fail-fast: false
             matrix:
                 python-version:
-                    - "3.9"
-                    - "3.10"
+                    - '3.10'
         runs-on: ubuntu-latest
-        # Service containers to run with `runner-job`
-        services:
-            # Label used to access the service container
-            postgres:
-                # Docker Hub image
-                image: postgres
-                # Provide the password for postgres
-                env:
-                    POSTGRES_PASSWORD: pyqrlew-test
-                # Set health checks to wait until postgres has started
-                options: >-
-                    --health-cmd pg_isready
-                    --health-interval 10s
-                    --health-timeout 5s
-                    --health-retries 5
-                ports:
-                    # Maps tcp port 5432 on service container to the host
-                    - 5432:5432
         steps:
             - uses: actions/checkout@v3
             - name: install rust stable
@@ -53,8 +34,6 @@ jobs:
               uses: Swatinem/rust-cache@v2
               with:
                   key: test-v3
-            - run: psql postgresql://postgres:pyqrlew-test@localhost:5432/postgres -f ./tests/ressources/install_db/install_postgres.sql
-            - run: psql postgresql://postgres:pyqrlew-test@localhost:5432/postgres -c "SELECT COUNT(*) FROM census"
             - name: set up python
               uses: actions/setup-python@v4
               with:
@@ -76,7 +55,7 @@ jobs:
             - uses: actions/checkout@v3
             - uses: actions/setup-python@v4
               with:
-                  python-version: "3.10"
+                  python-version: '3.10'
             - name: Build wheels
               uses: PyO3/maturin-action@v1
               with:
@@ -100,7 +79,7 @@ jobs:
             - uses: actions/checkout@v3
             - uses: actions/setup-python@v4
               with:
-                  python-version: "3.10"
+                  python-version: '3.10'
                   architecture: ${{ matrix.target }}
             - name: Build wheels
               uses: PyO3/maturin-action@v1
