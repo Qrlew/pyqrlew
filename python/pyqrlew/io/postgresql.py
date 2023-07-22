@@ -3,10 +3,10 @@ from pathlib import Path
 import importlib.resources as pkg_resources
 import json
 import logging
-from sqlalchemy import MetaData, Engine, exists, select, column, table, text
+from sqlalchemy import MetaData, Engine, exists, select, column, table, text, Result
 from datasets import sources
 from datasets.databases import PostgreSQL as EmptyPostgreSQL
-from pyqrlew.io.database import dataset_schema_size
+from pyqrlew.io.database import dataset
 import pyqrlew as qrl
 
 NAME: str = 'pyqrlew-db'
@@ -42,20 +42,21 @@ class PostgreSQL(EmptyPostgreSQL):
     
     def extract(self) -> qrl.Dataset:
         self.load_extract()
-        dataset, schema, size = dataset_schema_size('extract', self.engine())
-        return qrl.Dataset(json.dumps(dataset), json.dumps(schema), json.dumps(size))
+        return dataset('extract', self.engine())
     
     def financial(self) -> qrl.Dataset:
         self.load_financial()
-        dataset, schema, size = dataset_schema_size('financial', self.engine())
-        return qrl.Dataset(json.dumps(dataset), json.dumps(schema), json.dumps(size))
+        return dataset('financial', self.engine())
     
     def hepatitis(self) -> qrl.Dataset:
         self.load_hepatitis()
-        dataset, schema, size = dataset_schema_size('hepatitis_std', self.engine())
-        return qrl.Dataset(json.dumps(dataset), json.dumps(schema), json.dumps(size))
+        return dataset('hepatitis_std', self.engine())
 
     def imdb(self) -> qrl.Dataset:
         self.load_imdb()
-        dataset, schema, size = dataset_schema_size('imdb_ijs', self.engine())
-        return qrl.Dataset(json.dumps(dataset), json.dumps(schema), json.dumps(size))
+        return dataset('imdb_ijs', self.engine())
+
+    def eval(self, relation: qrl.Relation) -> Result:
+        with self.engine().connect() as conn:
+            result = conn.execute(text(relation.render()))
+        return result
