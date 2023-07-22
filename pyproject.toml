@@ -27,7 +27,7 @@ dependencies = [
   "SQLAlchemy ~= 2.0",
   "psycopg[binary, pool] ~= 3.0",
   "pymysql ~= 1.0",
-  "qrlew-datasets ~= 0.2.6",
+  "qrlew-datasets ~= 0.3.0",
 ]
 
 [project.optional-dependencies]
