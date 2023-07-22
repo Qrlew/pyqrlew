@@ -52,20 +52,7 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
                             'type': {
                                 'name': 'Union',
                                 'union': {
-                                    "fields": [
-                                        {
-                                            'name': schema,
-                                            'type': {
-                                                'name': 'Union',
-                                                'union': {
-                                                    "fields": [_table(metadata.tables[name]) for name in metadata.tables]
-                                                },
-                                                'properties': {
-                                                    'public_fields': '[]'
-                                                },
-                                            }
-                                        },
-                                    ]
+                                    "fields": [_table(metadata.tables[name]) for name in metadata.tables]
                                 },
                                 'properties': {
                                     'public_fields': '[]'
@@ -122,7 +109,7 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
 
     def _table(tab: Table) -> dict:
         return {
-            'name': tab.name,
+            'name': f'{schema}.{tab.name}',
             'type': {
                 'name': 'Struct',
                 'struct': {
@@ -213,19 +200,7 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
             'statistics': {
                 'name': 'Union',
                 'union': {
-                    'fields': [
-                        {
-                            'name': schema,
-                            'statistics': {
-                                'name': 'Union',
-                                'union': {
-                                    'fields': [_table_size(metadata.tables[name]) for name in metadata.tables]
-                                },
-                                'properties': {}
-                            },
-                            'properties': {}
-                        }
-                    ]
+                    'fields': [_table_size(metadata.tables[name]) for name in metadata.tables]
                 },
                 'properties': {}
             },
@@ -238,7 +213,7 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
             size = result.scalar()
         multiplicity = 1.0
         return {
-            'name': tab.name,
+            'name': f'{schema}.{tab.name}',
             'statistics': {
                 'name': 'Struct',
                 'size': str(size),

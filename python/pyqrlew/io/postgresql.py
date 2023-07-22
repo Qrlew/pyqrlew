@@ -56,7 +56,7 @@ class PostgreSQL(EmptyPostgreSQL):
         self.load_imdb()
         return dataset('imdb_ijs', self.engine())
 
-    def eval(self, relation: qrl.Relation) -> Result:
+    def eval(self, relation: qrl.Relation) -> list:
         with self.engine().connect() as conn:
-            result = conn.execute(text(relation.render()))
+            result = conn.execute(text(relation.render())).all()
         return result
