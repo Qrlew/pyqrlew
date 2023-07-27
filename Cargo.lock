@@ -1032,9 +1032,9 @@ dependencies = [
 
 [[package]]
 name = "qrlew"
-version = "0.1.9"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4b4449f36c9565aa300af891c90997d5440eafe4a00c93d8d6870e585cbc832a"
+checksum = "d8e986d96b51e9635057c66712e2caac10224b008b3b5b54554d87e38d741b85"
 dependencies = [
  "base64",
  "chrono",
@@ -1055,9 +1055,9 @@ dependencies = [
 
 [[package]]
 name = "qrlew-sarus"
-version = "0.2.2"
+version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "53055cfd1efb7aeeb2ad31ddefe40d661cf778fa44b92e8ddaa8b55930b38e52"
+checksum = "c2fc630e36f960672eb517862ae58ef5c881808505cc7b087814f61ecf587b12"
 dependencies = [
  "anyhow",
  "chrono",
@@ -1373,9 +1373,9 @@ dependencies = [
 
 [[package]]
 name = "sqlparser"
-version = "0.35.0"
+version = "0.36.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ca597d77c98894be1f965f2e4e2d2a61575d4998088e655476c73715c54b2b43"
+checksum = "2eaa1e88e78d2c2460d78b7dc3f0c08dbb606ab4222f9aff36f420d36e307d87"
 dependencies = [
  "log",
 ]
