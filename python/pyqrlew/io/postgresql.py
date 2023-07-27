@@ -1,3 +1,4 @@
+import typing as t
 import shutil
 from pathlib import Path
 import importlib.resources as pkg_resources
@@ -63,7 +64,11 @@ class PostgreSQL(EmptyPostgreSQL):
         self.load_retail()
         return dataset('retail', self.engine())
 
-    def eval(self, relation: qrl.Relation) -> list:
+    def eval(self, relation: qrl.Relation) -> t.List[t.Dict[str, t.Any]]:
+        return self.sql(relation.render())
+
+    def sql(self, query: str) -> t.List[t.Dict[str, t.Any]]:
         with self.engine().connect() as conn:
-            result = conn.execute(text(relation.render())).all()
-        return result
+            result = conn.execute(text(query))
+            names = result.keys()
+        return [{name:col for name, col in zip(names, row)} for row in result]
