@@ -17,7 +17,7 @@ PORT: str = 5433
 class PostgreSQL(EmptyPostgreSQL):
     def __init__(self) -> None:
         super().__init__(NAME, USER, PASSWORD, PORT)
-    
+
     def load_resource(self, schema: str, src: Path) -> 'PostgreSQL':
         with self.engine().connect() as conn:
             res = list(conn.execute(select(column('schema_name')).select_from(table('schemata', schema='information_schema')).where(column('schema_name') == schema)))
@@ -27,7 +27,7 @@ class PostgreSQL(EmptyPostgreSQL):
             shutil.copyfile(src, dst)
             self.load(dst)
         return self
-    
+
     def load_extract(self) -> 'PostgreSQL':
         return self.load_resource('extract', pkg_resources.files(sources) / 'extract' / 'extract.sql')
 
@@ -39,15 +39,18 @@ class PostgreSQL(EmptyPostgreSQL):
 
     def load_imdb(self) -> 'PostgreSQL':
         return self.load_resource('imdb_ijs', pkg_resources.files(sources) / 'imdb' / 'imdb_ijs.sql')
-    
+
+    def load_retail(self) -> 'PostgreSQL':
+        return self.load_resource('retail', pkg_resources.files(sources) / 'retail' / 'retail.sql')
+
     def extract(self) -> qrl.Dataset:
         self.load_extract()
         return dataset('extract', self.engine())
-    
+
     def financial(self) -> qrl.Dataset:
         self.load_financial()
         return dataset('financial', self.engine())
-    
+
     def hepatitis(self) -> qrl.Dataset:
         self.load_hepatitis()
         return dataset('hepatitis_std', self.engine())
@@ -55,6 +58,10 @@ class PostgreSQL(EmptyPostgreSQL):
     def imdb(self) -> qrl.Dataset:
         self.load_imdb()
         return dataset('imdb_ijs', self.engine())
+
+    def retail(self) -> qrl.Dataset:
+        self.load_retail()
+        return dataset('retail', self.engine())
 
     def eval(self, relation: qrl.Relation) -> list:
         with self.engine().connect() as conn:
