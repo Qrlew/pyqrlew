@@ -1,3 +1,4 @@
+import logging
 from uuid import uuid4 as generate_uuid
 from typing import Optional
 import json
@@ -308,6 +309,11 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
                     'properties': {},
                 }
             }
-    # 
+    # Gather protobufs
     dataset, schema, size = _dataset_schema_size()
+    # Display when debugging
+    logging.debug(json.dumps(dataset))
+    logging.debug(json.dumps(schema))
+    logging.debug(json.dumps(size))
+    # Return the result
     return qrl.Dataset(json.dumps(dataset), json.dumps(schema), json.dumps(size))
