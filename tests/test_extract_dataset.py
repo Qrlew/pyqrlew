@@ -30,6 +30,7 @@ def check_query(
     result = execute_query(connection, query)
     rel = dataset.sql(query)
     new_query = rel.render()
+    print(f'DEBUG {new_query}')
     print(f"{query}->{new_query}")
     try:
         result2 = execute_query(connection, new_query)

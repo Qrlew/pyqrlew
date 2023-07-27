@@ -1022,7 +1022,7 @@ dependencies = [
 
 [[package]]
 name = "pyqrlew"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "pyo3",
  "qrlew",
@@ -1032,9 +1032,9 @@ dependencies = [
 
 [[package]]
 name = "qrlew"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d8e986d96b51e9635057c66712e2caac10224b008b3b5b54554d87e38d741b85"
+checksum = "0726d200fbf67a1a954924d5feb613847a3fc317b9e1552a08e312752940a484"
 dependencies = [
  "base64",
  "chrono",
