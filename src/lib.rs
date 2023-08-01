@@ -111,6 +111,20 @@ impl Relation {
         (*self.0).schema().to_string()
     }
 
+    pub fn filter_columns(
+        &self,
+        columns: BTreeMap<
+            &str,
+            (
+                Option<data_type::value::Value>,
+                Option<data_type::value::Value>,
+                Vec<data_type::value::Value>,
+            ),
+        >,
+    ) -> Result<Self> {
+        Ok(Relation(Rc::new(*(self.0).filter_columns(columns))))
+    }
+
     pub fn protect(&self, dataset: &Dataset, protected_entity: &str) -> Result<Self> {
         let pe = parse_protected_entity(protected_entity);
         Ok(Relation(Rc::new(protect((*(self.0)).clone(), dataset, &pe))))
