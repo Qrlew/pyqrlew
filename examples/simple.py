@@ -11,5 +11,9 @@ ds = db.extract()
 # ds = db.imdb()
 # ds = db.hepatitis()
 
-print(ds.relations())
-print(ds.sql("select * from census").dot())
+for path, relation in ds.relations():
+    print(relation.render())
+    for row in db.eval(relation):
+        print(row)
+
+print(ds.sql("select * from census").render())

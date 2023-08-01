@@ -17,7 +17,7 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
         return (
             ds,
             _schema(ds),
-            _size(ds)
+            _size(ds),
         )
 
     def _dataset() -> dict:
@@ -31,7 +31,7 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
                     'transform': generate_uuid().hex,
                     'arguments': [],
                     'named_arguments': {},
-                }
+                },
             },
             'properties': {},
             'doc': 'This ia a demo dataset for testing purpose',
@@ -53,12 +53,23 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
                             'type': {
                                 'name': 'Union',
                                 'union': {
-                                    "fields": [_table(metadata.tables[name]) for name in metadata.tables]
+                                    "fields": [{
+                                        'name': schema,
+                                        'type': {
+                                            'name': 'Union',
+                                            'union': {
+                                                "fields": [_table(metadata.tables[name]) for name in metadata.tables]
+                                            },
+                                            'properties': {
+                                                'public_fields': '[]'
+                                            },
+                                        }
+                                    }],
                                 },
                                 'properties': {
-                                    'public_fields': '[]'
+                                    'public_fields': '[]',
                                 },
-                            }
+                            },
                         },
                         {
                             'name': 'sarus_weights',
@@ -71,15 +82,15 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
                                     'possible_values': []
                                 },
                                 'properties': {}
-                            }
+                            },
                         },
                         {
                             'name': 'sarus_is_public',
                             'type': {
                                 'name': 'Boolean',
                                 'boolean': {},
-                                'properties': {}
-                            }
+                                'properties': {},
+                            },
                         },
                         {
                             'name': 'sarus_protected_entity',
@@ -87,10 +98,10 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
                                 'name': 'Id',
                                 'id': {
                                     'base': 'STRING',
-                                    'unique': False
+                                    'unique': False,
                                 },
-                                'properties': {}
-                            }
+                                'properties': {},
+                            },
                         },
                     ],
                 },
@@ -99,7 +110,7 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
             'protected': {
                 'label': 'data',
                 'paths': [],
-                'properties': {}
+                'properties': {},
             },
             'properties': {
                 'max_max_multiplicity': '1',
@@ -110,11 +121,11 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
 
     def _table(tab: Table) -> dict:
         return {
-            'name': f'{schema}.{tab.name}',
+            'name': tab.name,
             'type': {
                 'name': 'Struct',
                 'struct': {
-                    'fields': [_column(col) for col in tab.columns]
+                    'fields': [_column(col) for col in tab.columns],
                 },
                 'properties': {},
             }
@@ -130,10 +141,10 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
                         'base': 'INT64',
                         'min': '-9223372036854775808',
                         'max': '9223372036854775807',
-                        'possible_values': []
+                        'possible_values': [],
                     },
                     'properties': {},
-                }
+                },
             }
         elif isinstance(col.type, types.Float) or isinstance(col.type, types.Numeric):
             return {
@@ -144,10 +155,10 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
                         'base': 'FLOAT64',
                         'min': '-1.7976931348623157e+308',
                         'max': '1.7976931348623157e+308',
-                        'possible_values': []
+                        'possible_values': [],
                     },
                     'properties': {},
-                }
+                },
             }
         elif isinstance(col.type, types.String) or isinstance(col.type, types.Text) or isinstance(col.type, types.Unicode) or isinstance(col.type, types.UnicodeText):
             return {
@@ -158,7 +169,7 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
                         'encoding': 'UTF-8'
                     },
                     'properties': {},
-                }
+                },
             }
         elif isinstance(col.type, types.Boolean):
             return {
@@ -167,7 +178,7 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
                     'name': 'Boolean',
                     'boolean': {},
                     'properties': {},
-                }
+                },
             }
         elif isinstance(col.type, types.Date) or isinstance(col.type, types.DateTime) or isinstance(col.type, types.Time):
             return {
@@ -180,7 +191,7 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
                         'max': '9999-12-31 00:00:00',
                     },
                     'properties': {},
-                }
+                },
             }
         else:
             return {
@@ -189,7 +200,7 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
                     'name': 'Type',
                     'type': {},
                     'properties': {},
-                }
+                },
             }
 
     def _size(dataset: dict) -> dict:
@@ -201,11 +212,23 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
             'statistics': {
                 'name': 'Union',
                 'union': {
-                    'fields': [_table_size(metadata.tables[name]) for name in metadata.tables]
+                    'fields': [
+                        {
+                            'name': schema,
+                            'statistics': {
+                                'name': 'Union',
+                                'union': {
+                                    'fields': [_table_size(metadata.tables[name]) for name in metadata.tables]
+                                },
+                                'properties': {},
+                            },
+                            'properties': {},
+                        },
+                    ],
                 },
-                'properties': {}
+                'properties': {},
             },
-            'properties': {}
+            'properties': {},
         }
 
     def _table_size(tab: Table) -> dict:
@@ -214,13 +237,13 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
             size = result.scalar()
         multiplicity = 1.0
         return {
-            'name': f'{schema}.{tab.name}',
+            'name': tab.name,
             'statistics': {
                 'name': 'Struct',
                 'size': str(size),
                 'multiplicity': multiplicity,
                 'struct': {
-                    'fields': [_column_size(col, size, multiplicity) for col in tab.columns]
+                    'fields': [_column_size(col, size, multiplicity) for col in tab.columns],
                 },
                 'properties': {},
             }
@@ -241,7 +264,7 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
                         'possible_values': []
                     },
                     'properties': {},
-                }
+                },
             }
         elif isinstance(col.type, types.Float) or isinstance(col.type, types.Numeric):
             return {
@@ -254,7 +277,7 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
                         'base': 'FLOAT64',
                         'min': '-1.7976931348623157e+308',
                         'max': '1.7976931348623157e+308',
-                        'possible_values': []
+                        'possible_values': [],
                     },
                     'properties': {},
                 }
@@ -267,10 +290,10 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
                     'size': str(size),
                     'multiplicity': multiplicity,
                     'text': {
-                        'encoding': 'UTF-8'
+                        'encoding': 'UTF-8',
                     },
                     'properties': {},
-                }
+                },
             }
         elif isinstance(col.type, types.Boolean):
             return {
@@ -281,7 +304,7 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
                     'multiplicity': multiplicity,
                     'boolean': {},
                     'properties': {},
-                }
+                },
             }
         elif isinstance(col.type, types.Date) or isinstance(col.type, types.DateTime) or isinstance(col.type, types.Time):
             return {
@@ -296,7 +319,7 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
                         'max': '9999-12-31 00:00:00',
                     },
                     'properties': {},
-                }
+                },
             }
         else:
             return {
@@ -307,7 +330,7 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
                     'multiplicity': multiplicity,
                     'type': {},
                     'properties': {},
-                }
+                },
             }
     # Gather protobufs
     dataset, schema, size = _dataset_schema_size()
