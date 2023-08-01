@@ -64,9 +64,9 @@ class PostgreSQL(EmptyPostgreSQL):
         return dataset('retail', self.engine())
 
     def eval(self, relation: qrl.Relation) -> list:
-        return self.send(relation.render())
+        return self.execute(relation.render())
 
-    def send(self, query: str) -> list:
+    def execute(self, query: str) -> list:
         with self.engine().connect() as conn:
             result = conn.execute(text(query)).all()
         return result
