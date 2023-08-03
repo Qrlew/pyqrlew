@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - support for SQLite
 ### Added
-- retail Dataset + notebook `range_propagation.ipynb``
+- retail Dataset + notebook `range_propagation.ipynb`
 
 ## [0.2.1] - 2023-07-18
 ### Changed
