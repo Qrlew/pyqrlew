@@ -1,6 +1,4 @@
-import typing as t
 import os
-import csv
 import sqlalchemy
 from datasets.database import Database
 import pyqrlew as qrl
@@ -18,12 +16,12 @@ dtype_to_sqlalchemy = {
 }
 
 class SQLite(Database):
-    def __init__(self, table_name, csv_file) -> None:
+    def __init__(self, table_name: str, csv_file:str) -> None:
         self.db_file = f"{table_name}.db"
         self.table_name = table_name
         self.load_csv(csv_file)
 
-    def load_csv(self, csv_file: str):
+    def load_csv(self, csv_file: str) -> None:
         engine = self.engine()
         df = pd.read_csv(csv_file)
         column_types = {
@@ -39,11 +37,10 @@ class SQLite(Database):
         metadata.create_all(engine)
         df.to_sql(self.table_name, self.engine(), if_exists='replace', index=False)
 
-
     def url(self) -> str:
         return f'sqlite:///{self.db_file}'
 
-    def remove(self):
+    def remove(self) -> None:
         os.remove(f"{self.table_name}.db")
 
     def engine(self) -> sqlalchemy.Engine:
@@ -60,7 +57,7 @@ class SQLite(Database):
     def dataset(self) -> qrl.Dataset:
         return dataset(self.table_name, self.engine())
 
-    def print_infos_metadata(self):
+    def print_infos_metadata(self) -> None:
         metadata = sqlalchemy.MetaData()
         metadata.reflect(self.engine(), schema=None)
         for table_name, table in metadata.tables.items():
