@@ -45,23 +45,23 @@ class PostgreSQL(EmptyPostgreSQL):
 
     def extract(self) -> qrl.Dataset:
         self.load_extract()
-        return dataset('extract', self.engine())
+        return dataset('extract', self.engine(), 'extract')
 
     def financial(self) -> qrl.Dataset:
         self.load_financial()
-        return dataset('financial', self.engine())
+        return dataset('financial', self.engine(), 'financial')
 
     def hepatitis(self) -> qrl.Dataset:
         self.load_hepatitis()
-        return dataset('hepatitis_std', self.engine())
+        return dataset('hepatitis_std', self.engine(), 'hepatitis_std')
 
     def imdb(self) -> qrl.Dataset:
         self.load_imdb()
-        return dataset('imdb_ijs', self.engine())
+        return dataset('imdb_ijs', self.engine(), 'imdb_ijs')
 
     def retail(self) -> qrl.Dataset:
         self.load_retail()
-        return dataset('retail', self.engine())
+        return dataset('retail', self.engine(), 'retail')
 
     def eval(self, relation: qrl.Relation) -> list:
         return self.execute(relation.render())
