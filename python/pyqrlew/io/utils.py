@@ -20,7 +20,7 @@ def from_csv(table_name: str, csv_file: str, db_name:str ="my_sqlite.db") -> 'SQ
     -------
     None
 
-    Examples
+    Example
     --------
     >>> import pyqrlew as pq
     >>> qdb = pq.from_csv(
@@ -65,7 +65,7 @@ def from_csv_dict(csv_dict: t.Dict[str, str], db_name:str ="my_sqlite.db") -> 'S
     -------
     None
 
-    Examples
+    Example
     --------
     >>> import pyqrlew as pq
     >>> import pandas as pd
@@ -124,7 +124,7 @@ def from_pandas(table_name: str, data: pd.DataFrame, db_name:str ="my_sqlite.db"
     -------
     None
 
-    Examples
+    Example
     --------
     >>> import pyqrlew as pq
     >>> import pandas as pd
@@ -159,7 +159,7 @@ def from_pandas_dict(data_dict: t.Dict[str, pd.DataFrame], db_name:str ="my_sqli
     -------
     None
 
-    Examples
+    Example
     --------
     >>> import pyqrlew as pq
     >>> import pandas as pd
