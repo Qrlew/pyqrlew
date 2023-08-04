@@ -8,8 +8,7 @@ import pyqrlew as qrl
 
 def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.Dataset:
     metadata = MetaData()
-    schema = schema_name or name
-    metadata.reflect(engine, schema=schema)
+    metadata.reflect(engine, schema=schema_name)
 
     def _dataset_schema_size() -> tuple[dict, dict, Optional[dict]]:
         """Return a (dataset, schema) pair or (dataset, schema, size) triplet """
@@ -38,6 +37,22 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
         }
 
     def _schema(dataset: dict) -> dict:
+        tables = {"fields": [_table(metadata.tables[name]) for name in metadata.tables]}
+
+        if schema_name is not None:
+            tables = {
+                "fields": [{
+                    'name': schema_name,
+                    'type': {
+                        'name': 'Union',
+                        'union': tables,
+                        'properties': {
+                            'public_fields': '[]'
+                        },
+                    }
+                }],
+            }
+
         return {
             '@type': 'sarus_data_spec/sarus_data_spec.Schema',
             'uuid': generate_uuid().hex,
@@ -52,20 +67,7 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
                             'name': 'sarus_data',
                             'type': {
                                 'name': 'Union',
-                                'union': {
-                                    "fields": [{
-                                        'name': schema,
-                                        'type': {
-                                            'name': 'Union',
-                                            'union': {
-                                                "fields": [_table(metadata.tables[name]) for name in metadata.tables]
-                                            },
-                                            'properties': {
-                                                'public_fields': '[]'
-                                            },
-                                        }
-                                    }],
-                                },
+                                'union': tables,
                                 'properties': {
                                     'public_fields': '[]',
                                 },
@@ -204,6 +206,22 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
             }
 
     def _size(dataset: dict) -> dict:
+        tables = {'fields': [_table_size(metadata.tables[name]) for name in metadata.tables]}
+        if schema_name is not None:
+            tables = {
+                'fields': [
+                    {
+                        'name': schema_name,
+                        'statistics': {
+                            'name': 'Union',
+                            'union': tables,
+                            'properties': {},
+                        },
+                        'properties': {},
+                    },
+                ],
+            }
+
         return {
             '@type': 'sarus_data_spec/sarus_data_spec.Size',
             'uuid': generate_uuid().hex,
@@ -211,21 +229,7 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
             'name': f'{name}_sizes',
             'statistics': {
                 'name': 'Union',
-                'union': {
-                    'fields': [
-                        {
-                            'name': schema,
-                            'statistics': {
-                                'name': 'Union',
-                                'union': {
-                                    'fields': [_table_size(metadata.tables[name]) for name in metadata.tables]
-                                },
-                                'properties': {},
-                            },
-                            'properties': {},
-                        },
-                    ],
-                },
+                'union': tables,
                 'properties': {},
             },
             'properties': {},
