@@ -1,17 +1,26 @@
-from IPython.display import display
-import graphviz
-from pyqrlew import Relation
-
-
 MAGENTA_COLOR = '\033[35m'
 BLUE_COLOR = '\033[34m'
 RESET_COLOR = '\033[0m'
 
-def display_relation(relation: Relation) -> None:
-    display(graphviz.Source(relation.dot()))
-
 
 def print_query(query: str) -> None:
+    """
+    Print a formatted and syntax-highlighted SQL query.
+
+    This function takes an SQL query as input and prints it to the console with syntax
+    highlighting applied to certain keywords for better readability.
+
+    Parameters
+    ----------
+    query: str
+        The SQL query to be printed and highlighted.
+
+    Returns
+    -------
+    None
+        This function does not return any value. It directly prints the formatted
+        and highlighted SQL query to the console.
+    """
     keywords = ["SELECT", "AS", "GROUP BY", "LIMIT", "ORDER BY", "WHERE"]
     colored_query = query
     colored_query = colored_query.replace("WITH", "WITH\n ")
