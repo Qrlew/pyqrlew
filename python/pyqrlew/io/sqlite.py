@@ -15,15 +15,16 @@ dtype_to_sqlalchemy = {
     'category': sqlalchemy.String
 }
 
-class SQLite(Database):
-    def __init__(self, table_name: str, csv_file:str) -> None:
-        self.db_file = f"{table_name}.db"
-        self.table_name = table_name
-        self.load_csv(csv_file)
 
-    def load_csv(self, csv_file: str) -> None:
-        engine = self.engine()
+class SQLite(Database):
+    def __init__(self, db_file:str) -> None:
+        self.db_file = db_file
+
+    def load_csv(self, table_name: str, csv_file: str) -> None:
         df = pd.read_csv(csv_file)
+        self.load_pandas(table_name, df)
+
+    def load_pandas(self, table_name: str, df: pd.DataFrame) -> None:
         column_types = {
             column: dtype_to_sqlalchemy[str(df[column].dtype)]
             for column in df.columns
@@ -33,15 +34,16 @@ class SQLite(Database):
             sqlalchemy.Column(col_name, col_type)
             for col_name, col_type in column_types.items()
         ]
-        _ = sqlalchemy.Table(self.table_name, metadata, *columns)
+        _ = sqlalchemy.Table(table_name, metadata, *columns)
+        engine = self.engine()
         metadata.create_all(engine)
-        df.to_sql(self.table_name, self.engine(), if_exists='replace', index=False)
+        df.to_sql(table_name, engine, if_exists='replace', index=False)
 
     def url(self) -> str:
         return f'sqlite:///{self.db_file}'
 
     def remove(self) -> None:
-        os.remove(f"{self.table_name}.db")
+        os.remove(self.db_file)
 
     def engine(self) -> sqlalchemy.Engine:
         return sqlalchemy.create_engine(self.url(), echo=True)
@@ -55,7 +57,7 @@ class SQLite(Database):
         return result
 
     def dataset(self) -> qrl.Dataset:
-        return dataset(self.table_name, self.engine())
+        return dataset(self.db_file, self.engine())
 
     def print_infos_metadata(self) -> None:
         metadata = sqlalchemy.MetaData()

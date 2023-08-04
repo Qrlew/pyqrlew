@@ -1,4 +1,5 @@
 from .pyqrlew import *
+from .io import *
 
 
 __doc__ = pyqrlew.__doc__
