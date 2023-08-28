@@ -4,7 +4,7 @@ use qrlew_sarus::data_spec;
 use std::rc::Rc;
 use pyo3::{pyclass, pymethods};
 
-use crate::{relation::Relation, error};
+use crate::{relation::Relation, error::Result};
 
 #[pyclass]
 pub struct Dataset(pub data_spec::Dataset);
@@ -12,7 +12,7 @@ pub struct Dataset(pub data_spec::Dataset);
 #[pymethods]
 impl Dataset {
     #[new]
-    pub fn new(dataset: &str, schema: &str, size: &str) -> error::Result<Self> {
+    pub fn new(dataset: &str, schema: &str, size: &str) -> Result<Self> {
         Ok(Dataset(data_spec::Dataset::parse_from_dataset_schema_size(
             dataset, schema, size,
         )?))
@@ -26,7 +26,7 @@ impl Dataset {
             .collect()
     }
 
-    pub fn sql(&self, query: &str) -> error::Result<Relation> {
+    pub fn sql(&self, query: &str) -> Result<Relation> {
         let query = sql::relation::parse(query)?;
         let relations = self.0.relations();
         let query_with_relations = query.with(&relations);

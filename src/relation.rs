@@ -3,7 +3,7 @@ use qrlew::relation::Variant;
 use qrlew::{relation, ast};
 use serde_json::Value;
 use std::rc::Rc;
-use crate::{error, dataset};
+use crate::{error::Result, dataset::Dataset};
 
 
 #[pyclass(unsendable)]
@@ -11,7 +11,7 @@ pub struct Relation(pub Rc<relation::Relation>);
 
 #[pymethods]
 impl Relation {
-    pub fn parse(&self, query: &str, dataset: &dataset::Dataset) -> error::Result<Self> {
+    pub fn parse(&self, query: &str, dataset: &Dataset) -> Result<Self> {
         dataset.sql(query)
     }
 
@@ -20,7 +20,7 @@ impl Relation {
         format!("{}", relation)
     }
 
-    pub fn dot(&self) -> error::Result<String> {
+    pub fn dot(&self) -> Result<String> {
         let mut out: Vec<u8> = vec![];
         (*self.0).dot(&mut out, &[]).unwrap();
         Ok(String::from_utf8(out).unwrap())
@@ -30,12 +30,12 @@ impl Relation {
         (*self.0).schema().to_string()
     }
 
-    pub fn protect(&self, dataset: &dataset::Dataset, protected_entity: &str) -> error::Result<Self> {
+    pub fn protect(&self, dataset: &Dataset, protected_entity: &str) -> Result<Self> {
         let pe = parse_protected_entity(protected_entity);
         Ok(Relation(Rc::new(protect((*(self.0)).clone(), dataset, &pe))))
     }
 
-    pub fn dp_compilation(&self, dataset: &dataset::Dataset, protected_entity: &str, epsilon: f64, delta: f64) -> error::Result<Self> {
+    pub fn dp_compilation(&self, dataset: &Dataset, protected_entity: &str, epsilon: f64, delta: f64) -> Result<Self> {
         let pe = parse_protected_entity(protected_entity);
         Ok(Relation(Rc::new(dp_compilation((*(self.0)).clone(), dataset, &pe, epsilon, delta))))
     }
@@ -49,7 +49,7 @@ impl Relation {
 
 fn protect<'a>(
     relation: relation::Relation,
-    dataset: &dataset::Dataset,
+    dataset: &Dataset,
     vec_of_string: &'a Vec<(String, Vec<(String, String, String)>, String)>,
 ) -> relation::Relation {
     let relations = dataset.0.relations();
@@ -72,7 +72,7 @@ fn protect<'a>(
 
 fn dp_compilation<'a>(
     relation: relation::Relation,
-    dataset: &dataset::Dataset,
+    dataset: &Dataset,
     vec_of_string: &'a Vec<(String, Vec<(String, String, String)>, String)>,
     epsilon: f64,
     delta: f64
