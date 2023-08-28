@@ -6,11 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- split lib.rs into 3 files[MR14](https://github.com/Qrlew/pyqrlew/pull/14)
+### Fixed
+- Visitor for protobuf files (set the size)[MR14](https://github.com/Qrlew/pyqrlew/pull/14)
 
 ## [0.3.2] - 2023-08-03
 ### Added
 - support for SQLite
-### Added
 - retail Dataset + notebook `range_propagation.ipynb`
 
 ## [0.2.1] - 2023-07-18
