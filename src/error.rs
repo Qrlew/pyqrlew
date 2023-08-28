@@ -1,5 +1,5 @@
-use pyo3::exceptions::{PyException, PyRuntimeError};
-use pyo3::prelude::*;
+use pyo3::exceptions::PyRuntimeError;
+use pyo3::prelude::PyErr;
 use qrlew_sarus::{data_spec, protobuf};
 use std::{error, result};
 use qrlew::relation;

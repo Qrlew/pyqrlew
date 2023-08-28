@@ -4,7 +4,7 @@ use qrlew_sarus::data_spec;
 use std::rc::Rc;
 use pyo3::{pyclass, pymethods};
 
-use crate::{relation, error};
+use crate::{relation::Relation, error};
 
 #[pyclass]
 pub struct Dataset(pub data_spec::Dataset);
@@ -18,19 +18,19 @@ impl Dataset {
         )?))
     }
 
-    pub fn relations(&self) -> Vec<(Vec<String>, relation::Relation)> {
+    pub fn relations(&self) -> Vec<(Vec<String>, Relation)> {
         self.0
             .relations()
             .into_iter()
-            .map(|(i, r)| (i, relation::Relation(r)))
+            .map(|(i, r)| (i, Relation(r)))
             .collect()
     }
 
-    pub fn sql(&self, query: &str) -> error::Result<relation::Relation> {
+    pub fn sql(&self, query: &str) -> error::Result<Relation> {
         let query = sql::relation::parse(query)?;
         let relations = self.0.relations();
         let query_with_relations = query.with(&relations);
-        Ok(relation::Relation(Rc::new(query_with_relations.try_into()?)))
+        Ok(Relation(Rc::new(query_with_relations.try_into()?)))
     }
 
     pub fn __str__(&self) -> String {
