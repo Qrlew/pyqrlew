@@ -244,10 +244,10 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
             'name': tab.name,
             'statistics': {
                 'name': 'Struct',
-                'size': str(size),
-                'multiplicity': multiplicity,
                 'struct': {
                     'fields': [_column_size(col, size, multiplicity) for col in tab.columns],
+                    'size': str(size),
+                    'multiplicity': multiplicity,
                 },
                 'properties': {},
             }
@@ -258,84 +258,106 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
             return {
                 'name': col.name,
                 'statistics': {
-                    'name': 'Integer',
-                    'size': str(size),
-                    'multiplicity': multiplicity,
-                    'integer': {
-                        'base': 'INT64',
-                        'min': '-9223372036854775808',
-                        'max': '9223372036854775807',
-                        'possible_values': []
+                    "integer": {
+                        "distribution": {
+                            "integer": {
+                                "max": "9223372036854775807",
+                                "min": "-9223372036854775808",
+                                "points": []
+                            },
+                            "properties": {}
+                            },
+                        "multiplicity": multiplicity,
+                        "size": size
                     },
-                    'properties': {},
-                },
+                    "name": "Integer",
+                    "properties": {}
+                }
             }
         elif isinstance(col.type, types.Float) or isinstance(col.type, types.Numeric):
             return {
                 'name': col.name,
                 'statistics': {
-                    'name': 'Float64',
-                    'size': str(size),
-                    'multiplicity': multiplicity,
-                    'float': {
-                        'base': 'FLOAT64',
-                        'min': '-1.7976931348623157e+308',
-                        'max': '1.7976931348623157e+308',
-                        'possible_values': [],
+                    "float": {
+                        "distribution": {
+                            "double": {
+                                "max": '1.7976931348623157e+308',
+                                "min": '-1.7976931348623157e+308',
+                                "points": []
+                            },
+                            "properties": {}
+                            },
+                        "multiplicity": multiplicity,
+                        "size": size
                     },
-                    'properties': {},
+                    "name": "Float",
+                    "properties": {}
                 }
             }
         elif isinstance(col.type, types.String) or isinstance(col.type, types.Text) or isinstance(col.type, types.Unicode) or isinstance(col.type, types.UnicodeText):
             return {
                 'name': col.name,
                 'statistics': {
-                    'name': 'Text UTF-8',
-                    'size': str(size),
-                    'multiplicity': multiplicity,
-                    'text': {
-                        'encoding': 'UTF-8',
+                    "text": {
+                        "distribution": {
+                            "integer": {
+                                "max": "9223372036854775807",
+                                "min": "-9223372036854775808",
+                                "points": []
+                            },
+                            "properties": {}
+                            },
+                        "multiplicity": multiplicity,
+                        "size": size
                     },
-                    'properties': {},
-                },
+                    "name": "Text",
+                    "properties": {}
+                }
             }
+
         elif isinstance(col.type, types.Boolean):
             return {
                 'name': col.name,
                 'statistics': {
-                    'name': 'Boolean',
-                    'size': str(size),
-                    'multiplicity': multiplicity,
-                    'boolean': {},
-                    'properties': {},
-                },
+                    "boolean": {
+                        "distribution": {
+                            "integer": {
+                                "max": "9223372036854775807",
+                                "min": "-9223372036854775808",
+                                "points": []
+                            },
+                            "properties": {}
+                            },
+                        "multiplicity": multiplicity,
+                        "size": size
+                    },
+                    "name": "Boolean",
+                    "properties": {}
+                }
             }
         elif isinstance(col.type, types.Date) or isinstance(col.type, types.DateTime) or isinstance(col.type, types.Time):
             return {
                 'name': col.name,
                 'statistics': {
-                    'name': 'Datetime',
-                    'size': str(size),
-                    'multiplicity': multiplicity,
-                    'datetime': {
-                        'format': '%Y-%m-%d %H:%M:%S',
-                        'min': '01-01-01 00:00:00',
-                        'max': '9999-12-31 00:00:00',
+                    "datetime": {
+                        "distribution": {
+                            "integer": {
+                                "max": "9223372036854775807",
+                                "min": "-9223372036854775808",
+                                "points": []
+                            },
+                            "properties": {}
+                            },
+                        "multiplicity": multiplicity,
+                        "size": size
                     },
-                    'properties': {},
-                },
+                    "name": "Datetime",
+                    "properties": {}
+                }
             }
-        else:
-            return {
-                'name': col.name,
-                'statistics': {
-                    'name': 'Type',
-                    'size': str(size),
-                    'multiplicity': multiplicity,
-                    'type': {},
-                    'properties': {},
-                },
-            }
+
+        else: # TODO: support more types
+            raise NotImplementedError(f"SQL -> Sarus Conversion not supported for {col.type} SQL type")
     # Gather protobufs
     dataset, schema, size = _dataset_schema_size()
     # Display when debugging
