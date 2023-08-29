@@ -32,12 +32,12 @@ impl Relation {
 
     pub fn protect(&self, dataset: &Dataset, protected_entity: &str) -> Result<Self> {
         let pe = parse_protected_entity(protected_entity);
-        Ok(Relation(Rc::new(protect((*(self.0)).clone(), dataset, &pe))))
+        Ok(Relation(Rc::new(protect((*(self.0)).clone(), dataset, &pe)?)))
     }
 
     pub fn dp_compilation(&self, dataset: &Dataset, protected_entity: &str, epsilon: f64, delta: f64) -> Result<Self> {
         let pe = parse_protected_entity(protected_entity);
-        Ok(Relation(Rc::new(dp_compilation((*(self.0)).clone(), dataset, &pe, epsilon, delta))))
+        Ok(Relation(Rc::new(dp_compilation((*(self.0)).clone(), dataset, &pe, epsilon, delta)?)))
     }
 
     pub fn render(&self) -> String {
@@ -51,7 +51,7 @@ fn protect<'a>(
     relation: relation::Relation,
     dataset: &Dataset,
     vec_of_string: &'a Vec<(String, Vec<(String, String, String)>, String)>,
-) -> relation::Relation {
+) -> Result<relation::Relation> {
     let relations = dataset.0.relations();
     let vec_pe = vec_of_string
         .iter()
@@ -67,7 +67,7 @@ fn protect<'a>(
         }).collect::<Vec<_>>();
     let slice_pe = vec_pe.iter()
     .map(|(t, fk, n)| (*t, fk.as_slice(), *n)).collect::<Vec<_>>();
-    relation.force_protect_from_field_paths(&relations, slice_pe.as_slice())
+    Ok(relation.force_protect_from_field_paths(&relations, slice_pe.as_slice()))
 }
 
 fn dp_compilation<'a>(
@@ -76,7 +76,7 @@ fn dp_compilation<'a>(
     vec_of_string: &'a Vec<(String, Vec<(String, String, String)>, String)>,
     epsilon: f64,
     delta: f64
-) -> relation::Relation {
+) -> Result<relation::Relation> {
     let relations = dataset.0.relations();
     let vec_pe = vec_of_string
         .iter()
@@ -92,7 +92,7 @@ fn dp_compilation<'a>(
         }).collect::<Vec<_>>();
     let slice_pe = vec_pe.iter()
     .map(|(t, fk, n)| (*t, fk.as_slice(), *n)).collect::<Vec<_>>();
-    relation.dp_compilation(&relations, slice_pe.as_slice(), epsilon, delta)
+    Ok(relation.dp_compilation(&relations, slice_pe.as_slice(), epsilon, delta)?)
 }
 
 fn parse_protected_entity(str_pe: &str) -> Vec<(String, Vec<(String, String, String)>, String)> {
