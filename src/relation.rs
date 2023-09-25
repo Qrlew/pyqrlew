@@ -8,7 +8,6 @@ use std::rc::Rc;
 use crate::{error::Result, dataset::Dataset};
 use qrlew_sarus::protobuf::{type_, schema, print_to_string};
 use qrlew::data_type::DataTyped;
-use protobuf::Message;
 use std::str;
 
 #[pyclass(unsendable)]
