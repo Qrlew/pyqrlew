@@ -1,6 +1,6 @@
 import shutil
 from pathlib import Path
-import importlib_resources as pkg_resources
+import importlib.resources as pkg_resources
 import json
 import logging
 from sqlalchemy import MetaData, exists, select, column, table, text
