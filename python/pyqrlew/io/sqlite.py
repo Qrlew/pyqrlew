@@ -128,7 +128,7 @@ class SQLite(Database):
         """Remove the SQLite database file from the filesystem."""
         os.remove(self.db_file)
 
-    def engine(self) -> sqlalchemy.Engine:
+    def engine(self) -> sqlalchemy.engine.Engine:
         """Create and return an SQLAlchemy Engine instance for the SQLite database."""
         return sqlalchemy.create_engine(self.url(), echo=True)
 

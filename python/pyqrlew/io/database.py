@@ -1,16 +1,16 @@
 import logging
 from uuid import uuid4 as generate_uuid
-from typing import Optional
+from typing import Optional, Tuple
 import json
-from sqlalchemy import Engine, MetaData, Table, Column
-from sqlalchemy import types, select, func
+from sqlalchemy import MetaData, Table, Column, types, select, func
+from sqlalchemy.engine import Engine
 import pyqrlew as qrl
 
 def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.Dataset:
     metadata = MetaData()
     metadata.reflect(engine, schema=schema_name)
 
-    def _dataset_schema_size() -> tuple[dict, dict, Optional[dict]]:
+    def _dataset_schema_size() -> Tuple[dict, dict, Optional[dict]]:
         """Return a (dataset, schema) pair or (dataset, schema, size) triplet """
         ds = _dataset()
         return (
