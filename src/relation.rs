@@ -31,15 +31,8 @@ impl Relation {
         Ok(String::from_utf8(out).unwrap())
     }
 
-    pub fn schema(&self) -> Result<String> {
-        let proto: schema::Schema = (*self.0).schema().try_into()?;
-        Ok(print_to_string(&proto)?)
-    }
-
-    pub fn data_type(&self) -> Result<Vec<u8>> {
-        let proto_data_type: type_::Type = (*self.0).schema().data_type().try_into()?;
-        let bytes = proto_data_type.write_to_bytes().expect("Failed to serialize protobuf message");
-        Ok(bytes)
+    pub fn schema(&self) -> String {
+        (*self.0).schema().to_string()
     }
 
     pub fn protect(&self, dataset: &Dataset, protected_entity: &str) -> Result<Self> {
