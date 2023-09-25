@@ -1,4 +1,4 @@
-from sqlalchemy import Engine, Connection, text
+from sqlalchemy import Connection, text
 import typing as t
 import os
 from termcolor import colored

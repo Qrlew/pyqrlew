@@ -2,8 +2,8 @@ import logging
 from uuid import uuid4 as generate_uuid
 from typing import Optional
 import json
-from sqlalchemy import Engine, MetaData, Table, Column
-from sqlalchemy import types, select, func
+from sqlalchemy import Engine, MetaData, Table, Column, types, select, func
+from sqlalchemy.engine import Engine
 import pyqrlew as qrl
 
 def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.Dataset:

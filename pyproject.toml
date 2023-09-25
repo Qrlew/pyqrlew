@@ -24,10 +24,10 @@ classifiers = [
 ]
 
 dependencies = [
-  "SQLAlchemy ~= 2.0",
-  "psycopg[binary, pool] ~= 3.0",
+  "SQLAlchemy < 2.0",
+  "psycopg2[binary, pool] < 3.0",
   "pymysql ~= 1.0",
-  "qrlew-datasets ~= 0.3.2",
+  "qrlew-datasets ~= 0.4",
 ]
 
 [project.optional-dependencies]
