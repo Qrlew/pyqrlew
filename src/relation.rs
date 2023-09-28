@@ -11,7 +11,7 @@ use crate::{error::Result, dataset::Dataset};
 use qrlew_sarus::protobuf::{type_, schema, print_to_string};
 use std::str;
 
-#[pyclass(unsendable)]
+#[pyclass]
 #[derive(Clone)]
 pub struct Relation(Arc<relation::Relation>);
 
