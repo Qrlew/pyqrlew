@@ -1,7 +1,7 @@
 use std::ops::Deref;
 use qrlew::{builder::With, sql};
 use qrlew_sarus::data_spec;
-use std::rc::Rc;
+use std::sync::Arc;
 use pyo3::{pyclass, pymethods};
 
 use crate::{relation::Relation, error::Result};
@@ -44,7 +44,7 @@ impl Dataset {
         let query = sql::relation::parse(query)?;
         let relations = self.deref().relations();
         let query_with_relations = query.with(&relations);
-        Ok(Relation::new(Rc::new(query_with_relations.try_into()?)))
+        Ok(Relation::new(Arc::new(query_with_relations.try_into()?)))
     }
 
     pub fn __str__(&self) -> String {
