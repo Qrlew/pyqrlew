@@ -6,14 +6,14 @@ use qrlew::{
     differential_privacy::{self, private_query}
 };
 use serde_json::Value;
-use std::{rc::Rc, ops::Deref};
+use std::{sync::Arc, ops::Deref};
 use crate::{error::Result, dataset::Dataset};
 use qrlew_sarus::protobuf::{type_, schema, print_to_string};
 use std::str;
 
-#[pyclass(unsendable)]
+#[pyclass]
 #[derive(Clone, Debug)]
-pub struct PrivateQuery(Rc<private_query::PrivateQuery>);
+pub struct PrivateQuery(Arc<private_query::PrivateQuery>);
 
 impl Deref for PrivateQuery {
     type Target = private_query::PrivateQuery;
@@ -24,7 +24,7 @@ impl Deref for PrivateQuery {
 }
 
 impl PrivateQuery {
-    pub fn new(private_query: Rc<private_query::PrivateQuery>) -> Self {
+    pub fn new(private_query: Arc<private_query::PrivateQuery>) -> Self {
         PrivateQuery(private_query)
     }
 }
@@ -36,9 +36,9 @@ impl PrivateQuery {
     }
 }
 
-#[pyclass(unsendable)]
+#[pyclass]
 #[derive(Clone)]
-pub struct Relation(Rc<relation::Relation>);
+pub struct Relation(Arc<relation::Relation>);
 
 impl Deref for Relation {
     type Target = relation::Relation;
@@ -49,7 +49,7 @@ impl Deref for Relation {
 }
 
 impl Relation {
-    pub fn new(relation: Rc<relation::Relation>) -> Self {
+    pub fn new(relation: Arc<relation::Relation>) -> Self {
         Relation(relation)
     }
 }
@@ -78,11 +78,11 @@ impl Relation {
 
     pub fn protect<'a>(&'a self, dataset: &'a Dataset, protected_entity: Vec<(&'a str, Vec<(&'a str, &'a str, &'a str)>, &'a str)>) -> Result<Self> {
         let relations = dataset.deref().relations();
-        Ok(Relation(Rc::new(self.deref().clone().force_protect_from_field_paths(&relations, protected_entity).into())))
+        Ok(Relation(Arc::new(self.deref().clone().force_protect_from_field_paths(&relations, protected_entity).into())))
     }
 
-    pub fn dp_compile<'a>(
-        &'a self, dataset: &'a Dataset,
+    pub fn dp_compile<'a>(&'a self,
+        dataset: &'a Dataset,
         protected_entity: Vec<(&'a str, Vec<(&'a str, &'a str, &'a str)>, &'a str)>,
         epsilon: f64,
         delta: f64,
@@ -92,7 +92,7 @@ impl Relation {
         let relations = dataset.deref().relations();
         let pep_relation = self.deref().clone().force_protect_from_field_paths(&relations, protected_entity);
         let (dp_relation, private_query) = pep_relation.dp_compile(epsilon, delta, epsilon_tau_thresholding, delta_tau_thresholding)?.into();
-        Ok((Relation(Rc::new(dp_relation.into())), PrivateQuery(Rc::new(private_query))))
+        Ok((Relation(Arc::new(dp_relation.into())), PrivateQuery(Arc::new(private_query))))
     }
 
     pub fn render(&self) -> String {
