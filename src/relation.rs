@@ -56,10 +56,17 @@ impl Relation {
         Ok(Relation(Arc::new(self.deref().clone().force_protect_from_field_paths(&relations, protected_entity).into())))
     }
 
-    pub fn dp_compile<'a>(&'a self, dataset: &'a Dataset, protected_entity: Vec<(&'a str, Vec<(&'a str, &'a str, &'a str)>, &'a str)>, epsilon: f64, delta: f64) -> Result<Self> {
+    pub fn dp_compile<'a>(&'a self,
+        dataset: &'a Dataset,
+        protected_entity: Vec<(&'a str, Vec<(&'a str, &'a str, &'a str)>, &'a str)>,
+        epsilon: f64,
+        delta: f64,
+        epsilon_tau_thresholding: f64,
+        delta_tau_thresholding: f64,
+    ) -> Result<Self> {
         let relations = dataset.deref().relations();
         let pep_relation = self.deref().clone().force_protect_from_field_paths(&relations, protected_entity);
-        let dp_relation = pep_relation.dp_compile(epsilon/2., delta/2., epsilon/2., delta/2.)?;
+        let dp_relation = pep_relation.dp_compile(epsilon, delta, epsilon_tau_thresholding, delta_tau_thresholding)?;
         Ok(Relation(Arc::new(dp_relation.into())))
     }
 
