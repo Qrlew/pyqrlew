@@ -51,7 +51,7 @@ impl Dataset {
         Ok(Relation::new(Arc::new(query_with_relations.try_into()?)))
     }
 
-    pub fn sql_from_dict(&self, queries: Vec<(Vec<String>, String)>) -> Result<Self> {
+    pub fn from_queries(&self, queries: Vec<(Vec<String>, String)>) -> Result<Self> {
         let relations = self.deref().relations();
 
         let result_relations: Hierarchy<Arc<relation::Relation>> = queries
