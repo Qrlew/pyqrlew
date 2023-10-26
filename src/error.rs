@@ -1,8 +1,8 @@
-use std::{error, result};
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::PyErr;
-use qrlew::{relation, sql, differential_privacy};
+use qrlew::{differential_privacy, relation, sql};
 use qrlew_sarus::{data_spec, protobuf};
+use std::{error, fmt, result};
 
 /*
 Error management
@@ -50,6 +50,23 @@ impl From<sql::Error> for Error {
 impl From<differential_privacy::Error> for Error {
     fn from(err: differential_privacy::Error) -> Error {
         Error(Box::new(err))
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct MissingKeysError(pub String);
+
+impl error::Error for MissingKeysError {}
+
+impl From<MissingKeysError> for Error {
+    fn from(err: MissingKeysError) -> Error {
+        Error(Box::new(err))
+    }
+}
+
+impl fmt::Display for MissingKeysError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Missing {} key", self.0)
     }
 }
 

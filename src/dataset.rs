@@ -1,10 +1,15 @@
-use std::ops::Deref;
-use qrlew::{builder::With, sql::{self}, relation::{self, Variant as _}, hierarchy::Hierarchy};
-use qrlew_sarus::{data_spec, protobuf::print_to_string};
-use std::sync::Arc;
 use pyo3::{pyclass, pymethods};
+use qrlew::{
+    builder::With,
+    hierarchy::Hierarchy,
+    relation::{self, Variant as _},
+    sql::{self},
+};
+use qrlew_sarus::{data_spec, protobuf::print_to_string};
+use std::ops::Deref;
+use std::sync::Arc;
 
-use crate::{relation::Relation, error::Result};
+use crate::{error::Result, relation::Relation};
 
 #[pyclass]
 #[derive(Clone)]
@@ -33,12 +38,12 @@ impl Dataset {
         )?))
     }
     #[getter]
-    pub fn schema(&self) -> Result<String> { 
+    pub fn schema(&self) -> Result<String> {
         Ok(print_to_string(self.0.schema())?)
     }
 
     #[getter]
-    pub fn size(&self) -> Option<String> { 
+    pub fn size(&self) -> Option<String> {
         match self.0.size() {
             Some(size_proto) => print_to_string(size_proto).ok(),
             None => None,
@@ -46,7 +51,8 @@ impl Dataset {
     }
 
     pub fn relations(&self) -> Vec<(Vec<String>, Relation)> {
-        self.deref().relations()
+        self.deref()
+            .relations()
             .into_iter()
             .map(|(i, r)| (i, Relation::new(r)))
             .collect()
@@ -63,14 +69,14 @@ impl Dataset {
         let relations = self.deref().relations();
 
         let result_relations: Hierarchy<Arc<relation::Relation>> = queries
-        .iter()
-        .map(|(path, query)| {
-            let parsed = sql::relation::parse(query)?;
-            let query_with_rel = parsed.with(&relations);
-            let rel = relation::Relation::try_from(query_with_rel)?;
-            Ok( (path.clone(), Arc::new(rel)) )
-        })
-        .collect::<Result<Hierarchy<Arc<relation::Relation>>>>()?;
+            .iter()
+            .map(|(path, query)| {
+                let parsed = sql::relation::parse(query)?;
+                let query_with_rel = parsed.with(&relations);
+                let rel = relation::Relation::try_from(query_with_rel)?;
+                Ok((path.clone(), Arc::new(rel)))
+            })
+            .collect::<Result<Hierarchy<Arc<relation::Relation>>>>()?;
         let ds: data_spec::Dataset = (&result_relations).try_into()?;
         Ok(Dataset(ds))
     }
