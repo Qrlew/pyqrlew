@@ -65,7 +65,7 @@ impl RelationWithPrivateQuery {
     pub fn __str__(&self) -> String {
         let relation_with_qiery = self.0.as_ref();
         format!(
-            "RELATION: {}\nPrivateQuery: {}",
+            "Relation: {}\nPrivateQuery: {}",
             relation_with_qiery.relation(),
             relation_with_qiery.private_query()
         )
