@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2023-10-26
+### Fixed
+- Fix synthetic_data argument type for Relation's rewrite_with_differential_privacy [MR20](https://github.com/Qrlew/pyqrlew/pull/20)
+
+
 ## [0.4.0] - 2023-10-26
 ### Changed
 - Updated qrlew version and dp compilation
