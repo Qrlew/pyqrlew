@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.1] - 2023-10-26
 ### Fixed
-- Updated qrlew version and dp compilation
+- Fix synthetic_data argument type for Relation's rewrite_with_differential_privacy [MR20](https://github.com/Qrlew/pyqrlew/pull/20)
 
 
 ## [0.4.0] - 2023-10-26
