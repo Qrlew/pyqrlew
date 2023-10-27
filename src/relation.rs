@@ -124,7 +124,7 @@ impl Relation {
     pub fn rewrite_with_differential_privacy<'a>(
         &'a self,
         dataset: &'a Dataset,
-        synthetic_data: Vec<(Vec<&'a str>, &'a str)>,
+        synthetic_data: Vec<(Vec<&'a str>, Vec<&'a str>)>,
         protected_entity: Vec<(&'a str, Vec<(&'a str, &'a str, &'a str)>, &'a str)>,
         epsilon_delta: HashMap<&'a str, f64>,
     ) -> Result<RelationWithPrivateQuery> {
@@ -133,8 +133,10 @@ impl Relation {
         let sd_hierarchy: Hierarchy<Identifier> = Hierarchy::from_iter(
             synthetic_data
                 .into_iter()
-                .map(|(path, iden)| (path, Identifier::from(iden))),
-        );
+                .map(|(path, iden)| {
+                    let iden_as_vec_of_strings: Vec<String> = iden.iter().map(|s| s.to_string()).collect();
+                    (path, Identifier::from(iden_as_vec_of_strings))
+                }));
         let synthetic_data = SyntheticData::new(sd_hierarchy);
         let protected_entity = ProtectedEntity::from(protected_entity);
         let epsilon = epsilon_delta
