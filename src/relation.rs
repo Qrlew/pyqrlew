@@ -121,6 +121,40 @@ impl Relation {
         (*self.0).schema().to_string()
     }
 
+    pub fn rewrite_as_protected_entity_preserving<'a>(
+        &'a self,
+        dataset: &'a Dataset,
+        synthetic_data: Vec<(Vec<&'a str>, Vec<&'a str>)>,
+        protected_entity: Vec<(&'a str, Vec<(&'a str, &'a str, &'a str)>, &'a str)>,
+        epsilon_delta: HashMap<&'a str, f64>,
+    ) -> Result<RelationWithPrivateQuery> {
+        let relation = self.deref().clone();
+        let relations = dataset.deref().relations();
+        let synthetic_data = SyntheticData::new(synthetic_data
+            .into_iter()
+            .map(|(path, iden)| {
+                let iden_as_vec_of_strings: Vec<String> = iden.iter().map(|s| s.to_string()).collect();
+                (path, Identifier::from(iden_as_vec_of_strings))
+            }).collect());
+        let protected_entity = ProtectedEntity::from(protected_entity);
+        let epsilon = epsilon_delta
+            .get("epsilon")
+            .ok_or(MissingKeysError("epsion".to_string()))?;
+        let delta = epsilon_delta
+            .get("delta")
+            .ok_or(MissingKeysError("delta".to_string()))?;
+        let budget = Budget::new(*epsilon, *delta);
+        let relation_with_private_query = relation.rewrite_as_protected_entity_preserving(
+            &relations,
+            synthetic_data,
+            protected_entity,
+            budget,
+        )?;
+        Ok(RelationWithPrivateQuery(Arc::new(
+            relation_with_private_query,
+        )))
+    }
+
     pub fn rewrite_with_differential_privacy<'a>(
         &'a self,
         dataset: &'a Dataset,
@@ -130,14 +164,12 @@ impl Relation {
     ) -> Result<RelationWithPrivateQuery> {
         let relation = self.deref().clone();
         let relations = dataset.deref().relations();
-        let sd_hierarchy: Hierarchy<Identifier> = Hierarchy::from_iter(
-            synthetic_data
-                .into_iter()
-                .map(|(path, iden)| {
-                    let iden_as_vec_of_strings: Vec<String> = iden.iter().map(|s| s.to_string()).collect();
-                    (path, Identifier::from(iden_as_vec_of_strings))
-                }));
-        let synthetic_data = SyntheticData::new(sd_hierarchy);
+        let synthetic_data = SyntheticData::new(synthetic_data
+            .into_iter()
+            .map(|(path, iden)| {
+                let iden_as_vec_of_strings: Vec<String> = iden.iter().map(|s| s.to_string()).collect();
+                (path, Identifier::from(iden_as_vec_of_strings))
+            }).collect());
         let protected_entity = ProtectedEntity::from(protected_entity);
         let epsilon = epsilon_delta
             .get("epsilon")
@@ -151,7 +183,7 @@ impl Relation {
             synthetic_data,
             protected_entity,
             budget,
-        );
+        )?;
         Ok(RelationWithPrivateQuery(Arc::new(
             relation_with_private_query,
         )))
