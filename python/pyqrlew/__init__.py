@@ -1,6 +1,6 @@
 from .pyqrlew import *
-from . import stochatic_dataset
 from .io import *
+from . import tester
 
 
 __doc__ = pyqrlew.__doc__
