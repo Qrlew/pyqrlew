@@ -11,10 +11,10 @@ N_SIM = 500
 
 
 class StochasticTester:
-    def __init__(self, database, delta, protected_entity, synthetic_data):
+    def __init__(self, database, delta, privacy_unit, synthetic_data):
         self.database = database
         self.delta = delta
-        self.protected_entity = protected_entity
+        self.privacy_unit = privacy_unit
         self.synthetic_data = synthetic_data
 
     def compute_dp_relation(self, query, epsilon):
@@ -24,7 +24,7 @@ class StochasticTester:
         relation_with_privatequeries = relation.rewrite_with_differential_privacy(
             self.database.dataset(),
             self.synthetic_data,
-            self.protected_entity,
+            self.privacy_unit,
             budget
         )
         return relation_with_privatequeries.relation()
@@ -164,13 +164,13 @@ if __name__ == "__main__":
     ]
     database.create_table("table2", 1000, column_specs, False)
     print('done')
-    protected_entity = [
+    privacy_unit = [
         ("table1", [], "id"),
     ]
     synthetic_data = [
         (["testing", "table1"], ["testing", "table1"]),
     ]
-    stochastic_tester = StochasticTester(database, 1 / 100 ** (3/2), protected_entity, synthetic_data)
+    stochastic_tester = StochasticTester(database, 1 / 100 ** (3/2), privacy_unit, synthetic_data)
     test_sum(stochastic_tester, 1000)
     test_count(stochastic_tester, 1000)
     test_avg(stochastic_tester, 1000)
