@@ -1,6 +1,6 @@
 import os
 import sqlalchemy
-from datasets.database import Database
+from qrlew_datasets.database import Database
 import pyqrlew as qrl
 from pyqrlew.io.database import dataset
 import pandas as pd
