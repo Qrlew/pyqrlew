@@ -81,7 +81,7 @@ if __name__ == "__main__":
         ('halton', -1., 1.),
     ]
     row_privacy=False
-    stochastic_tester = pq.tester.StochasticTester(database, 1 / size, protected_entity, synthetic_data)
+    stochastic_tester = pq.tester.StochasticTester(database, 1 / size, privacy_unit, synthetic_data)
     n_sim = 10000
     #test_count(database, stochastic_tester, n_sim, name="figures/count", row_privacy=row_privacy)
     test_sum(database, stochastic_tester, n_sim, distributions=distributions, name="figures/sum", row_privacy=row_privacy)
