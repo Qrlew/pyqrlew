@@ -1,84 +1,54 @@
 import pyqrlew as pq
-import numpy as np
-from typing import Callable
-import matplotlib.pylab as plt
 
 DBNAME: str = 'pyqrlew-db'
 USER: str = 'postgres'
 PASSWORD: str = 'pyqrlew-db'
 PORT: str = 5433
-N_SIM = 500
 
+def test_sum(database, stochastic_tester, n_sim, distributions, name, row_privacy=True):
+    tablename = 'table1' if row_privacy else 'table2'
+    rp = 'row_privacy' if row_privacy else 'multi_rows'
 
-def run_test(stochastic_tester: pq.tester.StochasticTester, query: str, adj_query_func: Callable[[int], str], name: str, n_sim: int):
-    print(f"Query = {query}")
-    dp_results = stochastic_tester.utility_per_epsilon(query, epsilons=[1., 5., 10.], n_sim=n_sim)
-    true_res = database.execute(query)[0][0]
-    plt.figure(figsize=(6, 15))
-    plt.subplot(3, 1, 1)
-    pq.tester.plot_utility(dp_results=dp_results, true_res=true_res)
-
-    epsilon = 1.
-    ref_res = stochastic_tester.compute_results(query, epsilon=epsilon, n_sim=n_sim)
-    adj_res = [
-        stochastic_tester.compute_results(adj_query_func(i), epsilon=epsilon, n_sim=n_sim)
-        for i in [np.random.uniform(0, 100) for _ in range(1)]
-    ]
-    plt.subplot(3, 1, 2)
-    pq.tester.plot_adjacent_histograms(ref_res, adj_res[0], epsilon=epsilon, delta=stochastic_tester.delta)
-
-    plt.subplot(3, 1, 3)
-    pq.tester.plot_privacy_profile(ref_res, adj_res)
-
-    plt.suptitle(query)
-    plt.tight_layout()
-    plt.savefig(name)
-    print("================================")
-
-def test_sum(stochastic_tester, n_sim):
     def write_inner_query(d, a, b):
-        return f"SELECT {d} as x FROM testing.table1 WHERE {d} > {a} AND {d} < {b}"
-
-    distributions = [
-        ('laplace', -2.5, 2.5),
-        ('gaussian', -2., 2.),
-        ('uniform', -1., 1.),
-        ('halton', -1., 1.),
-    ]
+        return f"SELECT {d} as x FROM testing.{tablename} WHERE {d} > {a} AND {d} < {b}"
 
     for (d, a, b) in distributions:
         inner_query = write_inner_query(d, a, b)
         query = f"SELECT SUM(x) AS my_sum FROM ({inner_query}) AS my_table"
         adj_query = lambda id: f"SELECT SUM(x) AS my_sum FROM ({inner_query} AND id != {id}) AS my_table"
-        run_test(stochastic_tester, query=query, adj_query_func=adj_query, name=f'figures/sum_{d}.png', n_sim=n_sim)
+        pq.tester.run_test(database, stochastic_tester, query=query, adj_query_func=adj_query, name=f'{name}_{d}_{rp}', n_sim=n_sim)
 
-def test_avg(stochastic_tester, n_sim):
+def test_avg(database, stochastic_tester, n_sim, distributions, name, row_privacy=True):
+    tablename = 'table1' if row_privacy else 'table2'
+    rp = 'row_privacy' if row_privacy else 'multi_rows'
+
     def write_inner_query(d, a, b):
-        return f"SELECT {d} as x FROM testing.table1 WHERE {d} > {a} AND {d} < {b}"
-
-    distributions = [
-        ('laplace', -2.5, 2.5),
-        ('gaussian', -2., 2.),
-        ('uniform', -1., 1.),
-        ('halton', -1., 1.),
-    ]
+        return f"SELECT {d} as x FROM testing.{tablename} WHERE {d} > {a} AND {d} < {b}"
 
     for (d, a, b) in distributions:
         inner_query = write_inner_query(d, a, b)
         query = f"SELECT AVG(x) AS my_sum FROM ({inner_query}) AS my_table"
         adj_query = lambda id: f"SELECT AVG(x) AS my_sum FROM ({inner_query} AND id != {id}) AS my_table"
-        run_test(stochastic_tester, query=query, adj_query_func=adj_query, name=f'figures/avg_{d}.png', n_sim=n_sim)
+        pq.tester.run_test(database, stochastic_tester, query=query, adj_query_func=adj_query, name=f'{name}_{d}_{rp}', n_sim=n_sim)
 
-def test_count(stochastic_tester, n_sim):
-    query = f"SELECT COUNT(x) AS my_sum FROM (SELECT laplace AS x FROM testing.table1) AS my_table"
-    adj_query = lambda id: f"SELECT COUNT(x) AS my_sum FROM (SELECT laplace AS x FROM testing.table1 WHERE id != {id}) AS my_table"
-    run_test(stochastic_tester, query=query, adj_query_func=adj_query, name='figures/count.png', n_sim=n_sim)
+def test_count(database, stochastic_tester, n_sim, name, row_privacy=True):
+    tablename = 'table1' if row_privacy else 'table2'
+    rp = 'row_privacy' if row_privacy else 'multi_rows'
 
+    query = f"SELECT COUNT(x) AS my_sum FROM (SELECT laplace AS x FROM testing.{tablename}) AS my_table"
+    adj_query = lambda id: f"SELECT COUNT(x) AS my_sum FROM (SELECT laplace AS x FROM testing.{tablename} WHERE id != {id}) AS my_table"
+    pq.tester.run_test(database, stochastic_tester, query=query, adj_query_func=adj_query, name=f'{name}_{rp}', n_sim=n_sim)
+
+def test_joins(database, stochastic_tester, n_sim, name):
+    inner_query = "SELECT t1.halton + 2 * t2.halton as x FROM testing.table1 AS t1 JOIN testing.table2 AS t2 ON t1.id = t2.id WHERE t1.halton > -1 AND t1.halton < 1 AND t2.halton > -1 AND t2.halton < 1"
+    query = f"SELECT SUM(x) AS my_sum FROM ({inner_query}) AS my_table"
+    adj_query = lambda id: f"SELECT SUM(x) AS my_sum FROM ({inner_query} AND id != {id}) AS my_table"
+    pq.tester.run_test(database, stochastic_tester, query=query, adj_query_func=adj_query, name=name, n_sim=n_sim)
 
 if __name__ == "__main__":
     database = pq.tester.StochasticDatabase('testing', DBNAME, USER, PASSWORD, PORT)
     print('creating tables ...')
-    size = 100
+    size = 1000
     ## create table
     column_specs = [
         pq.tester.ColumnSpec(name="laplace", distribution=pq.tester.Distribution.LAPLACE, loc=0, scale=1),
@@ -97,15 +67,26 @@ if __name__ == "__main__":
     print('done')
     protected_entity = [
         ("table1", [], "id"),
+        ("table2", [], "id"),
     ]
     synthetic_data = [
         (["testing", "table1"], ["testing", "table1"]),
+        (["testing", "table2"], ["testing", "table2"]),
     ]
+
+    distributions = [
+        # ('laplace', -2.5, 2.5),
+        # ('gaussian', -2., 2.),
+        # ('uniform', -1., 1.),
+        ('halton', -1., 1.),
+    ]
+    row_privacy=False
     stochastic_tester = pq.tester.StochasticTester(database, 1 / size, protected_entity, synthetic_data)
-    n_sim = 100
-    test_count(stochastic_tester, n_sim)
-    #test_sum(stochastic_tester, 1000)
-    #test_avg(stochastic_tester, 1000)
+    n_sim = 10000
+    #test_count(database, stochastic_tester, n_sim, name="figures/count", row_privacy=row_privacy)
+    test_sum(database, stochastic_tester, n_sim, distributions=distributions, name="figures/sum", row_privacy=row_privacy)
+    # test_avg(database, stochastic_tester, n_sim, distributions=distributions, name="figures/avg", row_privacy=row_privacy)
+    # test_joins(database, stochastic_tester, n_sim, name="figures/query_with_join")
 
 
 

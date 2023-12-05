@@ -151,7 +151,7 @@ impl Relation {
             synthetic_data,
             protected_entity,
             budget,
-        );
+        )?;
         Ok(RelationWithPrivateQuery(Arc::new(
             relation_with_private_query,
         )))
