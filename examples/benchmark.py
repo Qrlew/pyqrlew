@@ -65,7 +65,7 @@ if __name__ == "__main__":
     ]
     database.create_table("table2", size, column_specs, False)
     print('done')
-    protected_entity = [
+    privacy_unit = [
         ("table1", [], "id"),
         ("table2", [], "id"),
     ]

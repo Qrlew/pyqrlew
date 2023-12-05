@@ -9,7 +9,7 @@ use qrlew::{
     differential_privacy::{self, budget::Budget, private_query},
     expr::Identifier,
     hierarchy::Hierarchy,
-    protection::ProtectedEntity,
+    privacy_unit_tracking::PrivacyUnit,
     relation::{self, Variant},
     rewriting::rewriting_rule,
     synthetic_data::{self, SyntheticData},
@@ -121,24 +121,56 @@ impl Relation {
         (*self.0).schema().to_string()
     }
 
-    pub fn rewrite_with_differential_privacy<'a>(
+    pub fn rewrite_as_privacy_unit_preserving<'a>(
         &'a self,
         dataset: &'a Dataset,
         synthetic_data: Vec<(Vec<&'a str>, Vec<&'a str>)>,
-        protected_entity: Vec<(&'a str, Vec<(&'a str, &'a str, &'a str)>, &'a str)>,
+        privacy_unit: Vec<(&'a str, Vec<(&'a str, &'a str, &'a str)>, &'a str)>,
         epsilon_delta: HashMap<&'a str, f64>,
     ) -> Result<RelationWithPrivateQuery> {
         let relation = self.deref().clone();
         let relations = dataset.deref().relations();
-        let sd_hierarchy: Hierarchy<Identifier> = Hierarchy::from_iter(
-            synthetic_data
-                .into_iter()
-                .map(|(path, iden)| {
-                    let iden_as_vec_of_strings: Vec<String> = iden.iter().map(|s| s.to_string()).collect();
-                    (path, Identifier::from(iden_as_vec_of_strings))
-                }));
-        let synthetic_data = SyntheticData::new(sd_hierarchy);
-        let protected_entity = ProtectedEntity::from(protected_entity);
+        let synthetic_data = SyntheticData::new(synthetic_data
+            .into_iter()
+            .map(|(path, iden)| {
+                let iden_as_vec_of_strings: Vec<String> = iden.iter().map(|s| s.to_string()).collect();
+                (path, Identifier::from(iden_as_vec_of_strings))
+            }).collect());
+        let privacy_unit = PrivacyUnit::from(privacy_unit);
+        let epsilon = epsilon_delta
+            .get("epsilon")
+            .ok_or(MissingKeysError("epsion".to_string()))?;
+        let delta = epsilon_delta
+            .get("delta")
+            .ok_or(MissingKeysError("delta".to_string()))?;
+        let budget = Budget::new(*epsilon, *delta);
+        let relation_with_private_query = relation.rewrite_as_privacy_unit_preserving(
+            &relations,
+            synthetic_data,
+            privacy_unit,
+            budget,
+        )?;
+        Ok(RelationWithPrivateQuery(Arc::new(
+            relation_with_private_query,
+        )))
+    }
+
+    pub fn rewrite_with_differential_privacy<'a>(
+        &'a self,
+        dataset: &'a Dataset,
+        synthetic_data: Vec<(Vec<&'a str>, Vec<&'a str>)>,
+        privacy_unit: Vec<(&'a str, Vec<(&'a str, &'a str, &'a str)>, &'a str)>,
+        epsilon_delta: HashMap<&'a str, f64>,
+    ) -> Result<RelationWithPrivateQuery> {
+        let relation = self.deref().clone();
+        let relations = dataset.deref().relations();
+        let synthetic_data = SyntheticData::new(synthetic_data
+            .into_iter()
+            .map(|(path, iden)| {
+                let iden_as_vec_of_strings: Vec<String> = iden.iter().map(|s| s.to_string()).collect();
+                (path, Identifier::from(iden_as_vec_of_strings))
+            }).collect());
+        let privacy_unit = PrivacyUnit::from(privacy_unit);
         let epsilon = epsilon_delta
             .get("epsilon")
             .ok_or(MissingKeysError("epsion".to_string()))?;
@@ -149,7 +181,7 @@ impl Relation {
         let relation_with_private_query = relation.rewrite_with_differential_privacy(
             &relations,
             synthetic_data,
-            protected_entity,
+            privacy_unit,
             budget,
         )?;
         Ok(RelationWithPrivateQuery(Arc::new(
