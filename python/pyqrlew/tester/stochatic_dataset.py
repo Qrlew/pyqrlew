@@ -1,7 +1,7 @@
 from typing import List
 import numpy as np
 import pandas as pd
-from .io.postgresql import EmptyPostgreSQL
+from ..io.postgresql import EmptyPostgreSQL
 from pyqrlew.io.database import dataset
 from sqlalchemy import text
 from enum import Enum
@@ -48,7 +48,6 @@ class StochasticDatabase:
         with self.engine.connect() as conn:
             result = conn.execute(text(query)).all()
         return result
-
 
 class RandomTableGenerator:
     def __init__(self, size: int):
