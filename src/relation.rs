@@ -217,9 +217,10 @@ mod tests {
         let budget: HashMap<&str, f64> = [("epsilon", 1.), ("delta", 0.005)].iter().cloned().collect();
 
         let queries = [
-            //"SELECT SUM(capital_loss / 100000.) AS my_sum FROM census WHERE capital_loss > 2231. AND capital_loss < 4356.;",
+            "SELECT SUM(CASE WHEN capital_loss < 4000 THEN 0 ELSE 1 END) AS my_sum FROM census WHERE capital_loss > 2231. AND capital_loss < 4356.;",
+            "SELECT SUM(capital_loss / 100000.) AS my_sum FROM census WHERE capital_loss > 2231. AND capital_loss < 4356.;",
             //"SELECT SUM(capital_loss) FROM census GROUP BY capital_loss",
-            "SELECT SUM(DISTINCT capital_loss) AS s1 FROM census capital_loss > 2231 AND capital_loss < 4356 GROUP BY sex HAVING COUNT(*) > 5;",
+            //"SELECT SUM(DISTINCT capital_loss) AS s1 FROM census capital_loss > 2231 AND capital_loss < 4356 GROUP BY sex HAVING COUNT(*) > 5;",
         ];
 
         for query in queries {
