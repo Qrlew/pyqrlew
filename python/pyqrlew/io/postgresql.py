@@ -1,11 +1,7 @@
 import shutil
 from pathlib import Path
-import importlib_resources as pkg_resources
-import json
-import logging
-from sqlalchemy import MetaData, exists, select, column, table, text
-# from sqlalchemy.engine import Engine, Result
-from qrlew_datasets.files import SQL, CSV
+from sqlalchemy import select, column, table, text
+from qrlew_datasets.files import SQL
 from qrlew_datasets.databases import PostgreSQL as EmptyPostgreSQL
 from pyqrlew.io.database import dataset
 import pyqrlew as qrl
