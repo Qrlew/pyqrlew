@@ -18,15 +18,15 @@ SELECT SUM(age)  AS my_res FROM census as p WHERE age >20 AND age < 90;
 SELECT COUNT(*) AS count_all FROM census WHERE workclass LIKE 'Married%'
 --SELECT SUM(education_num) AS my_sum FROM census  WHERE age >20 AND age < 90 AND education_num > 0 AND education_num < 15 GROUP BY LOG(CASE WHEN age < 50 THEN 50 ELSE 1 END); -- group by exprs
 --SELECT COUNT(education_num) As my_sum FROM census  WHERE age >20 AND age < 90 AND education_num > 0 AND education_num < 15 GROUP BY CASE WHEN age < 50 THEN 50 ELSE 1 END; -- group by exprs
---SELECT CASE WHEN age < 50 THEN 50 ELSE 1 END AS case_age, COUNT(education_num) AS my_sum FROM census GROUP BY CASE WHEN age < 50 THEN 50 ELSE 1 END;
+--SELECT CASE WHEN age < 50 THEN 50 ELSE 1 END AS case_age, COUNT(education_num) AS my_sum FROM census GROUP BY CASE WHEN age < 50 THEN 50 ELSE 1 END;-- group by exprs
 SELECT age, SUM(education_num) AS my_sum, SUM(education_num) AS sum_education_num FROM census WHERE age >20 AND age < 90 AND education_num > 0 AND education_num < 15 GROUP BY age HAVING SUM(education_num) > 1 ORDER BY age;
 --SELECT age AS age1, SUM(education_num) FROM census GROUP BY age1 ORDER BY age1;
 -- SELECT SUM(age) AS my_sum FROM census WHERE age >20 AND age < 90 AND education_num > 0 AND education_num < 15 GROUP BY marital_status, CASE WHEN age > 90 THEN 1 ELSE 0 END;  -- group by exprs
 -- SELECT SUM(age) AS my_sum FROM census  WHERE age >20 AND age < 90 AND education_num > 0 AND education_num < 15 GROUP BY marital_status, CASE WHEN age > 90 THEN 1 ELSE 0 END ORDER BY my_sum;  -- group by exprs
---SELECT CASE WHEN age > 90 THEN 1 ELSE 0 END, SUM(age) AS my_sum FROM census GROUP BY marital_status, CASE WHEN age > 90 THEN 1 ELSE 0 END ORDER BY my_sum;
---SELECT CASE WHEN age > 90 THEN 1 ELSE 0 END AS my_col, SUM(age) AS my_sum FROM census GROUP BY my_col ORDER BY my_sum;
---SELECT SUM(CASE WHEN age > 90 THEN 1 ELSE 0 END) AS s1, SUM(age) AS s2 FROM census WHERE age >20 AND age < 90; --pyo3_runtime.PanicException: attempt to divide by zero
---SELECT ( 2 * (SUM(CASE WHEN age > 90 THEN 1 ELSE 0 END))) AS s1 FROM census WHERE age >20 AND age < 90;--pyo3_runtime.PanicException: attempt to divide by zero
+--SELECT CASE WHEN age > 80 THEN 1 ELSE 0 END, SUM(age) AS my_sum FROM census GROUP BY marital_status, CASE WHEN age > 80 THEN 1 ELSE 0 END ORDER BY my_sum;-- group by exprs
+--SELECT CASE WHEN age > 90 THEN 1 ELSE 0 END AS my_col, SUM(age) AS my_sum FROM census GROUP BY my_col ORDER BY my_sum;-- group by exprs
+SELECT SUM(CASE WHEN age > 80 THEN 1 ELSE 0 END) AS s1, SUM(age) AS s2 FROM census WHERE age >20 AND age < 90;
+SELECT ( 2 * (SUM(CASE WHEN age > 90 THEN 1 ELSE 0 END))) AS s1 FROM census WHERE age >20 AND age < 90;
 SELECT capital_loss, COUNT(*) AS my_count FROM census GROUP BY capital_loss;
 SELECT capital_loss, COUNT(1) AS my_count FROM census GROUP BY capital_loss;
 SELECT capital_loss, COUNT(age) AS count_all FROM census GROUP BY capital_loss;
