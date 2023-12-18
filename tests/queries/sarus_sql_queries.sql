@@ -20,6 +20,7 @@ SELECT SUM(education_num) AS my_sum FROM census GROUP BY LOG(CASE WHEN age < 50 
 SELECT COUNT(education_num) As my_sum FROM census GROUP BY CASE WHEN age < 50 THEN 50 ELSE 1 END;
 --SELECT CASE WHEN age < 50 THEN 50 ELSE 1 END AS case_age, COUNT(education_num) AS my_sum FROM census GROUP BY CASE WHEN age < 50 THEN 50 ELSE 1 END;
 SELECT age, SUM(education_num) AS my_sum, SUM(education_num) AS sum_education_num FROM census GROUP BY age HAVING SUM(education_num) > 1 ORDER BY age;
+SELECT age AS age1, SUM(education_num) FROM census GROUP BY age ORDER BY age1;
 --SELECT age AS age1, SUM(education_num) FROM census GROUP BY age1 ORDER BY age1;
 SELECT SUM(age) AS my_sum FROM census GROUP BY marital_status, CASE WHEN age > 90 THEN 1 ELSE 0 END;
 SELECT SUM(age) AS my_sum FROM census GROUP BY marital_status, CASE WHEN age > 90 THEN 1 ELSE 0 END ORDER BY my_sum;
