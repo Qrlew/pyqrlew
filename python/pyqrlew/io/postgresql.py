@@ -48,19 +48,19 @@ class PostgreSQL(EmptyPostgreSQL):
 
     def financial(self) -> qrl.Dataset:
         self.load_financial()
-        return dataset('financial', self.engine(), 'financial')
+        return dataset('financial', self.engine(), 'financial', ranges=True, possible_values_threshold=POSSIBLE_VALUES_THRESHOLD)
 
     def hepatitis(self) -> qrl.Dataset:
         self.load_hepatitis()
-        return dataset('hepatitis_std', self.engine(), 'hepatitis_std')
+        return dataset('hepatitis_std', self.engine(), 'hepatitis_std', ranges=True, possible_values_threshold=POSSIBLE_VALUES_THRESHOLD)
 
     def imdb(self) -> qrl.Dataset:
         self.load_imdb()
-        return dataset('imdb_ijs', self.engine(), 'imdb_ijs')
+        return dataset('imdb_ijs', self.engine(), 'imdb_ijs', ranges=True, possible_values_threshold=POSSIBLE_VALUES_THRESHOLD)
 
     def retail(self) -> qrl.Dataset:
         self.load_retail()
-        return dataset('retail', self.engine(), 'retail')
+        return dataset('retail', self.engine(), 'retail', ranges=True, possible_values_threshold=POSSIBLE_VALUES_THRESHOLD)
 
     def eval(self, relation: qrl.Relation) -> list:
         return self.execute(relation.render())
