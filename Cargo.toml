@@ -10,6 +10,6 @@ crate-type = ["cdylib"]
 
 [dependencies]
 pyo3 = { version = "0.20", features = ["abi3-py38"] }
-qrlew = {path = "./../qrlew"}
-qrlew-sarus = {path = "./../sarus"}
+qrlew = "0.6.0"
+qrlew-sarus = "0.6.0"
 serde_json = "1.0"
