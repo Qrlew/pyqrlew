@@ -11,6 +11,8 @@ USER: str = 'postgres'
 PASSWORD: str = 'pyqrlew-db'
 PORT: str = 5433
 
+POSSIBLE_VALUES_THRESHOLD: int = 20
+
 class PostgreSQL(EmptyPostgreSQL):
     def __init__(self) -> None:
         super().__init__(NAME, USER, PASSWORD, PORT)
@@ -42,7 +44,7 @@ class PostgreSQL(EmptyPostgreSQL):
 
     def extract(self) -> qrl.Dataset:
         self.load_extract()
-        return dataset('extract', self.engine(), 'extract')
+        return dataset('extract', self.engine(), 'extract', ranges=True, possible_values_threshold=POSSIBLE_VALUES_THRESHOLD)
 
     def financial(self) -> qrl.Dataset:
         self.load_financial()

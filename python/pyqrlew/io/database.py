@@ -1,25 +1,26 @@
 import logging
 from uuid import uuid4 as generate_uuid
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List, Dict, Union
 import json
-from sqlalchemy import MetaData, Table, Column, types, select, func
+from sqlalchemy import MetaData, Table, Column, types, select, func, text
 from sqlalchemy.engine import Engine
 import pyqrlew as qrl
+import pandas as pd
 
-def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.Dataset:
+def dataset(name: str, engine: Engine, schema_name: Optional[str]=None, ranges: bool=True, possible_values_threshold: Optional[int]=None) -> qrl.Dataset:
     metadata = MetaData()
     metadata.reflect(engine, schema=schema_name)
 
-    def _dataset_schema_size() -> Tuple[dict, dict, Optional[dict]]:
+    def dataset_schema_size() -> Tuple[dict, dict, Optional[dict]]:
         """Return a (dataset, schema) pair or (dataset, schema, size) triplet """
-        ds = _dataset()
+        ds = dataset()
         return (
             ds,
-            _schema(ds),
-            _size(ds),
+            schema(ds),
+            size(ds),
         )
 
-    def _dataset() -> dict:
+    def dataset() -> dict:
         """Return a (dataset, schema) pair or (dataset, schema, size) triplet """
         return {
             '@type': 'sarus_data_spec/sarus_data_spec.Dataset',
@@ -36,8 +37,8 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
             'doc': 'This ia a demo dataset for testing purpose',
         }
 
-    def _schema(dataset: dict) -> dict:
-        tables = {"fields": [_table(metadata.tables[name]) for name in metadata.tables]}
+    def schema(dataset: dict) -> dict:
+        tables = {"fields": [table(metadata.tables[name]) for name in metadata.tables]}
 
         if schema_name is not None:
             tables = {
@@ -121,42 +122,78 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
             }
         }
 
-    def _table(tab: Table) -> dict:
+    def table(tab: Table) -> dict:
+        min_max_possible_values = load_min_max_possible_values(tab)
         return {
             'name': tab.name,
             'type': {
                 'name': 'Struct',
                 'struct': {
-                    'fields': [_column(col) for col in tab.columns],
+                    'fields': [column(col, **min_max_possible_values[col.name]) for col in tab.columns],
                 },
                 'properties': {},
             }
         }
 
-    def _column(col: Column) -> dict:
+    def load_min_max_possible_values(tab: Table) -> Dict[str, Dict[str, Union[str, List[str]]]]:
+        values = {col.name: {'min': None, 'max': None, 'possible_values': []} for col in tab.columns}
+        tablename = tab.name if schema_name is None else f"{schema_name}.{tab.name}"
+
+        if ranges:
+            min_query = "SELECT " + ", ".join([f"MIN(\"{col.name}\"::text) AS \"{col.name}\"" for col in tab.columns]) + f" FROM {tablename}"
+            max_query = "SELECT " + ", ".join([f"MAX(\"{col.name}\"::text) AS \"{col.name}\"" for col in tab.columns]) + f" FROM {tablename}"
+
+            with engine.connect() as conn:
+                min_results = conn.execute(text(min_query)).fetchone()
+                max_results = conn.execute(text(max_query)).fetchone()
+
+            for col, min_val, max_val in zip(tab.columns, min_results, max_results):
+                values[col.name]['min'] = min_val
+                values[col.name]['max'] = max_val
+
+        if possible_values_threshold is not None:
+            values_query = "SELECT " + ", ".join([
+                f"CASE WHEN COUNT(DISTINCT \"{col.name}\"::text) < {possible_values_threshold} THEN ARRAY_AGG(DISTINCT \"{col.name}\"::text) "
+                f"ELSE ARRAY[]::VARCHAR[] END AS \"{col.name}\""
+                for col in tab.columns
+            ]) + f" FROM {tablename}"
+
+            with engine.connect() as conn:
+                values_results = conn.execute(text(values_query)).fetchone()
+
+            for col, possible_values in zip(tab.columns, values_results):
+                values[col.name]['possible_values'] = possible_values
+
+        return values
+
+    def column(col: Column, min:Optional[str]=None, max:Optional[str]=None, possible_values:List[str]=[]) -> dict:
         if isinstance(col.type, types.Integer) or isinstance(col.type, types.BigInteger):
+            min = '-9223372036854775808' if min is None else min
+            max = '9223372036854775807' if max is None else max
             return {
                 'name': col.name,
                 'type': {
                     'name': 'Integer',
                     'integer': {
                         'base': 'INT64',
-                        'min': '-9223372036854775808',
-                        'max': '9223372036854775807',
-                        'possible_values': [],
+                        'min': min,
+                        'max': max,
+                        'possible_values': possible_values,
                     },
                     'properties': {},
                 },
             }
         elif isinstance(col.type, types.Float) or isinstance(col.type, types.Numeric):
+            min = '-1.7976931348623157e+308' if min is None else min
+            max = '1.7976931348623157e+308' if max is None else max
             return {
                 'name': col.name,
                 'type': {
                     'name': 'Float64',
                     'float': {
                         'base': 'FLOAT64',
-                        'min': '-1.7976931348623157e+308',
-                        'max': '1.7976931348623157e+308',
+                        'min': min,
+                        'max': max,
                         'possible_values': [],
                     },
                     'properties': {},
@@ -183,14 +220,16 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
                 },
             }
         elif isinstance(col.type, types.Date) or isinstance(col.type, types.DateTime) or isinstance(col.type, types.Time):
+            min = '01-01-01 00:00:00' if min is None else min
+            max = '9999-12-31 00:00:00' if max is None else max
             return {
                 'name': col.name,
                 'type': {
                     'name': 'Datetime',
                     'datetime': {
                         'format': '%Y-%m-%d %H:%M:%S',
-                        'min': '01-01-01 00:00:00',
-                        'max': '9999-12-31 00:00:00',
+                        'min': min,
+                        'max': max,
                     },
                     'properties': {},
                 },
@@ -205,8 +244,8 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
                 },
             }
 
-    def _size(dataset: dict) -> dict:
-        tables = {'fields': [_table_size(metadata.tables[name]) for name in metadata.tables]}
+    def size(dataset: dict) -> dict:
+        tables = {'fields': [table_size(metadata.tables[name]) for name in metadata.tables]}
         if schema_name is not None:
             tables = {
                 'fields': [
@@ -235,7 +274,7 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
             'properties': {},
         }
 
-    def _table_size(tab: Table) -> dict:
+    def table_size(tab: Table) -> dict:
         with engine.connect() as conn:
             result = conn.execute(select(func.count()).select_from(tab))
             size = result.scalar()
@@ -245,7 +284,7 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
             'statistics': {
                 'name': 'Struct',
                 'struct': {
-                    'fields': [_column_size(col, size, multiplicity) for col in tab.columns],
+                    'fields': [column_size(col, size, multiplicity) for col in tab.columns],
                     'size': str(size),
                     'multiplicity': multiplicity,
                 },
@@ -253,7 +292,7 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
             }
         }
 
-    def _column_size(col: Column, size: int, multiplicity: float) -> dict:
+    def column_size(col: Column, size: int, multiplicity: float) -> dict:
         if isinstance(col.type, types.Integer) or isinstance(col.type, types.BigInteger):
             return {
                 'name': col.name,
@@ -358,8 +397,9 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None) -> qrl.D
 
         else: # TODO: support more types
             raise NotImplementedError(f"SQL -> Sarus Conversion not supported for {col.type} SQL type")
+
     # Gather protobufs
-    dataset, schema, size = _dataset_schema_size()
+    dataset, schema, size = dataset_schema_size()
     # Display when debugging
     logging.debug(json.dumps(dataset))
     logging.debug(json.dumps(schema))
