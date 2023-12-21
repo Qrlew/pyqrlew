@@ -2,8 +2,8 @@ use pyo3::{pyclass, pymethods};
 use qrlew::{
     builder::With,
     hierarchy::Hierarchy,
-    relation::{self, Variant as _},
-    sql::{self},
+    relation,
+    sql,
 };
 use qrlew_sarus::{data_spec, protobuf::print_to_string};
 use std::ops::Deref;
