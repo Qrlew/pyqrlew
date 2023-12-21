@@ -167,6 +167,7 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None, ranges: 
         return values
 
     def column(col: Column, min:Optional[str]=None, max:Optional[str]=None, possible_values:List[str]=[]) -> dict:
+        print(col, possible_values)
         if isinstance(col.type, types.Integer) or isinstance(col.type, types.BigInteger):
             min = '-9223372036854775808' if min is None else min
             max = '9223372036854775807' if max is None else max
@@ -200,12 +201,14 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None, ranges: 
                 },
             }
         elif isinstance(col.type, types.String) or isinstance(col.type, types.Text) or isinstance(col.type, types.Unicode) or isinstance(col.type, types.UnicodeText):
+
             return {
                 'name': col.name,
                 'type': {
                     'name': 'Text UTF-8',
                     'text': {
-                        'encoding': 'UTF-8'
+                        'encoding': 'UTF-8',
+                        'possible_values': [],
                     },
                     'properties': {},
                 },
