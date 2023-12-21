@@ -129,7 +129,7 @@ def dataset(
         }
 
     def table(tab: Table) -> dict:
-        min_max_possible_values = min_max_possible_values(tab)
+        min_max_possible_values = compute_min_max_possible_values(tab)
         return {
             'name': tab.name,
             'type': {
@@ -141,10 +141,9 @@ def dataset(
             }
         }
 
-    def min_max_possible_values(tab: Table) -> Dict[str, Dict[str, Union[str, List[str]]]]:
+    def compute_min_max_possible_values(tab: Table) -> Dict[str, Dict[str, Union[str, List[str]]]]:
         """Send 3 SQL queries for loading the bounds"""
         values = {col.name: {'min': None, 'max': None, 'possible_values': []} for col in tab.columns}
-        tablename = tab.name if schema_name is None else f"{schema_name}.{tab.name}"
         intervals_types = [
             types.Integer, types.BigInteger,
             types.Float, types.Numeric,
