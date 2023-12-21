@@ -2,7 +2,7 @@ import typing as t
 from .sqlite import SQLite
 import pandas as pd
 
-def from_csv(table_name: str, csv_file: str, db_name:str ="my_sqlite.db") -> 'SQLite':
+def from_csv(table_name: str, csv_file: str, db_name:str ="my_sqlite.db", ranges: bool=True, possible_values_threshold: t.Optional[int]=None) -> 'SQLite':
     """
     Construct a PyQrlew Database from a csv file.
     Its uses SQLite for storing the data. The data is cloned into Sqlite.
@@ -15,6 +15,10 @@ def from_csv(table_name: str, csv_file: str, db_name:str ="my_sqlite.db") -> 'SQ
         Any valid string path is acceptable. The string could be a URL.
     db_name : str, default "my_sqlite.db"
         Name of the file where the database is stored
+    ranges : bool
+        TODO
+    possible_values_threshold: int
+        TODO
 
     Returns
     -------
@@ -43,11 +47,11 @@ def from_csv(table_name: str, csv_file: str, db_name:str ="my_sqlite.db") -> 'SQ
          - active, Type: BIGINT
          - cardio, Type: BIGINT
     """
-    db = SQLite(db_name)
+    db = SQLite(db_name, ranges, possible_values_threshold)
     db.load_csv(table_name, csv_file)
     return db
 
-def from_csv_dict(csv_dict: t.Dict[str, str], db_name:str ="my_sqlite.db") -> 'SQLite':
+def from_csv_dict(csv_dict: t.Dict[str, str], db_name:str ="my_sqlite.db", ranges: bool=True, possible_values_threshold: t.Optional[int]=None) -> 'SQLite':
     """
     Construct a PyQrlew Database from a dictionary whose keys are the table names and values the
     corresponding data stored in csv files.
@@ -99,14 +103,14 @@ def from_csv_dict(csv_dict: t.Dict[str, str], db_name:str ="my_sqlite.db") -> 'S
         - col2, Type: TEXT
         - col3, Type: BOOLEAN
     """
-    db = SQLite(db_name)
+    db = SQLite(db_name, ranges, possible_values_threshold)
     _ = {
         db.load_csv(table_name, csv_file)
         for table_name, csv_file in csv_dict.items()
     }
     return db
 
-def from_pandas(table_name: str, data: pd.DataFrame, db_name:str ="my_sqlite.db") -> 'SQLite':
+def from_pandas(table_name: str, data: pd.DataFrame, db_name:str ="my_sqlite.db", ranges: bool=True, possible_values_threshold: t.Optional[int]=None) -> 'SQLite':
     """
     Construct a PyQrlew Database from a pandas DataFrame.
     Its uses SQLite for storing the data. The data is cloned into Sqlite.
@@ -137,11 +141,11 @@ def from_pandas(table_name: str, data: pd.DataFrame, db_name:str ="my_sqlite.db"
          - col3, Type: BOOLEAN
 
     """
-    db = SQLite(db_name)
+    db = SQLite(db_name, ranges, possible_values_threshold)
     db.load_pandas(table_name, data)
     return db
 
-def from_pandas_dict(data_dict: t.Dict[str, pd.DataFrame], db_name:str ="my_sqlite.db") -> 'SQLite':
+def from_pandas_dict(data_dict: t.Dict[str, pd.DataFrame], db_name:str ="my_sqlite.db", ranges: bool=True, possible_values_threshold: t.Optional[int]=None) -> 'SQLite':
     """
     Construct a PyQrlew Database from a dictionary whose keys are the table names and values the
     corresponding data stored in a pandas DataFrame.
@@ -176,7 +180,7 @@ def from_pandas_dict(data_dict: t.Dict[str, pd.DataFrame], db_name:str ="my_sqli
         - colA, Type: BIGINT
         - colB, Type: BIGINT
     """
-    db = SQLite(db_name)
+    db = SQLite(db_name, ranges, possible_values_threshold)
     _ = {
         db.load_pandas(table_name, df)
         for table_name, df in data_dict.items()

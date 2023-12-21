@@ -5,9 +5,15 @@ import json
 from sqlalchemy import MetaData, Table, Column, types, select, func, text
 from sqlalchemy.engine import Engine
 import pyqrlew as qrl
-import pandas as pd
 
-def dataset(name: str, engine: Engine, schema_name: Optional[str]=None, ranges: bool=True, possible_values_threshold: Optional[int]=None) -> qrl.Dataset:
+
+def dataset(
+    name: str,
+    engine: Engine,
+    schema_name: Optional[str]=None,
+    ranges: bool=False,
+    possible_values_threshold: Optional[int]=None
+) -> qrl.Dataset:
     metadata = MetaData()
     metadata.reflect(engine, schema=schema_name)
 
@@ -136,38 +142,46 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None, ranges: 
         }
 
     def load_min_max_possible_values(tab: Table) -> Dict[str, Dict[str, Union[str, List[str]]]]:
+        """Send 3 SQL queries for loading the bounds"""
         values = {col.name: {'min': None, 'max': None, 'possible_values': []} for col in tab.columns}
         tablename = tab.name if schema_name is None else f"{schema_name}.{tab.name}"
+        intervals_types = [
+            types.Integer, types.BigInteger,
+            types.Float, types.Numeric,
+            types.String, types.Text, types.Unicode, types.UnicodeText,
+            types.Date, types.DateTime, types.Time
+        ]
+        interval_cols = [col.names for col in tab.columns if col.type in intervals_types]
 
         if ranges:
-            min_query = "SELECT " + ", ".join([f"MIN(\"{col.name}\"::text) AS \"{col.name}\"" for col in tab.columns]) + f" FROM {tablename}"
-            max_query = "SELECT " + ", ".join([f"MAX(\"{col.name}\"::text) AS \"{col.name}\"" for col in tab.columns]) + f" FROM {tablename}"
+            min_query = "SELECT " + ", ".join([f"CAST(MIN(\"{col}\") AS TEXT) AS \"{col}\"" for col in interval_cols]) + f" FROM {tablename}"
+            max_query = "SELECT " + ", ".join([f"CAST(MAX(\"{col}\") AS TEXT) AS \"{col}\"" for col in interval_cols]) + f" FROM {tablename}"
 
             with engine.connect() as conn:
                 min_results = conn.execute(text(min_query)).fetchone()
                 max_results = conn.execute(text(max_query)).fetchone()
 
-            for col, min_val, max_val in zip(tab.columns, min_results, max_results):
+            for col, min_val, max_val in zip(interval_cols, min_results, max_results):
                 values[col.name]['min'] = min_val
                 values[col.name]['max'] = max_val
 
         if possible_values_threshold is not None:
             values_query = "SELECT " + ", ".join([
-                f"CASE WHEN COUNT(DISTINCT \"{col.name}\"::text) < {possible_values_threshold} THEN ARRAY_AGG(DISTINCT \"{col.name}\"::text) "
-                f"ELSE ARRAY[]::VARCHAR[] END AS \"{col.name}\""
-                for col in tab.columns
+                f"CASE WHEN COUNT(DISTINCT CAST(\"{col}\" AS TEXT)) < {possible_values_threshold}"
+                f" THEN ARRAY_AGG(DISTINCT CAST(\"{col}\" AS TEXT)) "
+                f"ELSE ARRAY[]::VARCHAR[] END AS \"{col}\""
+                for col in interval_cols
             ]) + f" FROM {tablename}"
 
             with engine.connect() as conn:
                 values_results = conn.execute(text(values_query)).fetchone()
 
-            for col, possible_values in zip(tab.columns, values_results):
+            for col, possible_values in zip(interval_cols, values_results):
                 values[col.name]['possible_values'] = possible_values
 
         return values
 
     def column(col: Column, min:Optional[str]=None, max:Optional[str]=None, possible_values:List[str]=[]) -> dict:
-        print(col, possible_values)
         if isinstance(col.type, types.Integer) or isinstance(col.type, types.BigInteger):
             min = '-9223372036854775808' if min is None else min
             max = '9223372036854775807' if max is None else max
@@ -208,6 +222,8 @@ def dataset(name: str, engine: Engine, schema_name: Optional[str]=None, ranges: 
                     'name': 'Text UTF-8',
                     'text': {
                         'encoding': 'UTF-8',
+                        'min': min,
+                        'max': max,
                         'possible_values': [],
                     },
                     'properties': {},
