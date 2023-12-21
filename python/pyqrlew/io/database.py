@@ -2,7 +2,7 @@ import logging
 from uuid import uuid4 as generate_uuid
 from typing import Optional, Tuple, List, Dict, Union
 import json
-from sqlalchemy import MetaData, Table, Column, types, select, func, literal, String, ARRAY, case
+from sqlalchemy import MetaData, Table, Column, types, select, func, literal, String, ARRAY
 from sqlalchemy.engine import Engine
 import pyqrlew as qrl
 
@@ -170,7 +170,7 @@ def dataset(
 
         if possible_values_threshold is not None and len(interval_cols) != 0:
             values_query =  select([
-                func.cast(case(
+                func.cast(func.case(
                     (
                         func.count(func.distinct(func.cast(col, String))) <= possible_values_threshold,
                         func.array_agg(func.distinct(col))
