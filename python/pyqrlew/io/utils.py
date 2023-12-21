@@ -15,10 +15,11 @@ def from_csv(table_name: str, csv_file: str, db_name:str ="my_sqlite.db", ranges
         Any valid string path is acceptable. The string could be a URL.
     db_name : str, default "my_sqlite.db"
         Name of the file where the database is stored
-    ranges : bool
-        TODO
-    possible_values_threshold: int
-        TODO
+    ranges: bool
+        Query the database for fetching min and max of each column of type integer, float, date/time and string and use then as bounds
+    possible_values_threshold: Optional[int]
+        If an integer is provided, count the distinct values of each column of type integer, float, date/time, and string.
+        If the count is greater than the integer, fetch these distinct values and set them as possible values in the datatype of the corresponding columns.
 
     Returns
     -------
@@ -64,6 +65,11 @@ def from_csv_dict(csv_dict: t.Dict[str, str], db_name:str ="my_sqlite.db", range
         and the value is the name (path or url) of the csv file where the data is stored
     db_name : str, default "my_sqlite.db"
         Name of the file where the database is stored
+    ranges: bool
+        Query the database for fetching min and max of each column of type integer, float, date/time and string and use then as bounds
+    possible_values_threshold: Optional[int]
+        If an integer is provided, count the distinct values of each column of type integer, float, date/time, and string.
+        If the count is greater than the integer, fetch these distinct values and set them as possible values in the datatype of the corresponding columns.
 
     Returns
     -------
@@ -123,6 +129,11 @@ def from_pandas(table_name: str, data: pd.DataFrame, db_name:str ="my_sqlite.db"
         Data represented as a pandas DataFrame
     db_name : str, default "my_sqlite.db"
         Name of the file where the database is stored
+    ranges: bool
+        Query the database for fetching min and max of each column of type integer, float, date/time and string and use then as bounds
+    possible_values_threshold: Optional[int]
+        If an integer is provided, count the distinct values of each column of type integer, float, date/time, and string.
+        If the count is greater than the integer, fetch these distinct values and set them as possible values in the datatype of the corresponding columns.
 
     Returns
     -------
@@ -158,6 +169,11 @@ def from_pandas_dict(data_dict: t.Dict[str, pd.DataFrame], db_name:str ="my_sqli
         and the value is the data represented as a pandas DataFrame
     db_name : str, default "my_sqlite.db"
         Name of the file where the database is stored
+    ranges: bool
+        Query the database for fetching min and max of each column of type integer, float, date/time and string and use then as bounds
+    possible_values_threshold: Optional[int]
+        If an integer is provided, count the distinct values of each column of type integer, float, date/time, and string.
+        If the count is greater than the integer, fetch these distinct values and set them as possible values in the datatype of the corresponding columns.
 
     Returns
     -------

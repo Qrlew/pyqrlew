@@ -63,7 +63,11 @@ class SQLite(Database):
         ----------
             db_file: str
                 The path to the SQLite database file.
-            TODO
+            ranges: bool
+                Query the database for fetching min and max of each column of type integer, float, date/time and string and use then as bounds
+            possible_values_threshold: Optional[int]
+                If an integer is provided, count the distinct values of each column of type integer, float, date/time, and string.
+                If the count is greater than the integer, fetch these distinct values and set them as possible values in the datatype of the corresponding columns.
 
         Returns
         ----------
