@@ -151,9 +151,12 @@ def dataset(
             types.String, types.Text, types.Unicode, types.UnicodeText,
             types.Date, types.DateTime, types.Time
         ]
-        interval_cols = [col.names for col in tab.columns if col.type in intervals_types]
+        interval_cols = [
+            col.name for col in tab.columns
+            if any(isinstance(col.type, t) for t in intervals_types)
+        ]
 
-        if ranges:
+        if ranges and len(interval_cols) != 0:
             min_query = "SELECT " + ", ".join([f"CAST(MIN(\"{col}\") AS TEXT) AS \"{col}\"" for col in interval_cols]) + f" FROM {tablename}"
             max_query = "SELECT " + ", ".join([f"CAST(MAX(\"{col}\") AS TEXT) AS \"{col}\"" for col in interval_cols]) + f" FROM {tablename}"
 
@@ -162,10 +165,10 @@ def dataset(
                 max_results = conn.execute(text(max_query)).fetchone()
 
             for col, min_val, max_val in zip(interval_cols, min_results, max_results):
-                values[col.name]['min'] = min_val
-                values[col.name]['max'] = max_val
+                values[col]['min'] = min_val
+                values[col]['max'] = max_val
 
-        if possible_values_threshold is not None:
+        if possible_values_threshold is not None and len(interval_cols) != 0:
             values_query = "SELECT " + ", ".join([
                 f"CASE WHEN COUNT(DISTINCT CAST(\"{col}\" AS TEXT)) < {possible_values_threshold}"
                 f" THEN ARRAY_AGG(DISTINCT CAST(\"{col}\" AS TEXT)) "
@@ -177,7 +180,7 @@ def dataset(
                 values_results = conn.execute(text(values_query)).fetchone()
 
             for col, possible_values in zip(interval_cols, values_results):
-                values[col.name]['possible_values'] = possible_values
+                values[col]['possible_values'] = possible_values
 
         return values
 
