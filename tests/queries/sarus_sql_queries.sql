@@ -5,7 +5,7 @@ SELECT AVG(education_num) AS my_avg FROM census;
 SELECT STDDEV(education_num) AS my_std FROM census;
 SELECT VARIANCE(education_num) AS my_var FROM census;
 SELECT SUM(education_num * age + 4 + LOG(age + 2)) AS my_sum FROM census;
-SELECT age, sex, SUM(education_num) AS sum_education_num FROM census GROUP BY age, sex ORDER BY age DESC;
+SELECT age, sex, SUM(education_num) AS sum_education_num FROM census GROUP BY age, sex ORDER BY age DESC, sex;
 SELECT COUNT(*) AS count_all, SUM(education_num) AS sum_education_num, AVG(education_num) AS avg_education_num, VARIANCE(education_num) AS var_education_num, STDDEV(education_num) AS stddev_education_num FROM census WHERE education_num > 0 AND education_num < 15;
 SELECT SUM(education_num * age + 4 + LOG(age + 3)) AS my_sum FROM census;
 SELECT VARIANCE(education_num) AS my_var, marital_status FROM census GROUP BY marital_status;
