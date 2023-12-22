@@ -1,5 +1,6 @@
 from .pyqrlew import *
 from .io import *
+from . import tester
 
 
 __doc__ = pyqrlew.__doc__
