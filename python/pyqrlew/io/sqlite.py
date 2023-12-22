@@ -1,4 +1,3 @@
-import typing as t
 import os
 import sqlalchemy
 from qrlew_datasets.database import Database
@@ -55,7 +54,7 @@ class SQLite(Database):
         [(3,)]
     """
 
-    def __init__(self, db_file:str, ranges: bool, possible_values_threshold: t.Optional[int]) -> None:
+    def __init__(self, db_file:str, ranges: bool) -> None:
         """
         Initialize an SQLite instance.
 
@@ -65,17 +64,13 @@ class SQLite(Database):
                 The path to the SQLite database file.
             ranges: bool
                 Query the database for fetching min and max of each column of type integer, float, date/time and string and use then as bounds
-            possible_values_threshold: Optional[int]
-                If an integer is provided, count the distinct values of each column of type integer, float, date/time, and string.
-                If the count is greater than the integer, fetch these distinct values and set them as possible values in the datatype of the corresponding columns.
-
         Returns
         ----------
             None
         """
         self.db_file = db_file
         self.ranges = ranges
-        self.possible_values_threshold = possible_values_threshold
+        self.possible_values_threshold = None # Array no implemented in SQLite
 
     def load_csv(self, table_name: str, csv_file: str) -> None:
         """
