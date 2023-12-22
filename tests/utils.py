@@ -81,9 +81,9 @@ def test_differential_privacy(
     relation = dataset.sql(query)
     dp_relation = relation.rewrite_with_differential_privacy(
         dataset,
-        synthetic_data,
         privacy_unit,
-        budget
+        budget,
+        synthetic_data,
     ).relation()
     results = pd.DataFrame(database.eval(relation))
     dp_results = pd.DataFrame(database.eval(dp_relation))
