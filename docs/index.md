@@ -6,8 +6,11 @@
 # Qrlew framework documentation
 
 ```{toctree}
-:caption: 'Contents:'
-:maxdepth: 2
+---
+maxdepth: 2
+caption: Contents:
+---
+api
 ```
 
 ## What is [Qrlew](https://qrlew.github.io/)?
@@ -25,7 +28,6 @@ Differential Privacy (DP) guaranrtees are hard to obtain without destroying too 
 ## Contributing
 
 To contribute to this code, follow the [instructions](contributing)
-
 
 # Indices and tables
 
