@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [0.7.0] - 2023-12-28
+### Changed
+- Update qrlew version
+
 ## [0.7.0] - 2023-12-22
 ### Changed
 - Update qrlew and make synthetic dato optional for rewritting into DP [MR27](https://github.com/Qrlew/pyqrlew/pull/27)
