@@ -61,11 +61,3 @@ class PostgreSQL(EmptyPostgreSQL):
     def retail(self) -> qrl.Dataset:
         self.load_retail()
         return dataset('retail', self.engine(), 'retail', ranges=True, possible_values_threshold=POSSIBLE_VALUES_THRESHOLD)
-
-    def eval(self, relation: qrl.Relation) -> list:
-        return self.execute(relation.render())
-
-    def execute(self, query: str) -> list:
-        with self.engine().connect() as conn:
-            result = conn.execute(text(query)).all()
-        return result

@@ -121,18 +121,19 @@ impl Relation {
     pub fn rewrite_as_privacy_unit_preserving<'a>(
         &'a self,
         dataset: &'a Dataset,
-        synthetic_data: Vec<(Vec<&'a str>, Vec<&'a str>)>,
         privacy_unit: Vec<(&'a str, Vec<(&'a str, &'a str, &'a str)>, &'a str)>,
         epsilon_delta: HashMap<&'a str, f64>,
+        synthetic_data: Option<Vec<(Vec<&'a str>, Vec<&'a str>)>>,
     ) -> Result<RelationWithPrivateQuery> {
         let relation = self.deref().clone();
         let relations = dataset.deref().relations();
-        let synthetic_data = SyntheticData::new(synthetic_data
+        let synthetic_data = synthetic_data.map(|sd| SyntheticData::new(sd
             .into_iter()
             .map(|(path, iden)| {
                 let iden_as_vec_of_strings: Vec<String> = iden.iter().map(|s| s.to_string()).collect();
                 (path, Identifier::from(iden_as_vec_of_strings))
-            }).collect());
+            }).collect())
+        );
         let privacy_unit = PrivacyUnit::from(privacy_unit);
         let epsilon = epsilon_delta
             .get("epsilon")
@@ -155,18 +156,19 @@ impl Relation {
     pub fn rewrite_with_differential_privacy<'a>(
         &'a self,
         dataset: &'a Dataset,
-        synthetic_data: Vec<(Vec<&'a str>, Vec<&'a str>)>,
         privacy_unit: Vec<(&'a str, Vec<(&'a str, &'a str, &'a str)>, &'a str)>,
         epsilon_delta: HashMap<&'a str, f64>,
+        synthetic_data: Option<Vec<(Vec<&'a str>, Vec<&'a str>)>>,
     ) -> Result<RelationWithPrivateQuery> {
         let relation = self.deref().clone();
         let relations = dataset.deref().relations();
-        let synthetic_data = SyntheticData::new(synthetic_data
-            .into_iter()
-            .map(|(path, iden)| {
-                let iden_as_vec_of_strings: Vec<String> = iden.iter().map(|s| s.to_string()).collect();
-                (path, Identifier::from(iden_as_vec_of_strings))
-            }).collect());
+        let synthetic_data = synthetic_data.map(|sd| SyntheticData::new(sd
+                .into_iter()
+                .map(|(path, iden)| {
+                    let iden_as_vec_of_strings: Vec<String> = iden.iter().map(|s| s.to_string()).collect();
+                    (path, Identifier::from(iden_as_vec_of_strings))
+                }).collect())
+            );
         let privacy_unit = PrivacyUnit::from(privacy_unit);
         let epsilon = epsilon_delta
             .get("epsilon")
@@ -212,7 +214,7 @@ mod tests {
         let dataset = Dataset::new(DATASET, SCHEMA, SIZE).unwrap();
         println!("{:?}", dataset.relations()[1].0) ;
 
-        let synthetic_data = vec![(vec!["extract", "census"], vec!["extract", "census"])];
+        let synthetic_data = Some(vec![(vec!["extract", "census"], vec!["extract", "census"])]);
         let privacy_unit = vec![("census", Vec::<(&str, &str, &str)>::new(), "_PRIVACY_UNIT_ROW_")];
         let budget: HashMap<&str, f64> = [("epsilon", 1.), ("delta", 0.005)].iter().cloned().collect();
 
@@ -227,11 +229,21 @@ mod tests {
             let relation = Relation::parse(query, &dataset).unwrap();
             println!("{}", relation.0);
             let dp_relation = relation.rewrite_with_differential_privacy(
-                &dataset, synthetic_data.clone(), privacy_unit.clone(), budget.clone()
+                &dataset, privacy_unit.clone(), budget.clone(), synthetic_data.clone()
             ).unwrap();
             let dp_query = dp_relation.relation().render();
             println!("\n\n{dp_query}");
         }
 
+        // No synthetic data
+        for query in queries {
+            let relation = Relation::parse(query, &dataset).unwrap();
+            println!("{}", relation.0);
+            let dp_relation = relation.rewrite_with_differential_privacy(
+                &dataset, privacy_unit.clone(), budget.clone(), None
+            ).unwrap();
+            let dp_query = dp_relation.relation().render();
+            println!("\n\n{dp_query}");
+        }
     }
 }
