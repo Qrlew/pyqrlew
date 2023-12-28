@@ -3,7 +3,7 @@ from pathlib import Path
 from sqlalchemy import select, column, table, text
 from qrlew_datasets.files import SQL
 from qrlew_datasets.databases import PostgreSQL as EmptyPostgreSQL
-from pyqrlew.io.database import dataset
+from pyqrlew.io.dataset import dataset
 import pyqrlew as qrl
 
 NAME: str = 'pyqrlew-db'

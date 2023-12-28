@@ -2,7 +2,7 @@ import os
 import sqlalchemy
 from qrlew_datasets.database import Database
 import pyqrlew as qrl
-from pyqrlew.io.database import dataset
+from pyqrlew.io.dataset import dataset
 import pandas as pd
 
 dtype_to_sqlalchemy = {

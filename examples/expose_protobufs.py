@@ -1,7 +1,7 @@
 import logging
 import pyqrlew as qrl
 from pyqrlew.io import PostgreSQL
-from pyqrlew.io.database import dataset
+from pyqrlew.io.dataset import dataset
 
 logging.basicConfig(level=logging.DEBUG)
 

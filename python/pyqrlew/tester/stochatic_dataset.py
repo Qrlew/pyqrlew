@@ -2,7 +2,7 @@ from typing import List
 import numpy as np
 import pandas as pd
 from ..io.postgresql import EmptyPostgreSQL
-from pyqrlew.io.database import dataset
+from pyqrlew.io.dataset import dataset
 from sqlalchemy import text
 from enum import Enum
 
