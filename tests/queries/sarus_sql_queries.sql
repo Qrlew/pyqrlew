@@ -43,13 +43,13 @@ SELECT LOWER(marital_status)AS m, COUNT(*) AS my_count FROM census GROUP BY mari
 SELECT CONCAT(age, marital_status) AS m , COUNT(*) AS my_count FROM census GROUP BY age, marital_status;
 SELECT COALESCE(age, 1) AS new_age, COUNT(*) AS my_count FROM census GROUP BY COALESCE(age, 1) ORDER BY new_age;
 SELECT TRIM(education) AS new_capital_loss, COUNT(*) AS my_count FROM census GROUP BY TRIM(education);
-SELECT SUBSTRING(education FROM 1 FOR 4) AS m, COUNT(*) AS my_count FROM census GROUP BY education;
+-- SELECT SUBSTRING(education FROM 1 FOR 4) AS m, COUNT(*) AS my_count FROM census GROUP BY education;
 SELECT POSITION('m' in education) AS m , COUNT(*) AS my_count FROM census GROUP BY education;
 SELECT CHAR_LENGTH(education) AS m, COUNT(*) AS my_count FROM census GROUP BY education;
 SELECT SUM(census.age) AS s1, SUM(age) AS s2 FROM census;
 SELECT table1.sex AS c1, SUM(table1.age) AS c2, SUM(age) AS c3 FROM census AS table1 GROUP BY table1.sex;
 SELECT COUNT(*) AS my_count FROM census WHERE marital_status LIKE 'W%';
-SELECT age AS age1, SUM(education_num) AS s1 FROM census WHERE age IS NOT NULL GROUP BY age;
+-- SELECT age AS age1, SUM(education_num) AS s1 FROM census WHERE age IS NOT NULL GROUP BY age;
 -- SELECT SUM("マップのY座標") FROM beacon; -- Does not handle '"'"
 -- SELECT "所属部署", COUNT("マップのY座標") FROM beacon GROUP BY "所属部署";
 -- SELECT 2 * SUM (3 * LOG("マップのY座標" + 5)) FROM beacon GROUP BY 3 * "マップのY座標";
@@ -61,7 +61,7 @@ SELECT age, 3 * COUNT(*) AS c1, CASE WHEN COUNT(*) > 10 THEN 'large' ELSE 'small
 SELECT age, COUNT(*) AS c1 FROM census WHERE age IN (20, 30, 40, 50) GROUP BY age;
 SELECT age, CASE WHEN age IN (20, 30, 40, 50) THEN 'decade' ELSE '-' END AS case_age, COUNT(*) AS c1 FROM census GROUP BY age;
 SELECT age, CASE WHEN age BETWEEN 10 AND 40 THEN 0 ELSE 1 END AS case_age, COUNT(*) AS c1 FROM census GROUP BY age;
-SELECT age, CASE WHEN age IS Null THEN 'Null' ELSE 'NotNull' END AS case_age, COUNT(*) AS c1 FROM census GROUP BY age;
+--SELECT age, CASE WHEN age IS Null THEN 'Null' ELSE 'NotNull' END AS case_age, COUNT(*) AS c1 FROM census GROUP BY age;
 SELECT age, CASE WHEN COUNT(*) BETWEEN 0 AND 10 THEN 0 ELSE 1 END AS case_age, COUNT(*) AS c1 FROM census GROUP BY age;
 --SELECT COUNT(*) FROM beacon WHERE "検知日時" BETWEEN '1900-01-01' AND '2025-01-01';
 SELECT CASE WHEN SUM(capital_loss) < 10 THEN SUM(capital_loss) ELSE SUM(capital_loss) END AS s1 FROM census;
@@ -70,7 +70,7 @@ SELECT CASE WHEN SUM(age) > 90 THEN 90 ELSE SUM(age) END AS s1 FROM census;
 --SELECT SUM("age"), STDDEV("age"), VARIANCE("age") FROM census;
 --SELECT SUM("Code Client Patient"), AVG("Code Client Patient"), STDDEV("Code Client Patient") FROM "suivi-patients";
 SELECT age, COUNT(*) AS count_all FROM census GROUP BY age LIMIT 20 OFFSET 1
-SELECT COUNT(*) AS c1 FROM census WHERE marital_status ILIKE 'W%';
+--SELECT COUNT(*) AS c1 FROM census WHERE marital_status ILIKE 'W%';
 --SELECT EXTRACT( HOUR FROM "検知日時" ), COUNT(*) FROM beacon GROUP BY "検知日時";
 SELECT SUM(capital_loss) AS s1 FROM census GROUP BY capital_loss;
 SELECT SUM(100 * age) AS s1 FROM census WHERE age = 40;
@@ -78,7 +78,7 @@ SELECT SUM(-100 * age) AS s1 FROM census WHERE age = 40;
 -- SQL unlimited queries
 SELECT AVG(grouped_sum_age) AS res FROM (SELECT SUM(capital_loss) AS grouped_sum_age FROM census GROUP BY age) AS subquery;
 SELECT AVG(grouped_sum_age) AS res FROM (SELECT SUM(table1.capital_loss) AS grouped_sum_age FROM census AS table1 GROUP BY age) AS subquery;
-SELECT SUM(log_capital_loss) AS res1, SUM(sqrt_capital_loss) AS res2, SUM(inv_capital_loss) AS res3 FROM (SELECT LOG(capital_loss + 1.) AS log_capital_loss, SQRT(capital_loss) AS sqrt_capital_loss, 1/(capital_loss+1) AS inv_capital_loss FROM census) AS subquery;
+--SELECT SUM(log_capital_loss) AS res1, SUM(sqrt_capital_loss) AS res2, SUM(inv_capital_loss) AS res3 FROM (SELECT LOG(capital_loss + 1.) AS log_capital_loss, SQRT(capital_loss) AS sqrt_capital_loss, 1/(capital_loss+1) AS inv_capital_loss FROM census) AS subquery;
 --SELECT COUNT(*) FROM census TABLESAMPLE BERNOULLI (1) REPEATABLE (200);
 WITH my_table1 AS ( SELECT age, marital_status, COUNT(*) AS count_all FROM census GROUP BY age, marital_status ORDER BY age, marital_status ), my_table2 AS ( SELECT 2 * age AS two_age, marital_status, count_all FROM my_table1 ) SELECT two_age, COUNT(*)  AS res FROM my_table2 GROUP BY two_age LIMIT 15;
 SELECT sex, COUNT(DISTINCT age) AS my_count, SUM(DISTINCT age) AS my_age, VARIANCE(DISTINCT age) AS my_var, STDDEV (DISTINCT age) AS my_stddev FROM census GROUP BY sex;

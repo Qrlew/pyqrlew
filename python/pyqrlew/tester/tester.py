@@ -13,9 +13,9 @@ class StochasticTester:
 
         relation_with_privatequeries = relation.rewrite_with_differential_privacy(
             self.database.dataset(),
-            self.synthetic_data,
             self.protected_entity,
-            budget
+            budget,
+            self.synthetic_data,
         )
         return relation_with_privatequeries.relation()
 
