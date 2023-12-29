@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import List
 import pytest
 
 
@@ -12,6 +13,6 @@ def queries_path(tests_path) -> Path:
     return tests_path / 'queries' / 'base_queries.sql'
 
 @pytest.fixture
-def queries(queries_path) -> list[str]:
+def queries(queries_path) -> List[str]:
     with open(queries_path, 'r') as f:
         return [query for query in f if not query.startswith('--')]
