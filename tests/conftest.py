@@ -9,7 +9,7 @@ def tests_path() -> Path:
 @pytest.fixture
 def queries_path(tests_path) -> Path:
     """Provide the path to test queries"""
-    return tests_path / 'queries' / 'test_queries.sql'
+    return tests_path / 'queries' / 'base_queries.sql'
 
 @pytest.fixture
 def queries(queries_path) -> list[str]:

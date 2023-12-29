@@ -46,18 +46,15 @@ def test_queries_consistency(queries):
     dataset = database.extract() # load the db
     
     for query in queries:
-        print(f"\n{colored(query, 'red')}")
+        print(f"\n{colored(query, 'blue')}")
         replaced_query = query.replace("census", "extract.census").replace("beacon", "extract.beacon")
-        with database.engine().connect() as conn:
-            result = pd.read_sql(replaced_query, conn)
-            print(list(result))
+        result = pd.read_sql(replaced_query, database.engine())            
         relation = dataset.sql(query)
         new_query = relation.render()
         print('===================')
-        print(f'{query} -> {new_query}')
+        print(f"{colored(query, 'red')} -> {colored(new_query, 'green')}")
         try:
-            with database.engine().connect() as conn:
-                result_after_rewriting = pd.read_sql(new_query, conn)
+            result_after_rewriting = pd.read_sql(new_query, database.engine())
         except TypeError as e:
             print(f"Sending {new_query}\nfailed with error:\n{e}")
             return
@@ -80,7 +77,7 @@ def test_queries_differential_privacy(queries):
     ]
     dataset = database.extract()
     for query in queries:
-        print(f"{colored(query, 'red')}")
+        print(f"{colored(query, 'blue')}")
         relation = dataset.sql(query)
         dp_relation = relation.rewrite_with_differential_privacy(
             dataset,
@@ -88,10 +85,7 @@ def test_queries_differential_privacy(queries):
             budget,
             synthetic_data,
         ).relation()
-        print('===================')
-        print(list(database.engine().execute(relation.render())))
-        print('===================')
-        # results = pd.DataFrame.from_dict(database.engine().execute(relation.render()))
-        # dp_results = pd.DataFrame.from_dict(database.engine().execute(dp_relation.render()))
-        # if len(dp_results) != 0:
-        #     assert (results.columns == dp_results.columns).all()
+        results = pd.read_sql(relation.render(), database.engine())
+        dp_results = pd.read_sql(dp_relation.render(), database.engine())
+        if len(dp_results) != 0:
+            assert (results.columns == dp_results.columns).all()
