@@ -4,8 +4,6 @@ import pandas as pd
 from pyqrlew.io import PostgreSQL
 from termcolor import colored
 
-DIRNAME = os.path.join(os.getcwd(), os.path.dirname(__file__))
-
 def are_dataframes_almost_equal(df1, df2, float_tolerance=1e-6):
     # Check if the shape is the same
     if df1.shape != df2.shape:
@@ -42,34 +40,35 @@ def are_dataframes_almost_equal(df1, df2, float_tolerance=1e-6):
 
     return True
 
-def test_queries_consistency():
+def test_queries_consistency(queries):
     """Test the consistency of results for queries stored in a file."""
     database = PostgreSQL()
     dataset = database.extract() # load the db
-    filename = os.path.join(DIRNAME, 'queries/sarus_sql_queries.sql')
     
-    with open(filename, 'r') as f:
-        for query in f:
-            if not query.startswith('--'):
-                colored_query = colored(query, 'blue')
-                print('\n\n', colored_query)
-                replaced_query = query.replace("census", "extract.census").replace("beacon", "extract.beacon")
-                result = pd.DataFrame(database.engine().execute(replaced_query))
-                relation = dataset.sql(query)
-                new_query = relation.render()
-                print(f'\n===================\n{query} -> {new_query}')
-                try:
-                    result_after_rewriting = pd.DataFrame.from_dict(database.engine().execute(new_query))
-                except TypeError as e:
-                    print(f"Sending {new_query}\nfailed with error:\n{e}")
-                    return
-                print(f'{result}\n{result_after_rewriting}\n===================\n')
-                assert are_dataframes_almost_equal(result, result_after_rewriting)
+    for query in queries:
+        print(f"\n{colored(query, 'red')}")
+        replaced_query = query.replace("census", "extract.census").replace("beacon", "extract.beacon")
+        with database.engine().connect() as conn:
+            result = pd.read_sql(replaced_query, conn)
+            print(list(result))
+        relation = dataset.sql(query)
+        new_query = relation.render()
+        print('===================')
+        print(f'{query} -> {new_query}')
+        try:
+            with database.engine().connect() as conn:
+                result_after_rewriting = pd.read_sql(new_query, conn)
+        except TypeError as e:
+            print(f"Sending {new_query}\nfailed with error:\n{e}")
+            return
+        print(f'{result}')
+        print(f'{result_after_rewriting}')
+        print('===================')
+        assert are_dataframes_almost_equal(result, result_after_rewriting)
 
-def test_queries_differential_privacy():
+def test_queries_differential_privacy(queries):
     """Test that we can rewrite the query into DP then execute it and check that the exact and DP results have the same type"""
     database = PostgreSQL()
-    filename = os.path.join(DIRNAME, 'queries/sarus_sql_queries.sql')
     privacy_unit = [
         ("census", [], "_PRIVACY_UNIT_ROW_"),
         ("beacon", [], "_PRIVACY_UNIT_ROW_"),
@@ -80,20 +79,19 @@ def test_queries_differential_privacy():
         (["extract", "beacon"], ["extract", "beacon"]),
     ]
     dataset = database.extract()
-    with open(filename, 'r') as f:
-        for query in f:
-            if not query.startswith('--'):
-                colored_query = colored(query, 'blue')
-                print('\n\n', colored_query)
-                relation = dataset.sql(query)
-                dp_relation = relation.rewrite_with_differential_privacy(
-                    dataset,
-                    privacy_unit,
-                    budget,
-                    synthetic_data,
-                ).relation()
-                print(list(database.engine().execute(relation.render())))
-                # results = pd.DataFrame.from_dict(database.engine().execute(relation.render()))
-                # dp_results = pd.DataFrame.from_dict(database.engine().execute(dp_relation.render()))
-                # if len(dp_results) != 0:
-                #     assert (results.columns == dp_results.columns).all()
+    for query in queries:
+        print(f"{colored(query, 'red')}")
+        relation = dataset.sql(query)
+        dp_relation = relation.rewrite_with_differential_privacy(
+            dataset,
+            privacy_unit,
+            budget,
+            synthetic_data,
+        ).relation()
+        print('===================')
+        print(list(database.engine().execute(relation.render())))
+        print('===================')
+        # results = pd.DataFrame.from_dict(database.engine().execute(relation.render()))
+        # dp_results = pd.DataFrame.from_dict(database.engine().execute(dp_relation.render()))
+        # if len(dp_results) != 0:
+        #     assert (results.columns == dp_results.columns).all()

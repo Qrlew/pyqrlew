@@ -1,0 +1,17 @@
+from pathlib import Path
+import pytest
+
+
+@pytest.fixture
+def tests_path() -> Path:
+    return Path(__file__).parent
+
+@pytest.fixture
+def queries_path(tests_path) -> Path:
+    """Provide the path to test queries"""
+    return tests_path / 'queries' / 'test_queries.sql'
+
+@pytest.fixture
+def queries(queries_path) -> list[str]:
+    with open(queries_path, 'r') as f:
+        return [query for query in f if not query.startswith('--')]
