@@ -14,8 +14,8 @@ PORT: str = 5433
 POSSIBLE_VALUES_THRESHOLD: int = 20
 
 class PostgreSQL(EmptyPostgreSQL):
-    def __init__(self) -> None:
-        super().__init__(NAME, USER, PASSWORD, PORT)
+    def __init__(self, name=NAME, user=USER, password=PASSWORD, port=PORT) -> None:
+        super().__init__(name, user, password, port)
 
     def load_resource(self, schema: str, src: Path) -> 'PostgreSQL':
         with self.engine().connect() as conn:
