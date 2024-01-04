@@ -2,7 +2,7 @@ use crate::{
     dataset::Dataset,
     error::{MissingKeysError, Result},
 };
-use pyo3::prelude::*;
+use pyo3::{prelude::*, types::{PyDict,PyList, PyTuple}};
 use qrlew::{
     ast,
     differential_privacy::{budget::Budget, private_query},
@@ -32,10 +32,44 @@ impl PrivateQuery {
     }
 }
 
+
 #[pymethods]
 impl PrivateQuery {
     fn __str__(&self) -> String {
         format!("{:?}", self)
+    }
+
+    fn to_dict(&self, py: Python) -> PyResult<PyObject> {
+        Ok(
+            match self.0.deref() {
+                private_query::PrivateQuery::Gaussian(value) => {
+                    let py_dict = PyDict::new(py);
+                    py_dict.set_item("name", "Gaussian")?;
+                    py_dict.set_item("noise", value)?;
+                    py_dict.to_object(py)
+                }
+                private_query::PrivateQuery::Laplace(value) => {
+                    let py_dict = PyDict::new(py);
+                    py_dict.set_item("name", "Laplace")?;
+                    py_dict.set_item("noise", value)?;
+                    py_dict.to_object(py)
+                }
+                private_query::PrivateQuery::EpsilonDelta(epsilon, delta) => {
+                    let py_dict = PyDict::new(py);
+                    py_dict.set_item("name", "EpsilonDelta")?;
+                    py_dict.set_item("epsilon", epsilon)?;
+                    py_dict.set_item("delta", delta)?;
+                    py_dict.to_object(py)
+                }
+                private_query::PrivateQuery::Composed(pqueries) => {
+                    let vec_of_obj: Vec<PyObject> = pqueries
+                        .iter()
+                        .map(|query| PrivateQuery::new(Arc::new(query.clone())).to_dict(py))
+                        .collect::<PyResult<_>>()?;
+                    PyList::new(py, vec_of_obj).to_object(py)
+                }
+            }
+        )
     }
 }
 
