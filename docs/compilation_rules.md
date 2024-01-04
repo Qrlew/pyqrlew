@@ -68,7 +68,7 @@ A `Relation::Values` may be:
 - `SyntheticData`
 
 
-## Rewriing
+## Rewriting
 The rewriting process consists of three sequential steps:
 
 1. **Initial Assignment**: Each `Relation` is assigned a set of rules based solely on its type. For instance, if it contains only supported aggregations, a `Reduce` may be categorized as `Public`, `Published`, `SyntheticData`, or `DifferentiallyPrivate`.
