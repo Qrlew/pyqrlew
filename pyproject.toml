@@ -29,6 +29,7 @@ dependencies = [
   "pymysql ~= 1.0",
   "qrlew-datasets ~= 0.5",
   "pandas ~= 2.0",
+  "numpy ~= 1.26",
 ]
 
 [project.optional-dependencies]

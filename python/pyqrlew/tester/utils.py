@@ -1,12 +1,16 @@
 import numpy as np
 from typing import List, Callable
-import matplotlib.pylab as plt
 import textwrap
 from .stochatic_dataset import StochasticDatabase
 from .tester import StochasticTester
 import pandas as pd
 
-plt.rcParams['text.usetex'] = True
+# Optionally import matplotlib
+try:
+    import matplotlib.pylab as plt
+    plt.rcParams['text.usetex'] = True
+except ImportError:
+    plt = None
 
 def divergence(array1: np.array, array2: np.array, epsilon: float) -> float:
     arr = [max(l1 - np.exp(epsilon)*l2, 0) for (l1, l2) in zip(array1, array2)]
@@ -25,6 +29,8 @@ def compute_distribution(my_list: list, bins: int) -> np.array:
     return values
 
 def plot_utility(dp_results: List[float], true_res: float):
+    if plt is None:
+        raise ModuleNotFoundError
     [
         plt.hist(results, bins=20, alpha=0.5, label = fr"$\varepsilon = {epsilon}$")
         for (epsilon, results) in dp_results.items()
@@ -34,6 +40,8 @@ def plot_utility(dp_results: List[float], true_res: float):
     plt.legend()
 
 def plot_adjacent_histograms(array1: List[float], array2: List[float], epsilon:float, delta: float, nbins:float=20, alpha=0.5, color1='blue', color2='orange'):
+    if plt is None:
+        raise ModuleNotFoundError
     xmin = max(min(array1), min(array2))
     xmax = min(max(array1), max(array2))
     bins = np.linspace(xmin, xmax, nbins)
@@ -47,6 +55,8 @@ def plot_adjacent_histograms(array1: List[float], array2: List[float], epsilon:f
     plt.legend()
 
 def plot_privacy_profile(array: List[float], arrays: List[List[float]], nbins:float=20, epsilons: List[float]=list(np.linspace(0, 3, 100))):
+    if plt is None:
+        raise ModuleNotFoundError
     xmin = max(min([min(a) for a in arrays]), min(array))
     xmax = min(max([max(a) for a in arrays]), max(array))
     bins = np.linspace(xmin, xmax, nbins)
@@ -73,6 +83,8 @@ def save_data(filename: str, arr_ref: List[float], arr_adj: List[List[float]]):
     print(f"file {filename} written.")
 
 def run_test(database: StochasticDatabase, stochastic_tester: StochasticTester, query: str, adj_query_func: Callable[[int], str], name: str, n_sim: int):
+    if plt is None:
+        raise ModuleNotFoundError
     print(f"Query = {query}")
     dp_results = stochastic_tester.utility_per_epsilon(query, epsilons=[1., 5., 10.], n_sim=n_sim)
     true_res = database.execute(query)[0][0]
