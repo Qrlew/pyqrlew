@@ -183,7 +183,7 @@ def dataset(
                 values_results = conn.execute(values_query).fetchone()
 
             for col, possible_values in zip(interval_cols, values_results):
-                values[col.name]['possible_values'] = possible_values
+                values[col.name]['possible_values'] = [str(v) for v in possible_values]
 
         return values
 
@@ -230,7 +230,7 @@ def dataset(
                         'encoding': 'UTF-8',
                         'min': min,
                         'max': max,
-                        'possible_values': [],
+                        'possible_values': possible_values,
                     },
                     'properties': {},
                 },
