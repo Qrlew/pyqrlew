@@ -5,7 +5,7 @@ use crate::{
 use pyo3::{prelude::*, types::{PyDict,PyList, PyTuple}};
 use qrlew::{
     ast,
-    differential_privacy::{budget::Budget, private_query},
+    differential_privacy::{budget::Budget, dp_event},
     expr::Identifier,
     privacy_unit_tracking::PrivacyUnit,
     relation::{self, Variant},
@@ -16,25 +16,25 @@ use std::{collections::HashMap, ops::Deref, str, sync::Arc};
 
 #[pyclass]
 #[derive(Clone, Debug)]
-pub struct PrivateQuery(Arc<private_query::PrivateQuery>);
+pub struct DpEvent(Arc<dp_event::DpEvent>);
 
-impl Deref for PrivateQuery {
-    type Target = private_query::PrivateQuery;
+impl Deref for DpEvent {
+    type Target = dp_event::DpEvent;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl PrivateQuery {
-    pub fn new(private_query: Arc<private_query::PrivateQuery>) -> Self {
-        PrivateQuery(private_query)
+impl DpEvent {
+    pub fn new(dp_event: Arc<dp_event::DpEvent>) -> Self {
+        DpEvent(dp_event)
     }
 }
 
 
 #[pymethods]
-impl PrivateQuery {
+impl DpEvent {
     fn __str__(&self) -> String {
         format!("{:?}", self)
     }
@@ -42,32 +42,40 @@ impl PrivateQuery {
     fn to_dict(&self, py: Python) -> PyResult<PyObject> {
         Ok(
             match self.0.deref() {
-                private_query::PrivateQuery::Gaussian(value) => {
-                    let py_dict = PyDict::new(py);
-                    py_dict.set_item("name", "Gaussian")?;
-                    py_dict.set_item("noise", value)?;
-                    py_dict.to_object(py)
-                }
-                private_query::PrivateQuery::Laplace(value) => {
-                    let py_dict = PyDict::new(py);
-                    py_dict.set_item("name", "Laplace")?;
-                    py_dict.set_item("noise", value)?;
-                    py_dict.to_object(py)
-                }
-                private_query::PrivateQuery::EpsilonDelta(epsilon, delta) => {
-                    let py_dict = PyDict::new(py);
-                    py_dict.set_item("name", "EpsilonDelta")?;
-                    py_dict.set_item("epsilon", epsilon)?;
-                    py_dict.set_item("delta", delta)?;
-                    py_dict.to_object(py)
-                }
-                private_query::PrivateQuery::Composed(pqueries) => {
-                    let vec_of_obj: Vec<PyObject> = pqueries
-                        .iter()
-                        .map(|query| PrivateQuery::new(Arc::new(query.clone())).to_dict(py))
-                        .collect::<PyResult<_>>()?;
-                    PyList::new(py, vec_of_obj).to_object(py)
-                }
+                dp_event::DpEvent::NoOp => todo!(),
+                dp_event::DpEvent::Gaussian { noise_multiplier } => todo!(),
+                dp_event::DpEvent::Laplace { noise_multiplier } => todo!(),
+                dp_event::DpEvent::EpsilonDelta { epsilon, delta } => todo!(),
+                dp_event::DpEvent::Composed { events } => todo!(),
+                dp_event::DpEvent::PoissonSampled { sampling_probability, event } => todo!(),
+                dp_event::DpEvent::SampledWithReplacement { source_dataset_size, sample_size, event } => todo!(),
+                dp_event::DpEvent::SampledWithoutReplacement { source_dataset_size, sample_size, event } => todo!(),
+                // dp_event::DpEvent::Gaussian(value) => {
+                //     let py_dict = PyDict::new(py);
+                //     py_dict.set_item("name", "Gaussian")?;
+                //     py_dict.set_item("noise", value)?;
+                //     py_dict.to_object(py)
+                // }
+                // dp_event::DpEvent::Laplace(value) => {
+                //     let py_dict = PyDict::new(py);
+                //     py_dict.set_item("name", "Laplace")?;
+                //     py_dict.set_item("noise", value)?;
+                //     py_dict.to_object(py)
+                // }
+                // dp_event::DpEvent::EpsilonDelta(epsilon, delta) => {
+                //     let py_dict = PyDict::new(py);
+                //     py_dict.set_item("name", "EpsilonDelta")?;
+                //     py_dict.set_item("epsilon", epsilon)?;
+                //     py_dict.set_item("delta", delta)?;
+                //     py_dict.to_object(py)
+                // }
+                // dp_event::DpEvent::Composed(pqueries) => {
+                //     let vec_of_obj: Vec<PyObject> = pqueries
+                //         .iter()
+                //         .map(|query| DpEvent::new(Arc::new(query.clone())).to_dict(py))
+                //         .collect::<PyResult<_>>()?;
+                //     PyList::new(py, vec_of_obj).to_object(py)
+                // }
             }
         )
     }
@@ -75,30 +83,30 @@ impl PrivateQuery {
 
 #[pyclass]
 #[derive(Clone, Debug)]
-pub struct RelationWithPrivateQuery(Arc<rewriting_rule::RelationWithPrivateQuery>);
+pub struct RelationWithDpEvent(Arc<rewriting_rule::RelationWithDpEvent>);
 
-impl Deref for RelationWithPrivateQuery {
-    type Target = rewriting_rule::RelationWithPrivateQuery;
+impl Deref for RelationWithDpEvent {
+    type Target = rewriting_rule::RelationWithDpEvent;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl RelationWithPrivateQuery {
-    pub fn new(relation_with_private_query: Arc<rewriting_rule::RelationWithPrivateQuery>) -> Self {
-        RelationWithPrivateQuery(relation_with_private_query)
+impl RelationWithDpEvent {
+    pub fn new(relation_with_dp_event: Arc<rewriting_rule::RelationWithDpEvent>) -> Self {
+        RelationWithDpEvent(relation_with_dp_event)
     }
 }
 
 #[pymethods]
-impl RelationWithPrivateQuery {
+impl RelationWithDpEvent {
     pub fn __str__(&self) -> String {
         let relation_with_qiery = self.0.as_ref();
         format!(
-            "Relation: {}\nPrivateQuery: {}",
+            "Relation: {}\nDpEvent: {}",
             relation_with_qiery.relation(),
-            relation_with_qiery.private_query()
+            relation_with_qiery.dp_event()
         )
     }
     pub fn relation(&self) -> Relation {
@@ -106,9 +114,9 @@ impl RelationWithPrivateQuery {
         Relation(Arc::new(relation_with_qiery.relation().clone()))
     }
 
-    pub fn private_query(&self) -> PrivateQuery {
+    pub fn dp_event(&self) -> DpEvent {
         let relation_with_qiery = self.0.as_ref();
-        PrivateQuery::new(Arc::new(relation_with_qiery.private_query().clone()))
+        DpEvent::new(Arc::new(relation_with_qiery.dp_event().clone()))
     }
 }
 
@@ -158,7 +166,7 @@ impl Relation {
         privacy_unit: Vec<(&'a str, Vec<(&'a str, &'a str, &'a str)>, &'a str)>,
         epsilon_delta: HashMap<&'a str, f64>,
         synthetic_data: Option<Vec<(Vec<&'a str>, Vec<&'a str>)>>,
-    ) -> Result<RelationWithPrivateQuery> {
+    ) -> Result<RelationWithDpEvent> {
         let relation = self.deref().clone();
         let relations = dataset.deref().relations();
         let synthetic_data = synthetic_data.map(|sd| SyntheticData::new(sd
@@ -176,14 +184,14 @@ impl Relation {
             .get("delta")
             .ok_or(MissingKeysError("delta".to_string()))?;
         let budget = Budget::new(*epsilon, *delta);
-        let relation_with_private_query = relation.rewrite_as_privacy_unit_preserving(
+        let relation_with_dp_event = relation.rewrite_as_privacy_unit_preserving(
             &relations,
             synthetic_data,
             privacy_unit,
             budget,
         )?;
-        Ok(RelationWithPrivateQuery(Arc::new(
-            relation_with_private_query,
+        Ok(RelationWithDpEvent(Arc::new(
+            relation_with_dp_event,
         )))
     }
 
@@ -193,7 +201,7 @@ impl Relation {
         privacy_unit: Vec<(&'a str, Vec<(&'a str, &'a str, &'a str)>, &'a str)>,
         epsilon_delta: HashMap<&'a str, f64>,
         synthetic_data: Option<Vec<(Vec<&'a str>, Vec<&'a str>)>>,
-    ) -> Result<RelationWithPrivateQuery> {
+    ) -> Result<RelationWithDpEvent> {
         let relation = self.deref().clone();
         let relations = dataset.deref().relations();
         let synthetic_data = synthetic_data.map(|sd| SyntheticData::new(sd
@@ -211,14 +219,14 @@ impl Relation {
             .get("delta")
             .ok_or(MissingKeysError("delta".to_string()))?;
         let budget = Budget::new(*epsilon, *delta);
-        let relation_with_private_query = relation.rewrite_with_differential_privacy(
+        let relation_with_dp_event = relation.rewrite_with_differential_privacy(
             &relations,
             synthetic_data,
             privacy_unit,
             budget,
         )?;
-        Ok(RelationWithPrivateQuery(Arc::new(
-            relation_with_private_query,
+        Ok(RelationWithDpEvent(Arc::new(
+            relation_with_dp_event,
         )))
     }
 
