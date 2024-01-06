@@ -2,7 +2,7 @@ use crate::{
     error::{MissingKeysError, Result},
     relation::Relation,
 };
-use pyo3::{prelude::*, types::{PyDict, PyList}};
+use pyo3::{prelude::*, types::{PyTuple, PyList}};
 use qrlew::{
     differential_privacy::dp_event,
     rewriting::rewriting_rule,
@@ -19,72 +19,72 @@ impl DpEvent {
     }
 
     pub fn _to_named_tuple(event: &dp_event::DpEvent, py: Python) -> PyObject {
-        let named_tuple = PyDict::new(py);
+        let named_tuple = PyTuple::empty(py);
         let fields = PyList::empty(py);
-        named_tuple.set_item("module_name", "dp_accounting.dp_event");
+        named_tuple.setattr("module_name", "dp_accounting.dp_event");
         fields.append("module_name");
         match event {
             dp_event::DpEvent::NoOp => {
-                named_tuple.set_item("class_name", "NoOpDpEvent");
+                named_tuple.setattr("class_name", "NoOpDpEvent");
                 fields.append("class_name");
             },
             dp_event::DpEvent::Gaussian { noise_multiplier } => {
-                named_tuple.set_item("class_name", "GaussianDpEvent");
+                named_tuple.setattr("class_name", "GaussianDpEvent");
                 fields.append("class_name");
-                named_tuple.set_item("noise_multiplier", noise_multiplier);
+                named_tuple.setattr("noise_multiplier", noise_multiplier);
                 fields.append("noise_multiplier");
             },
             dp_event::DpEvent::Laplace { noise_multiplier } => {
-                named_tuple.set_item("class_name", "LaplaceDpEvent");
+                named_tuple.setattr("class_name", "LaplaceDpEvent");
                 fields.append("class_name");
-                named_tuple.set_item("noise_multiplier", noise_multiplier);
+                named_tuple.setattr("noise_multiplier", noise_multiplier);
                 fields.append("noise_multiplier");
             },
             dp_event::DpEvent::EpsilonDelta { epsilon, delta } => {
-                named_tuple.set_item("class_name", "EpsilonDeltaDpEvent");
+                named_tuple.setattr("class_name", "EpsilonDeltaDpEvent");
                 fields.append("class_name");
-                named_tuple.set_item("epsilon", epsilon);
+                named_tuple.setattr("epsilon", epsilon);
                 fields.append("epsilon");
-                named_tuple.set_item("delta", delta);
+                named_tuple.setattr("delta", delta);
                 fields.append("delta");
             },
             dp_event::DpEvent::Composed { events } => {
-                named_tuple.set_item("class_name", "ComposedDpEvent");
+                named_tuple.setattr("class_name", "ComposedDpEvent");
                 fields.append("class_name");
-                named_tuple.set_item("events", PyList::new(py, events.into_iter().map(|event| DpEvent::_to_named_tuple(event, py))));
+                named_tuple.setattr("events", PyList::new(py, events.into_iter().map(|event| DpEvent::_to_named_tuple(event, py))));
                 fields.append("events");
             },
             dp_event::DpEvent::PoissonSampled { sampling_probability, event } => {
-                named_tuple.set_item("class_name", "PoissonSampledDpEvent");
+                named_tuple.setattr("class_name", "PoissonSampledDpEvent");
                 fields.append("class_name");
-                named_tuple.set_item("sampling_probability", sampling_probability);
+                named_tuple.setattr("sampling_probability", sampling_probability);
                 fields.append("sampling_probability");
-                named_tuple.set_item("event", DpEvent::_to_named_tuple(event, py));
+                named_tuple.setattr("event", DpEvent::_to_named_tuple(event, py));
                 fields.append("event");
             },
             dp_event::DpEvent::SampledWithReplacement { source_dataset_size, sample_size, event } => {
-                named_tuple.set_item("class_name", "SampledWithReplacementDpEvent");
+                named_tuple.setattr("class_name", "SampledWithReplacementDpEvent");
                 fields.append("class_name");
-                named_tuple.set_item("source_dataset_size", source_dataset_size);
+                named_tuple.setattr("source_dataset_size", source_dataset_size);
                 fields.append("source_dataset_size");
-                named_tuple.set_item("sample_size", sample_size);
+                named_tuple.setattr("sample_size", sample_size);
                 fields.append("sample_size");
-                named_tuple.set_item("event", DpEvent::_to_named_tuple(event, py));
+                named_tuple.setattr("event", DpEvent::_to_named_tuple(event, py));
                 fields.append("event");
             },
             dp_event::DpEvent::SampledWithoutReplacement { source_dataset_size, sample_size, event } => {
-                named_tuple.set_item("class_name", "SampledWithoutReplacementDpEvent");
+                named_tuple.setattr("class_name", "SampledWithoutReplacementDpEvent");
                 fields.append("class_name");
-                named_tuple.set_item("source_dataset_size", source_dataset_size);
+                named_tuple.setattr("source_dataset_size", source_dataset_size);
                 fields.append("source_dataset_size");
-                named_tuple.set_item("sample_size", sample_size);
+                named_tuple.setattr("sample_size", sample_size);
                 fields.append("sample_size");
-                named_tuple.set_item("event", DpEvent::_to_named_tuple(event, py));
+                named_tuple.setattr("event", DpEvent::_to_named_tuple(event, py));
                 fields.append("event");
             },
         }
-        named_tuple.set_item("_fields", fields);
-        named_tuple.into_py(py)
+        named_tuple.setattr("_fields", fields);
+        named_tuple.to_object(py)
     }
 }
 
