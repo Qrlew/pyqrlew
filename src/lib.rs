@@ -1,6 +1,7 @@
 pub mod dataset;
 pub mod error;
 pub mod relation;
+pub mod dp_event;
 
 use crate::{dataset::Dataset, relation::Relation};
 use pyo3::prelude::{pymodule, PyModule, PyResult, Python};

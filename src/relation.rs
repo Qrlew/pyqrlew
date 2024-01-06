@@ -1,8 +1,9 @@
 use crate::{
     dataset::Dataset,
     error::{MissingKeysError, Result},
+    dp_event::{DpEvent, RelationWithDpEvent},
 };
-use pyo3::{prelude::*, types::{PyDict,PyList, PyTuple}};
+use pyo3::prelude::*;
 use qrlew::{
     ast,
     differential_privacy::{budget::Budget, dp_event},
@@ -13,112 +14,6 @@ use qrlew::{
     synthetic_data::SyntheticData,
 };
 use std::{collections::HashMap, ops::Deref, str, sync::Arc};
-
-#[pyclass]
-#[derive(Clone, Debug)]
-pub struct DpEvent(Arc<dp_event::DpEvent>);
-
-impl Deref for DpEvent {
-    type Target = dp_event::DpEvent;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DpEvent {
-    pub fn new(dp_event: Arc<dp_event::DpEvent>) -> Self {
-        DpEvent(dp_event)
-    }
-}
-
-
-#[pymethods]
-impl DpEvent {
-    fn __str__(&self) -> String {
-        format!("{:?}", self)
-    }
-
-    fn to_dict(&self, py: Python) -> PyResult<PyObject> {
-        Ok(
-            match self.0.deref() {
-                dp_event::DpEvent::NoOp => todo!(),
-                dp_event::DpEvent::Gaussian { noise_multiplier } => todo!(),
-                dp_event::DpEvent::Laplace { noise_multiplier } => todo!(),
-                dp_event::DpEvent::EpsilonDelta { epsilon, delta } => todo!(),
-                dp_event::DpEvent::Composed { events } => todo!(),
-                dp_event::DpEvent::PoissonSampled { sampling_probability, event } => todo!(),
-                dp_event::DpEvent::SampledWithReplacement { source_dataset_size, sample_size, event } => todo!(),
-                dp_event::DpEvent::SampledWithoutReplacement { source_dataset_size, sample_size, event } => todo!(),
-                // dp_event::DpEvent::Gaussian(value) => {
-                //     let py_dict = PyDict::new(py);
-                //     py_dict.set_item("name", "Gaussian")?;
-                //     py_dict.set_item("noise", value)?;
-                //     py_dict.to_object(py)
-                // }
-                // dp_event::DpEvent::Laplace(value) => {
-                //     let py_dict = PyDict::new(py);
-                //     py_dict.set_item("name", "Laplace")?;
-                //     py_dict.set_item("noise", value)?;
-                //     py_dict.to_object(py)
-                // }
-                // dp_event::DpEvent::EpsilonDelta(epsilon, delta) => {
-                //     let py_dict = PyDict::new(py);
-                //     py_dict.set_item("name", "EpsilonDelta")?;
-                //     py_dict.set_item("epsilon", epsilon)?;
-                //     py_dict.set_item("delta", delta)?;
-                //     py_dict.to_object(py)
-                // }
-                // dp_event::DpEvent::Composed(pqueries) => {
-                //     let vec_of_obj: Vec<PyObject> = pqueries
-                //         .iter()
-                //         .map(|query| DpEvent::new(Arc::new(query.clone())).to_dict(py))
-                //         .collect::<PyResult<_>>()?;
-                //     PyList::new(py, vec_of_obj).to_object(py)
-                // }
-            }
-        )
-    }
-}
-
-#[pyclass]
-#[derive(Clone, Debug)]
-pub struct RelationWithDpEvent(Arc<rewriting_rule::RelationWithDpEvent>);
-
-impl Deref for RelationWithDpEvent {
-    type Target = rewriting_rule::RelationWithDpEvent;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl RelationWithDpEvent {
-    pub fn new(relation_with_dp_event: Arc<rewriting_rule::RelationWithDpEvent>) -> Self {
-        RelationWithDpEvent(relation_with_dp_event)
-    }
-}
-
-#[pymethods]
-impl RelationWithDpEvent {
-    pub fn __str__(&self) -> String {
-        let relation_with_qiery = self.0.as_ref();
-        format!(
-            "Relation: {}\nDpEvent: {}",
-            relation_with_qiery.relation(),
-            relation_with_qiery.dp_event()
-        )
-    }
-    pub fn relation(&self) -> Relation {
-        let relation_with_qiery = self.0.as_ref();
-        Relation(Arc::new(relation_with_qiery.relation().clone()))
-    }
-
-    pub fn dp_event(&self) -> DpEvent {
-        let relation_with_qiery = self.0.as_ref();
-        DpEvent::new(Arc::new(relation_with_qiery.dp_event().clone()))
-    }
-}
 
 #[pyclass]
 #[derive(Clone)]
@@ -179,7 +74,7 @@ impl Relation {
         let privacy_unit = PrivacyUnit::from(privacy_unit);
         let epsilon = epsilon_delta
             .get("epsilon")
-            .ok_or(MissingKeysError("epsion".to_string()))?;
+            .ok_or(MissingKeysError("epsilon".to_string()))?;
         let delta = epsilon_delta
             .get("delta")
             .ok_or(MissingKeysError("delta".to_string()))?;
@@ -190,7 +85,7 @@ impl Relation {
             privacy_unit,
             budget,
         )?;
-        Ok(RelationWithDpEvent(Arc::new(
+        Ok(RelationWithDpEvent::new(Arc::new(
             relation_with_dp_event,
         )))
     }
@@ -225,7 +120,7 @@ impl Relation {
             privacy_unit,
             budget,
         )?;
-        Ok(RelationWithDpEvent(Arc::new(
+        Ok(RelationWithDpEvent::new(Arc::new(
             relation_with_dp_event,
         )))
     }
