@@ -2,7 +2,7 @@ use crate::{
     error::{MissingKeysError, Result},
     relation::Relation,
 };
-use pyo3::prelude::*;
+use pyo3::{prelude::*, types::{PyDict, PyList}};
 use qrlew::{
     differential_privacy::dp_event,
     rewriting::rewriting_rule,
@@ -29,8 +29,61 @@ impl Deref for DpEvent {
 
 #[pymethods]
 impl DpEvent {
-    fn __str__(&self) -> String {
+    pub fn __str__(&self) -> String {
         format!("{:?}", self)
+    }
+
+    pub fn _to_named_tuple(dp_event: &dp_event::DpEvent, py: Python) -> PyObject {
+        let named_tuple = PyDict::new(py);
+        let fields = PyList::empty(py);
+        named_tuple.set_item("module_name", "dp_accounting.dp_event");
+        fields.append("module_name");
+        match dp_event {
+            dp_event::DpEvent::NoOp => {
+                named_tuple.set_item("class_name", "NoOpDpEvent");
+                fields.append("class_name");
+            },
+            dp_event::DpEvent::Gaussian { noise_multiplier } => {
+                named_tuple.set_item("class_name", "GaussianDpEvent");
+                fields.append("class_name");
+                named_tuple.set_item("noise_multiplier", noise_multiplier);
+                fields.append("noise_multiplier");
+            },
+            dp_event::DpEvent::Laplace { noise_multiplier } => {
+                named_tuple.set_item("class_name", "LaplaceDpEvent");
+                fields.append("class_name");
+                named_tuple.set_item("noise_multiplier", noise_multiplier);
+                fields.append("noise_multiplier");
+            },
+            dp_event::DpEvent::EpsilonDelta { epsilon, delta } => {
+                named_tuple.set_item("class_name", "EpsilonDeltaDpEvent");
+                fields.append("class_name");
+                named_tuple.set_item("epsilon", epsilon);
+                fields.append("epsilon");
+                named_tuple.set_item("delta", delta);
+                fields.append("delta");
+            },
+            dp_event::DpEvent::Composed { events } => {
+                named_tuple.set_item("class_name", "ComposedDpEvent");
+                fields.append("class_name");
+                named_tuple.set_item("events", PyList::new(py, events.into_iter().map(|dpe| DpEvent::_to_named_tuple(dpe, py))));
+                fields.append("events");
+            },
+            dp_event::DpEvent::PoissonSampled { sampling_probability, event } => {
+                named_tuple.set_item("class_name", "PoissonSampledDpEvent");
+                fields.append("class_name");
+            },
+            dp_event::DpEvent::SampledWithReplacement { source_dataset_size, sample_size, event } => {
+                named_tuple.set_item("class_name", "SampledWithReplacementDpEvent");
+                fields.append("class_name");
+            },
+            dp_event::DpEvent::SampledWithoutReplacement { source_dataset_size, sample_size, event } => {
+                named_tuple.set_item("class_name", "SampledWithoutReplacementDpEvent");
+                fields.append("class_name");
+            },
+        }
+        named_tuple.set_item("_fields", fields);
+        named_tuple.to_object(py)
     }
 }
 
