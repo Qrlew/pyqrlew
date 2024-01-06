@@ -84,7 +84,7 @@ impl DpEvent {
             },
         }
         named_tuple.set_item("_fields", fields);
-        named_tuple.to_object(py)
+        named_tuple.into_py(py)
     }
 }
 
