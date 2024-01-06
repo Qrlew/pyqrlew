@@ -17,28 +17,13 @@ impl DpEvent {
     pub fn new(dp_event: Arc<dp_event::DpEvent>) -> Self {
         DpEvent(dp_event)
     }
-}
 
-impl Deref for DpEvent {
-    type Target = dp_event::DpEvent;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-#[pymethods]
-impl DpEvent {
-    pub fn __str__(&self) -> String {
-        format!("{:?}", self)
-    }
-
-    pub fn _to_named_tuple(dp_event: &dp_event::DpEvent, py: Python) -> PyObject {
+    pub fn _to_named_tuple(event: &dp_event::DpEvent, py: Python) -> PyObject {
         let named_tuple = PyDict::new(py);
         let fields = PyList::empty(py);
         named_tuple.set_item("module_name", "dp_accounting.dp_event");
         fields.append("module_name");
-        match dp_event {
+        match event {
             dp_event::DpEvent::NoOp => {
                 named_tuple.set_item("class_name", "NoOpDpEvent");
                 fields.append("class_name");
@@ -66,24 +51,60 @@ impl DpEvent {
             dp_event::DpEvent::Composed { events } => {
                 named_tuple.set_item("class_name", "ComposedDpEvent");
                 fields.append("class_name");
-                named_tuple.set_item("events", PyList::new(py, events.into_iter().map(|dpe| DpEvent::_to_named_tuple(dpe, py))));
+                named_tuple.set_item("events", PyList::new(py, events.into_iter().map(|event| DpEvent::_to_named_tuple(event, py))));
                 fields.append("events");
             },
             dp_event::DpEvent::PoissonSampled { sampling_probability, event } => {
                 named_tuple.set_item("class_name", "PoissonSampledDpEvent");
                 fields.append("class_name");
+                named_tuple.set_item("sampling_probability", sampling_probability);
+                fields.append("sampling_probability");
+                named_tuple.set_item("event", DpEvent::_to_named_tuple(event, py));
+                fields.append("event");
             },
             dp_event::DpEvent::SampledWithReplacement { source_dataset_size, sample_size, event } => {
                 named_tuple.set_item("class_name", "SampledWithReplacementDpEvent");
                 fields.append("class_name");
+                named_tuple.set_item("source_dataset_size", source_dataset_size);
+                fields.append("source_dataset_size");
+                named_tuple.set_item("sample_size", sample_size);
+                fields.append("sample_size");
+                named_tuple.set_item("event", DpEvent::_to_named_tuple(event, py));
+                fields.append("event");
             },
             dp_event::DpEvent::SampledWithoutReplacement { source_dataset_size, sample_size, event } => {
                 named_tuple.set_item("class_name", "SampledWithoutReplacementDpEvent");
                 fields.append("class_name");
+                named_tuple.set_item("source_dataset_size", source_dataset_size);
+                fields.append("source_dataset_size");
+                named_tuple.set_item("sample_size", sample_size);
+                fields.append("sample_size");
+                named_tuple.set_item("event", DpEvent::_to_named_tuple(event, py));
+                fields.append("event");
             },
         }
         named_tuple.set_item("_fields", fields);
         named_tuple.to_object(py)
+    }
+}
+
+impl Deref for DpEvent {
+    type Target = dp_event::DpEvent;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+#[pymethods]
+impl DpEvent {
+    pub fn __str__(&self) -> String {
+        format!("{:?}", self)
+    }
+
+    /// Generate a namedtuple-like usable with https://github.com/google/differential-privacy/blob/main/python/dp_accounting/dp_event.py
+    pub fn to_named_tuple(&self, py: Python) -> PyObject {
+        DpEvent::_to_named_tuple(self, py)
     }
 }
 
