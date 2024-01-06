@@ -9,4 +9,4 @@ termcolor ~= 2.0
 pytest ~= 7.0
 pandas ~= 2.0
 matplotlib ~= 3.7.3
-importlib_resources ~= 6.1.0
+dp-accounting ~= 0.4.3
