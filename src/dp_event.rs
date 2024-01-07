@@ -1,8 +1,11 @@
 use crate::{
-    error::{MissingKeysError, Result},
     relation::Relation,
 };
-use pyo3::{prelude::*, types::{PyTuple, PyList}};
+use pyo3::{
+    prelude::*,
+    types::{PyList, PyDict},
+    exceptions::PyAttributeError,
+};
 use qrlew::{
     differential_privacy::dp_event,
     rewriting::rewriting_rule,
@@ -18,73 +21,73 @@ impl DpEvent {
         DpEvent(dp_event)
     }
 
-    pub fn _to_named_tuple(event: &dp_event::DpEvent, py: Python) -> PyObject {
-        let named_tuple = PyTuple::empty(py);
+    pub fn _to_dict<'py>(event: &dp_event::DpEvent, py: Python<'py>) -> &'py PyDict {
+        let dict = PyDict::new(py);
         let fields = PyList::empty(py);
-        named_tuple.setattr("module_name", "dp_accounting.dp_event");
-        fields.append("module_name");
+        dict.set_item("module_name", "dp_accounting.dp_event").unwrap();
+        fields.append("module_name").unwrap();
         match event {
             dp_event::DpEvent::NoOp => {
-                named_tuple.setattr("class_name", "NoOpDpEvent");
-                fields.append("class_name");
+                dict.set_item("class_name", "NoOpDpEvent").unwrap();
+                fields.append("class_name").unwrap();
             },
             dp_event::DpEvent::Gaussian { noise_multiplier } => {
-                named_tuple.setattr("class_name", "GaussianDpEvent");
-                fields.append("class_name");
-                named_tuple.setattr("noise_multiplier", noise_multiplier);
-                fields.append("noise_multiplier");
+                dict.set_item("class_name", "GaussianDpEvent").unwrap();
+                fields.append("class_name").unwrap();
+                dict.set_item("noise_multiplier", noise_multiplier).unwrap();
+                fields.append("noise_multiplier").unwrap();
             },
             dp_event::DpEvent::Laplace { noise_multiplier } => {
-                named_tuple.setattr("class_name", "LaplaceDpEvent");
-                fields.append("class_name");
-                named_tuple.setattr("noise_multiplier", noise_multiplier);
-                fields.append("noise_multiplier");
+                dict.set_item("class_name", "LaplaceDpEvent").unwrap();
+                fields.append("class_name").unwrap();
+                dict.set_item("noise_multiplier", noise_multiplier).unwrap();
+                fields.append("noise_multiplier").unwrap();
             },
             dp_event::DpEvent::EpsilonDelta { epsilon, delta } => {
-                named_tuple.setattr("class_name", "EpsilonDeltaDpEvent");
-                fields.append("class_name");
-                named_tuple.setattr("epsilon", epsilon);
-                fields.append("epsilon");
-                named_tuple.setattr("delta", delta);
-                fields.append("delta");
+                dict.set_item("class_name", "EpsilonDeltaDpEvent").unwrap();
+                fields.append("class_name").unwrap();
+                dict.set_item("epsilon", epsilon).unwrap();
+                fields.append("epsilon").unwrap();
+                dict.set_item("delta", delta).unwrap();
+                fields.append("delta").unwrap();
             },
             dp_event::DpEvent::Composed { events } => {
-                named_tuple.setattr("class_name", "ComposedDpEvent");
-                fields.append("class_name");
-                named_tuple.setattr("events", PyList::new(py, events.into_iter().map(|event| DpEvent::_to_named_tuple(event, py))));
-                fields.append("events");
+                dict.set_item("class_name", "ComposedDpEvent").unwrap();
+                fields.append("class_name").unwrap();
+                dict.set_item("events", PyList::new(py, events.into_iter().map(|event| DpEvent::_to_dict(event, py)))).unwrap();
+                fields.append("events").unwrap();
             },
             dp_event::DpEvent::PoissonSampled { sampling_probability, event } => {
-                named_tuple.setattr("class_name", "PoissonSampledDpEvent");
-                fields.append("class_name");
-                named_tuple.setattr("sampling_probability", sampling_probability);
-                fields.append("sampling_probability");
-                named_tuple.setattr("event", DpEvent::_to_named_tuple(event, py));
-                fields.append("event");
+                dict.set_item("class_name", "PoissonSampledDpEvent").unwrap();
+                fields.append("class_name").unwrap();
+                dict.set_item("sampling_probability", sampling_probability).unwrap();
+                fields.append("sampling_probability").unwrap();
+                dict.set_item("event", DpEvent::_to_dict(event, py)).unwrap();
+                fields.append("event").unwrap();
             },
             dp_event::DpEvent::SampledWithReplacement { source_dataset_size, sample_size, event } => {
-                named_tuple.setattr("class_name", "SampledWithReplacementDpEvent");
-                fields.append("class_name");
-                named_tuple.setattr("source_dataset_size", source_dataset_size);
-                fields.append("source_dataset_size");
-                named_tuple.setattr("sample_size", sample_size);
-                fields.append("sample_size");
-                named_tuple.setattr("event", DpEvent::_to_named_tuple(event, py));
-                fields.append("event");
+                dict.set_item("class_name", "SampledWithReplacementDpEvent").unwrap();
+                fields.append("class_name").unwrap();
+                dict.set_item("source_dataset_size", source_dataset_size).unwrap();
+                fields.append("source_dataset_size").unwrap();
+                dict.set_item("sample_size", sample_size).unwrap();
+                fields.append("sample_size").unwrap();
+                dict.set_item("event", DpEvent::_to_dict(event, py)).unwrap();
+                fields.append("event").unwrap();
             },
             dp_event::DpEvent::SampledWithoutReplacement { source_dataset_size, sample_size, event } => {
-                named_tuple.setattr("class_name", "SampledWithoutReplacementDpEvent");
-                fields.append("class_name");
-                named_tuple.setattr("source_dataset_size", source_dataset_size);
-                fields.append("source_dataset_size");
-                named_tuple.setattr("sample_size", sample_size);
-                fields.append("sample_size");
-                named_tuple.setattr("event", DpEvent::_to_named_tuple(event, py));
-                fields.append("event");
+                dict.set_item("class_name", "SampledWitoutReplacement").unwrap();
+                fields.append("class_name").unwrap();
+                dict.set_item("source_dataset_size", source_dataset_size).unwrap();
+                fields.append("source_dataset_size").unwrap();
+                dict.set_item("sample_size", sample_size).unwrap();
+                fields.append("sample_size").unwrap();
+                dict.set_item("event", DpEvent::_to_dict(event, py)).unwrap();
+                fields.append("event").unwrap();
             },
         }
-        named_tuple.setattr("_fields", fields);
-        named_tuple.to_object(py)
+        dict.set_item("_fields", fields).unwrap();
+        dict
     }
 }
 
@@ -103,8 +106,8 @@ impl DpEvent {
     }
 
     /// Generate a namedtuple-like usable with https://github.com/google/differential-privacy/blob/main/python/dp_accounting/dp_event.py
-    pub fn to_named_tuple(&self, py: Python) -> PyObject {
-        DpEvent::_to_named_tuple(self, py)
+    pub fn to_dict<'py>(&self, py: Python<'py>) -> &'py PyDict {
+        DpEvent::_to_dict(self.deref(), py)
     }
 }
 
@@ -144,5 +147,61 @@ impl RelationWithDpEvent {
     pub fn dp_event(&self) -> DpEvent {
         let relation_with_qiery = self.0.as_ref();
         DpEvent::new(Arc::new(relation_with_qiery.dp_event().clone()))
+    }
+}
+
+#[pyclass]
+#[derive(Clone, Debug)]
+pub struct NamedTuple {
+    dict: Py<PyDict>,
+}
+
+#[pymethods]
+impl NamedTuple {
+    #[new]
+    fn new(dict: Py<PyDict>) -> Self {
+        NamedTuple { dict }
+    }
+
+    fn __getattribute__<'py>(&'py self, name: &str, py: Python<'py>) -> PyResult<&'py PyAny> {
+        self.dict.as_ref(py).get_item(name)?.ok_or(PyAttributeError::new_err("Unknown attribute: {name}"))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::{
+        sync::Arc,
+    };
+    use pyo3::prelude::*;
+    use qrlew::differential_privacy::dp_event;
+    use super::{NamedTuple, DpEvent};
+    
+    #[test]
+    fn test_to_dict() {
+        let gaussian_mechanism = DpEvent::new(Arc::new(dp_event::DpEvent::gaussian(1.5)));
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|py| {
+            let mut gm = Py::new(py, gaussian_mechanism).unwrap();
+            pyo3::py_run!(py, gm, r#"
+                print(gm)
+                print(gm.to_dict())
+            "#);
+        });
+    }
+
+    #[test]
+    fn test_named_tuple() {
+        let gaussian_mechanism = DpEvent::new(Arc::new(dp_event::DpEvent::laplace(1.5)));
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|py| {
+            let named_tuple = Py::new(py, NamedTuple::new(gaussian_mechanism.to_dict(py).into())).unwrap();
+            pyo3::py_run!(py, named_tuple, r#"
+                print(named_tuple._fields)
+                print(named_tuple.module_name)
+                print(named_tuple.class_name)
+                print(named_tuple.noise_multiplier)
+            "#);
+        });
     }
 }
