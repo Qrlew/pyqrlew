@@ -105,9 +105,14 @@ impl DpEvent {
         format!("{:?}", self)
     }
 
-    /// Generate a namedtuple-like usable with https://github.com/google/differential-privacy/blob/main/python/dp_accounting/dp_event.py
+    /// Generate a dict similar to https://github.com/google/differential-privacy/blob/main/python/dp_accounting/dp_event.py
     pub fn to_dict<'py>(&self, py: Python<'py>) -> &'py PyDict {
         DpEvent::_to_dict(self.deref(), py)
+    }
+
+    /// Generate a namedtuple-like usable with https://github.com/google/differential-privacy/blob/main/python/dp_accounting/dp_event.py
+    pub fn to_named_tuple<'py>(&self, py: Python<'py>) -> Py<NamedTuple> {
+        Py::new(py, NamedTuple::new(self.to_dict(py).into())).unwrap()
     }
 }
 
@@ -195,7 +200,7 @@ mod tests {
         let gaussian_mechanism = DpEvent::new(Arc::new(dp_event::DpEvent::laplace(1.5)));
         pyo3::prepare_freethreaded_python();
         Python::with_gil(|py| {
-            let named_tuple = Py::new(py, NamedTuple::new(gaussian_mechanism.to_dict(py).into())).unwrap();
+            let named_tuple = gaussian_mechanism.to_named_tuple(py);
             pyo3::py_run!(py, named_tuple, r#"
                 print(named_tuple._fields)
                 print(named_tuple.module_name)
