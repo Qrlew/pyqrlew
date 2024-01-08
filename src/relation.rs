@@ -15,6 +15,7 @@ use qrlew::{
 };
 use std::{collections::HashMap, ops::Deref, str, sync::Arc};
 
+/// A Relation is a Dataset transformed by a SQL query
 #[pyclass]
 #[derive(Clone)]
 pub struct Relation(Arc<relation::Relation>);

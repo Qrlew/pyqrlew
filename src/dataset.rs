@@ -11,6 +11,7 @@ use std::sync::Arc;
 
 use crate::{error::Result, relation::Relation};
 
+/// A Dataset is a set of SQL Tables
 #[pyclass]
 #[derive(Clone)]
 pub struct Dataset(data_spec::Dataset);
@@ -37,6 +38,7 @@ impl Dataset {
             dataset, schema, size,
         )?))
     }
+    /// The schema of the Dataset
     #[getter]
     pub fn schema(&self) -> Result<String> {
         Ok(print_to_string(self.0.schema())?)

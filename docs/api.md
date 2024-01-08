@@ -1,22 +1,26 @@
 
 # API
 
-```{currentmodule} pyqrlew
-```
-
 ```{eval-rst}
-.. autosummary::
-    pyqrlew
-    pyqrlew.io.dataset
-```
-
-
-```{eval-rst}
-.. automodule:: pyqrlew.io.dataset
+.. automodule:: pyqrlew
     :members:
 ```
 
 ```{eval-rst}
-.. automodule:: pyqrlew.io.postgresql
+.. autoclass:: pyqrlew.io.PostgreSQL
     :members:
 ```
+
+```{eval-rst}
+.. autoclass:: pyqrlew.io.SQLite
+    :members:
+```
+
+```{eval-rst}
+.. autofunction:: pyqrlew.io.dataset
+```
+
+<!-- ```{eval-rst}
+.. autoclass:: pyqrlew.Relation
+    :members:
+``` -->
