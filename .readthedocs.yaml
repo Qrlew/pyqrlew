@@ -13,12 +13,12 @@ build:
     - graphviz
 
 python:
-   install:
-   - requirements: docs/requirements.txt
+  install:
+  - requirements: docs/requirements.txt
 
 sphinx:
-   configuration: docs/conf.py
+  configuration: docs/conf.py
 
 formats:
-   - pdf
-   - epub
+  - pdf
+  - epub
