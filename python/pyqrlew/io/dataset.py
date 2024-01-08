@@ -14,6 +14,21 @@ def dataset(
     ranges: bool=False,
     possible_values_threshold: Optional[int]=None
 ) -> qrl.Dataset:
+    """_summary_
+
+    Args:
+        name (str): _description_
+        engine (Engine): _description_
+        schema_name (Optional[str], optional): _description_. Defaults to None.
+        ranges (bool, optional): _description_. Defaults to False.
+        possible_values_threshold (Optional[int], optional): _description_. Defaults to None.
+
+    Raises:
+        NotImplementedError: _description_
+
+    Returns:
+        qrl.Dataset: _description_
+    """
     metadata = MetaData()
     metadata.reflect(engine, schema=schema_name)
 
