@@ -1,10 +1,15 @@
 pub mod dataset;
 pub mod error;
 pub mod relation;
+pub mod dialect;
 pub mod dp_event;
 
-use crate::{dataset::Dataset, relation::{Relation, Dialect}};
-use pyo3::prelude::{pymodule, PyModule, PyResult, Python};
+pub use crate::{
+    dataset::Dataset,
+    relation::Relation,
+    dialect::Dialect
+};
+use pyo3::prelude::*;
 
 /// A Python module implemented in Rust.
 #[pymodule]

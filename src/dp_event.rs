@@ -1,6 +1,4 @@
-use crate::{
-    relation::Relation,
-};
+use std::{ops::Deref, str, sync::Arc};
 use pyo3::{
     prelude::*,
     types::{PyList, PyDict},
@@ -10,7 +8,7 @@ use qrlew::{
     differential_privacy::dp_event,
     rewriting::rewriting_rule,
 };
-use std::{ops::Deref, str, sync::Arc};
+use crate::relation::Relation;
 
 #[pyclass]
 #[derive(Clone, Debug)]
@@ -175,19 +173,17 @@ impl NamedTuple {
 
 #[cfg(test)]
 mod tests {
-    use std::{
-        sync::Arc,
-    };
+    use std::sync::Arc;
     use pyo3::prelude::*;
     use qrlew::differential_privacy::dp_event;
-    use super::{NamedTuple, DpEvent};
+    use super::DpEvent;
     
     #[test]
     fn test_to_dict() {
         let gaussian_mechanism = DpEvent::new(Arc::new(dp_event::DpEvent::gaussian(1.5)));
         pyo3::prepare_freethreaded_python();
         Python::with_gil(|py| {
-            let mut gm = Py::new(py, gaussian_mechanism).unwrap();
+            let gm = Py::new(py, gaussian_mechanism).unwrap();
             pyo3::py_run!(py, gm, r#"
                 print(gm)
                 print(gm.to_dict())

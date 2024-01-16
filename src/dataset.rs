@@ -2,20 +2,26 @@ use pyo3::prelude::*;
 use qrlew::{
     builder::With,
     hierarchy::Hierarchy,
+    sql,
     relation,
-    sql, dialect_translation::{postgres::PostgresTranslator, QueryToRelationTranslator, mssql::MSSQLTranslator},
+    dialect_translation::{
+        postgresql::PostgresSqlTranslator,
+        mssql::MsSqlTranslator,
+        QueryToRelationTranslator,
+    },
 };
 use qrlew_sarus::{
     data_spec,
-    protobuf::{
-        print_to_string,
-        type_::{Type, type_},
-    },
+    protobuf::print_to_string,
 };
-use std::{ops::Deref, borrow::BorrowMut};
+use std::ops::Deref;
 use std::sync::Arc;
 
-use crate::{error::{Result, Error, MissingKeyError}, relation::Relation};
+use crate::{
+    error::Result,
+    relation::Relation,
+    dialect::Dialect,
+};
 
 /// A Dataset is a set of SQL Tables
 #[pyclass]
@@ -58,40 +64,17 @@ impl Dataset {
         }
     }
 
-    // TODO use with_range from Sarus
-    // pub fn range(&self, schema_name: &str, table_name: &str, field_name: &str, min: f64, max: f64) -> Result<Self> {
-    //     let mut new_schema = self.0.schema().clone();
-    //     println!("DEBUG range {}", new_schema.mut_type());
-    //     let mut sarus_data = new_schema.mut_type().mut_struct().mut_fields().iter_mut().find(|field| field.name()=="sarus_data").ok_or_else(|| MissingKeyError(schema_name.into()))?;
-    //     let mut schema = sarus_data.mut_type().mut_union().mut_fields().iter_mut().find(|field| field.name()==schema_name).ok_or_else(|| MissingKeyError(schema_name.into()))?;
-    //     let mut table = schema.mut_type().mut_union().mut_fields().iter_mut().find(|field| field.name()==table_name).ok_or_else(|| MissingKeyError(table_name.into()))?;
-    //     let mut field = table.mut_type().mut_struct().mut_fields().iter_mut().find(|field| field.name()==field_name).ok_or_else(|| MissingKeyError(field_name.into()))?;
-    //     match &mut field.mut_type().type_ {
-    //         Some(type_::Type::Integer(integer)) => {
-    //             integer.set_min(min.round() as i64);
-    //             integer.set_max(max.round() as i64);
-    //         },
-    //         Some(type_::Type::Float(float)) => {
-    //             float.set_min(min);
-    //             float.set_max(max);
-    //         },
-    //         Some(type_::Type::Optional(optional)) => {
-    //             match &mut optional.mut_type().type_ {
-    //                 Some(type_::Type::Integer(integer)) => {
-    //                     integer.set_min(min.round() as i64);
-    //                     integer.set_max(max.round() as i64);
-    //                 },
-    //                 Some(type_::Type::Float(float)) => {
-    //                     float.set_min(min);
-    //                     float.set_max(max);
-    //                 },
-    //                 _ => (),
-    //             }
-    //         },
-    //         _ => (),
-    //     }
-    //     Ok(Dataset(data_spec::Dataset::new(self.0.dataset().clone(), new_schema, self.0.size().cloned())))
-    // }
+    pub fn with_range(&self, schema_name: &str, table_name: &str, field_name: &str, min: f64, max: f64) -> Result<Self> {
+        Ok(Dataset(self.0.with_range(schema_name, table_name, field_name, min, max)?))
+    }
+
+    pub fn with_possible_values(&self, schema_name: &str, table_name: &str, field_name: &str, possible_values: Vec<String>) -> Result<Self> {
+        Ok(Dataset(self.0.with_possible_values(schema_name, table_name, field_name, &possible_values)?))
+    }
+
+    pub fn with_constraint(&self, schema_name: &str, table_name: &str, field_name: &str, constraint: Option<&str>) -> Result<Self> {
+        Ok(Dataset(self.0.with_constraint(schema_name, table_name, field_name, constraint)?))
+    }
 
     pub fn relations(&self) -> Vec<(Vec<String>, Relation)> {
         self.deref()
@@ -102,46 +85,44 @@ impl Dataset {
     }
 
     pub fn relation(&self, query: &str, dialect: Option<Dialect>) -> Result<Relation> {
-        let dialect = dialect.unwrap_or(Dialect::Postgres);
+        let dialect = dialect.unwrap_or(Dialect::PostgresSql);
         let relations = self.deref().relations();
-        
         match dialect {
-            Dialect::Postgres => {
-                let translator = PostgresTranslator;
+            Dialect::PostgresSql => {
+                let translator = PostgresSqlTranslator;
                 let query = sql::relation::parse_with_dialect(query, translator.dialect())?;
                 let query_with_relations = query.with(&relations);
                 Ok(Relation::new(Arc::new(relation::Relation::try_from((query_with_relations, translator))?)))
             },
-            Dialect::Mssql => {
-                let translator = MSSQLTranslator;
+            Dialect::MsSql => {
+                let translator = MsSqlTranslator;
                 let query = sql::relation::parse_with_dialect(query, translator.dialect())?;
                 let query_with_relations = query.with(&relations);
                 Ok(Relation::new(Arc::new(relation::Relation::try_from((query_with_relations, translator))?)))
-            }, 
-        
+            },
         }  
     }
 
     pub fn from_queries(&self, queries: Vec<(Vec<String>, String)>, dialect: Option<Dialect>) -> Result<Self> {
         let relations = self.deref().relations();
-        let dialect = dialect.unwrap_or(Dialect::Postgres);
+        let dialect = dialect.unwrap_or(Dialect::PostgresSql);
 
         let result_relations: Result<Hierarchy<Arc<relation::Relation>>> = queries
             .iter()
             .map(|(path, query)| {
                 match dialect {
-                    Dialect::Postgres => {
-                        let tranlator = PostgresTranslator;
-                        let parsed = sql::relation::parse_with_dialect(query, tranlator.dialect())?;
+                    Dialect::PostgresSql => {
+                        let translator = PostgresSqlTranslator;
+                        let parsed = sql::relation::parse_with_dialect(query, translator.dialect())?;
                         let query_with_rel = parsed.with(&relations);
-                        let rel = relation::Relation::try_from((query_with_rel, tranlator))?;
+                        let rel = relation::Relation::try_from((query_with_rel, translator))?;
                         Ok((path.clone(), Arc::new(rel)))
                     },
-                    Dialect::Mssql => {
-                        let tranlator = MSSQLTranslator;
-                        let parsed = sql::relation::parse_with_dialect(query, tranlator.dialect())?;
+                    Dialect::MsSql => {
+                        let translator = MsSqlTranslator;
+                        let parsed = sql::relation::parse_with_dialect(query, translator.dialect())?;
                         let query_with_rel = parsed.with(&relations);
-                        let rel = relation::Relation::try_from((query_with_rel, tranlator))?;
+                        let rel = relation::Relation::try_from((query_with_rel, translator))?;
                         Ok((path.clone(), Arc::new(rel)))
                     }
                 }

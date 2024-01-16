@@ -96,6 +96,6 @@ def test_simple_mssql_translation():
     database = PostgreSQL()
     dataset = database.extract()
     query = "SELECT * FROM census LIMIT 10;"
-    relation = dataset.relation(query, Dialect.Postgres)
-    translated = relation.to_query(Dialect.Mssql)
+    relation = dataset.relation(query, Dialect.PostgreSql)
+    translated = relation.to_query(Dialect.MsSql)
     assert "SELECT TOP (10) * FROM" in translated

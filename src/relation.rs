@@ -1,8 +1,4 @@
-use crate::{
-    dataset::Dataset,
-    error::{MissingKeyError, Result},
-    dp_event::{DpEvent, RelationWithDpEvent},
-};
+use std::{collections::HashMap, ops::Deref, str, sync::Arc};
 use pyo3::prelude::*;
 use qrlew::{
     ast,
@@ -11,23 +7,23 @@ use qrlew::{
     privacy_unit_tracking::PrivacyUnit,
     relation::{self, Variant},
     synthetic_data::SyntheticData,
-    dialect_translation::{RelationWithTranslator, postgres::PostgresTranslator, mssql::MSSQLTranslator}
+    dialect_translation::{
+        RelationWithTranslator,
+        postgresql::PostgresSqlTranslator,
+        mssql::MsSqlTranslator,
+    }
 };
-use std::{collections::HashMap, ops::Deref, str, sync::Arc};
-
+use crate::{
+    dataset::Dataset,
+    error::{MissingKeyError, Result},
+    dp_event::RelationWithDpEvent,
+    dialect::Dialect,
+};
 
 /// A Relation is a Dataset transformed by a SQL query
 #[pyclass]
 #[derive(Clone)]
 pub struct Relation(Arc<relation::Relation>);
-
-#[pyclass]
-#[derive(Clone)]
-pub enum Dialect {
-    Postgres,
-    Mssql
-}
-
 
 impl Deref for Relation {
     type Target = relation::Relation;
@@ -53,7 +49,7 @@ impl Relation {
     pub fn __str__(&self) -> String {
         // String representation of the relation in the default dialect
         let relation = self.0.as_ref();
-        let query = ast::Query::from(RelationWithTranslator(&relation, PostgresTranslator)).to_string();
+        let query = ast::Query::from(RelationWithTranslator(&relation, PostgresSqlTranslator)).to_string();
         format!("{}", query)
     }
 
@@ -139,10 +135,10 @@ impl Relation {
 
     pub fn to_query(&self, dialect: Option<Dialect>) -> String {
         let relation = &*(self.0);
-        let dialect = dialect.unwrap_or(Dialect::Postgres);
+        let dialect = dialect.unwrap_or(Dialect::PostgresSql);
         match dialect {
-            Dialect::Postgres => ast::Query::from(RelationWithTranslator(&relation, PostgresTranslator)).to_string(),
-            Dialect::Mssql => ast::Query::from(RelationWithTranslator(&relation, MSSQLTranslator)).to_string()
+            Dialect::PostgresSql => ast::Query::from(RelationWithTranslator(&relation, PostgresSqlTranslator)).to_string(),
+            Dialect::MsSql => ast::Query::from(RelationWithTranslator(&relation, MsSqlTranslator)).to_string()
         }
     }
 }
@@ -152,7 +148,7 @@ mod tests {
 
     use crate::{
         dataset::Dataset,
-        relation::{Relation, Dialect}
+        relation::Relation
     };
     use std::collections::HashMap;
 
