@@ -3,13 +3,13 @@ use qrlew::{
     builder::With,
     hierarchy::Hierarchy,
     relation,
-    sql,
+    sql, dialect_translation::{postgres::PostgresTranslator, QueryToRelationTranslator, mssql::MSSQLTranslator, RelationToQueryTranslator},
 };
 use qrlew_sarus::{data_spec, protobuf::print_to_string};
 use std::ops::Deref;
 use std::sync::Arc;
 
-use crate::{error::Result, relation::Relation};
+use crate::{error::Result, relation::{Relation, Dialect}};
 
 /// A Dataset is a set of SQL Tables
 #[pyclass]
@@ -60,23 +60,50 @@ impl Dataset {
             .collect()
     }
 
-    pub fn relation(&self, query: &str) -> Result<Relation> {
-        let query = sql::relation::parse(query)?;
+    pub fn relation(&self, query: &str, dialect: Option<Dialect>) -> Result<Relation> {
+        let dialect = dialect.unwrap_or(Dialect::Postgres);
         let relations = self.deref().relations();
-        let query_with_relations = query.with(&relations);
-        Ok(Relation::new(Arc::new(query_with_relations.try_into()?)))
+        
+        match dialect {
+            Dialect::Postgres => {
+                let translator = PostgresTranslator;
+                let query = sql::relation::parse_with_dialect(query, translator.dialect())?;
+                let query_with_relations = query.with(&relations);
+                Ok(Relation::new(Arc::new(relation::Relation::try_from((query_with_relations, translator))?)))
+            },
+            Dialect::Mssql => {
+                let translator = MSSQLTranslator;
+                let query = sql::relation::parse_with_dialect(query, translator.dialect())?;
+                let query_with_relations = query.with(&relations);
+                Ok(Relation::new(Arc::new(relation::Relation::try_from((query_with_relations, translator))?)))
+            }, 
+        
+        }  
     }
 
-    pub fn from_queries(&self, queries: Vec<(Vec<String>, String)>) -> Result<Self> {
+    pub fn from_queries(&self, queries: Vec<(Vec<String>, String)>, dialect: Option<Dialect>) -> Result<Self> {
         let relations = self.deref().relations();
+        let dialect = dialect.unwrap_or(Dialect::Postgres);
 
         let result_relations: Hierarchy<Arc<relation::Relation>> = queries
             .iter()
             .map(|(path, query)| {
-                let parsed = sql::relation::parse(query)?;
-                let query_with_rel = parsed.with(&relations);
-                let rel = relation::Relation::try_from(query_with_rel)?;
-                Ok((path.clone(), Arc::new(rel)))
+                match dialect {
+                    Dialect::Postgres => {
+                        let tranlator = PostgresTranslator;
+                        let parsed = sql::relation::parse_with_dialect(query, tranlator.dialect())?;
+                        let query_with_rel = parsed.with(&relations);
+                        let rel = relation::Relation::try_from((query_with_rel, tranlator))?;
+                        Ok((path.clone(), Arc::new(rel)))
+                    },
+                    Dialect::Mssql => {
+                        let tranlator = MSSQLTranslator;
+                        let parsed = sql::relation::parse_with_dialect(query, tranlator.dialect())?;
+                        let query_with_rel = parsed.with(&relations);
+                        let rel = relation::Relation::try_from((query_with_rel, tranlator))?;
+                        Ok((path.clone(), Arc::new(rel)))
+                    }
+                }
             })
             .collect::<Result<Hierarchy<Arc<relation::Relation>>>>()?;
         let ds: data_spec::Dataset = (&result_relations).try_into()?;

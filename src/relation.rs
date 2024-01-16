@@ -48,8 +48,8 @@ impl Relation {
 #[pymethods]
 impl Relation {
     #[staticmethod]
-    pub fn parse(query: &str, dataset: &Dataset) -> Result<Self> {
-        dataset.relation(query)
+    pub fn from_query(query: &str, dataset: &Dataset, dialect: Option<Dialect>) -> Result<Self> {
+        dataset.relation(query, dialect)
     }
 
     pub fn __str__(&self) -> String {
@@ -139,12 +139,6 @@ impl Relation {
         )))
     }
 
-    #[staticmethod]
-    pub fn from_query(dataset: &Dataset, query: String, dialect: Option<Dialect>) -> Result<Self> {
-        todo!()
-    }
-
-    // or simply query?
     pub fn to_query(&self, dialect: Option<Dialect>) -> String {
         let relation = &*(self.0);
         let dialect = dialect.unwrap_or(Dialect::Postgres);
@@ -161,7 +155,7 @@ mod tests {
 
     use crate::{
         dataset::Dataset,
-        relation::{Relation,Dialect}
+        relation::{Relation, Dialect}
     };
     use std::collections::HashMap;
 
@@ -187,7 +181,7 @@ mod tests {
         ];
 
         for query in queries {
-            let relation = Relation::parse(query, &dataset).unwrap();
+            let relation = Relation::from_query(query, &dataset, None).unwrap();
             println!("{}", relation.0);
             let dp_relation = relation.rewrite_with_differential_privacy(
                 &dataset, privacy_unit.clone(), budget.clone(), synthetic_data.clone()
@@ -198,7 +192,7 @@ mod tests {
 
         // No synthetic data
         for query in queries {
-            let relation = Relation::parse(query, &dataset).unwrap();
+            let relation = Relation::from_query(query, &dataset, None).unwrap();
             println!("{}", relation.0);
             let dp_relation = relation.rewrite_with_differential_privacy(
                 &dataset, privacy_unit.clone(), budget.clone(), None
