@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from pyqrlew.io import PostgreSQL
 from termcolor import colored
+from pyqrlew import Dialect
 
 def are_dataframes_almost_equal(df1, df2, float_tolerance=1e-6):
     # Check if the shape is the same
@@ -49,8 +50,8 @@ def test_queries_consistency(queries):
         print(f"\n{colored(query, 'blue')}")
         replaced_query = query.replace("census", "extract.census").replace("beacon", "extract.beacon")
         result = pd.read_sql(replaced_query, database.engine())            
-        relation = dataset.sql(query)
-        new_query = relation.render()
+        relation = dataset.relation(query)
+        new_query = relation.to_query()
         print('===================')
         print(f"{colored(query, 'red')} -> {colored(new_query, 'green')}")
         try:
@@ -78,14 +79,23 @@ def test_queries_differential_privacy(queries):
     dataset = database.extract()
     for query in queries:
         print(f"{colored(query, 'blue')}")
-        relation = dataset.sql(query)
+        relation = dataset.relation(query)
         dp_relation = relation.rewrite_with_differential_privacy(
             dataset,
             privacy_unit,
             budget,
             synthetic_data,
         ).relation()
-        results = pd.read_sql(relation.render(), database.engine())
-        dp_results = pd.read_sql(dp_relation.render(), database.engine())
+        results = pd.read_sql(relation.to_query(), database.engine())
+        dp_results = pd.read_sql(dp_relation.to_query(), database.engine())
         if len(dp_results) != 0:
             assert (results.columns == dp_results.columns).all()
+
+
+def test_simple_mssql_translation():
+    database = PostgreSQL()
+    dataset = database.extract()
+    query = "SELECT * FROM census LIMIT 10;"
+    relation = dataset.relation(query, Dialect.Postgres)
+    translated = relation.to_query(Dialect.Mssql)
+    assert "SELECT TOP (10) * FROM" in translated

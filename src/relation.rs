@@ -6,19 +6,28 @@ use crate::{
 use pyo3::prelude::*;
 use qrlew::{
     ast,
-    differential_privacy::{budget::Budget, dp_event},
+    differential_privacy::budget::Budget,
     expr::Identifier,
     privacy_unit_tracking::PrivacyUnit,
     relation::{self, Variant},
-    rewriting::rewriting_rule,
     synthetic_data::SyntheticData,
+    dialect_translation::{RelationWithTranslator, postgres::PostgresTranslator, mssql::MSSQLTranslator}
 };
 use std::{collections::HashMap, ops::Deref, str, sync::Arc};
+
 
 /// A Relation is a Dataset transformed by a SQL query
 #[pyclass]
 #[derive(Clone)]
 pub struct Relation(Arc<relation::Relation>);
+
+#[pyclass]
+#[derive(Clone)]
+pub enum Dialect {
+    Postgres,
+    Mssql
+}
+
 
 impl Deref for Relation {
     type Target = relation::Relation;
@@ -37,13 +46,15 @@ impl Relation {
 #[pymethods]
 impl Relation {
     #[staticmethod]
-    pub fn parse(query: &str, dataset: &Dataset) -> Result<Self> {
-        dataset.sql(query)
+    pub fn from_query(query: &str, dataset: &Dataset, dialect: Option<Dialect>) -> Result<Self> {
+        dataset.relation(query, dialect)
     }
 
     pub fn __str__(&self) -> String {
+        // String representation of the relation in the default dialect
         let relation = self.0.as_ref();
-        format!("{}", relation)
+        let query = ast::Query::from(RelationWithTranslator(&relation, PostgresTranslator)).to_string();
+        format!("{}", query)
     }
 
     pub fn dot(&self) -> Result<String> {
@@ -126,19 +137,22 @@ impl Relation {
         )))
     }
 
-    pub fn render(&self) -> String {
+    pub fn to_query(&self, dialect: Option<Dialect>) -> String {
         let relation = &*(self.0);
-        let ast_query: ast::Query = relation.into();
-        format!("{}", ast_query)
+        let dialect = dialect.unwrap_or(Dialect::Postgres);
+        match dialect {
+            Dialect::Postgres => ast::Query::from(RelationWithTranslator(&relation, PostgresTranslator)).to_string(),
+            Dialect::Mssql => ast::Query::from(RelationWithTranslator(&relation, MSSQLTranslator)).to_string()
+        }
     }
 }
 
-
 #[cfg(test)]
 mod tests {
+
     use crate::{
         dataset::Dataset,
-        relation::Relation
+        relation::{Relation, Dialect}
     };
     use std::collections::HashMap;
 
@@ -164,23 +178,23 @@ mod tests {
         ];
 
         for query in queries {
-            let relation = Relation::parse(query, &dataset).unwrap();
+            let relation = Relation::from_query(query, &dataset, None).unwrap();
             println!("{}", relation.0);
             let dp_relation = relation.rewrite_with_differential_privacy(
                 &dataset, privacy_unit.clone(), budget.clone(), synthetic_data.clone()
             ).unwrap();
-            let dp_query = dp_relation.relation().render();
+            let dp_query = dp_relation.relation().to_query(None);
             println!("\n\n{dp_query}");
         }
 
         // No synthetic data
         for query in queries {
-            let relation = Relation::parse(query, &dataset).unwrap();
+            let relation = Relation::from_query(query, &dataset, None).unwrap();
             println!("{}", relation.0);
             let dp_relation = relation.rewrite_with_differential_privacy(
                 &dataset, privacy_unit.clone(), budget.clone(), None
             ).unwrap();
-            let dp_query = dp_relation.relation().render();
+            let dp_query = dp_relation.relation().to_query(None);
             println!("\n\n{dp_query}");
         }
     }
