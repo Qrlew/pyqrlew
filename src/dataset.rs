@@ -60,7 +60,7 @@ impl Dataset {
             .collect()
     }
 
-    pub fn sql(&self, query: &str) -> Result<Relation> {
+    pub fn relation(&self, query: &str) -> Result<Relation> {
         let query = sql::relation::parse(query)?;
         let relations = self.deref().relations();
         let query_with_relations = query.with(&relations);

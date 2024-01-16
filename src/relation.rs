@@ -23,6 +23,14 @@ use std::{collections::HashMap, ops::Deref, str, sync::Arc};
 #[derive(Clone)]
 pub struct Relation(Arc<relation::Relation>);
 
+#[pyclass]
+#[derive(Clone)]
+pub enum Dialect {
+    Postgres,
+    Mssql
+}
+
+
 impl Deref for Relation {
     type Target = relation::Relation;
 
@@ -41,12 +49,14 @@ impl Relation {
 impl Relation {
     #[staticmethod]
     pub fn parse(query: &str, dataset: &Dataset) -> Result<Self> {
-        dataset.sql(query)
+        dataset.relation(query)
     }
 
     pub fn __str__(&self) -> String {
+        // String representation of the relation in the default dialect
         let relation = self.0.as_ref();
-        format!("{}", relation)
+        let query = ast::Query::from(RelationWithTranslator(&relation, PostgresTranslator)).to_string();
+        format!("{}", query)
     }
 
     pub fn dot(&self) -> Result<String> {
@@ -129,17 +139,18 @@ impl Relation {
         )))
     }
 
-    // #[args(dialect = "postgres")]
-    pub fn render(&self, dialect: Option<String>) -> Result<String> {
+    #[staticmethod]
+    pub fn from_query(dataset: &Dataset, query: String, dialect: Option<Dialect>) -> Result<Self> {
+        todo!()
+    }
+
+    // or simply query?
+    pub fn to_query(&self, dialect: Option<Dialect>) -> String {
         let relation = &*(self.0);
-        let ast_query: ast::Query = relation.into();
-        let dialect_string = dialect.unwrap_or("postgres".to_string());
-        if dialect_string.upper() == "mssql".upper() {
-            Ok(ast::Query::from(RelationWithTranslator(&relation, MSSQLTranslator)).to_string())
-        } else if dialect_string.upper() == "postgres".upper(){
-            Ok(ast::Query::from(RelationWithTranslator(&relation, PostgresTranslator)).to_string())
-        } else {
-            Err("")
+        let dialect = dialect.unwrap_or(Dialect::Postgres);
+        match dialect {
+            Dialect::Postgres => ast::Query::from(RelationWithTranslator(&relation, PostgresTranslator)).to_string(),
+            Dialect::Mssql => ast::Query::from(RelationWithTranslator(&relation, MSSQLTranslator)).to_string()
         }
     }
 }
@@ -147,9 +158,10 @@ impl Relation {
 
 #[cfg(test)]
 mod tests {
+
     use crate::{
         dataset::Dataset,
-        relation::Relation
+        relation::{Relation,Dialect}
     };
     use std::collections::HashMap;
 
@@ -180,7 +192,7 @@ mod tests {
             let dp_relation = relation.rewrite_with_differential_privacy(
                 &dataset, privacy_unit.clone(), budget.clone(), synthetic_data.clone()
             ).unwrap();
-            let dp_query = dp_relation.relation().render();
+            let dp_query = dp_relation.relation().to_query(None);
             println!("\n\n{dp_query}");
         }
 
@@ -191,7 +203,7 @@ mod tests {
             let dp_relation = relation.rewrite_with_differential_privacy(
                 &dataset, privacy_unit.clone(), budget.clone(), None
             ).unwrap();
-            let dp_query = dp_relation.relation().render();
+            let dp_query = dp_relation.relation().to_query(None);
             println!("\n\n{dp_query}");
         }
     }
