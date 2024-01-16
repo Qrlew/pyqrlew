@@ -12,8 +12,11 @@ use qrlew::{
     relation::{self, Variant},
     rewriting::rewriting_rule,
     synthetic_data::SyntheticData,
+    dialect_translation::{RelationToQueryTranslator, RelationWithTranslator, postgres::PostgresTranslator, mssql::MSSQLTranslator}
 };
+use qrlew_sarus::protobuf::transform::transform::external::op_identifier::Op;
 use std::{collections::HashMap, ops::Deref, str, sync::Arc};
+
 
 /// A Relation is a Dataset transformed by a SQL query
 #[pyclass]
@@ -126,10 +129,18 @@ impl Relation {
         )))
     }
 
-    pub fn render(&self) -> String {
+    // #[args(dialect = "postgres")]
+    pub fn render(&self, dialect: Option<String>) -> Result<String> {
         let relation = &*(self.0);
         let ast_query: ast::Query = relation.into();
-        format!("{}", ast_query)
+        let dialect_string = dialect.unwrap_or("postgres".to_string());
+        if dialect_string.upper() == "mssql".upper() {
+            Ok(ast::Query::from(RelationWithTranslator(&relation, MSSQLTranslator)).to_string())
+        } else if dialect_string.upper() == "postgres".upper(){
+            Ok(ast::Query::from(RelationWithTranslator(&relation, PostgresTranslator)).to_string())
+        } else {
+            Err("")
+        }
     }
 }
 
