@@ -70,7 +70,7 @@ impl Dataset {
     pub fn from_queries(&self, queries: Vec<(Vec<String>, String)>) -> Result<Self> {
         let relations = self.deref().relations();
 
-        let result_relations: Hierarchy<Arc<relation::Relation>> = queries
+        let result_relations: Result<Hierarchy<Arc<relation::Relation>>> = queries
             .iter()
             .map(|(path, query)| {
                 let parsed = sql::relation::parse(query)?;
@@ -78,8 +78,8 @@ impl Dataset {
                 let rel = relation::Relation::try_from(query_with_rel)?;
                 Ok((path.clone(), Arc::new(rel)))
             })
-            .collect::<Result<Hierarchy<Arc<relation::Relation>>>>()?;
-        let ds: data_spec::Dataset = (&result_relations).try_into()?;
+            .collect();
+        let ds: data_spec::Dataset = (&result_relations?).try_into()?;
         Ok(Dataset(ds))
     }
 
