@@ -6,7 +6,6 @@ from sqlalchemy import MetaData, Table, Column, types, select, func, literal, St
 from sqlalchemy.engine import Engine
 import pyqrlew as qrl
 
-
 def dataset_from_database(
     name: str,
     engine: Engine,
