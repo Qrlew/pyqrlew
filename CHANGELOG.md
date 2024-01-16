@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Relation render() method changed to to_query(dialect: Option<Dialect>).
 - Relation parse(query: &str, dataset: &Dataset) method changed to from_query(query: &str, dataset: &Dataset, dialect: Option<Dialect>).
 
+## [0.8.2] - 2024-01-04
+### Changed
+- Update versions
+- Change Dataset API to set bounds and constraints
+
 ## [0.7.3] - 2024-01-04
 ### Removed
 - Dependency to matplotlib removed

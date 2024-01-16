@@ -7,7 +7,7 @@ from sqlalchemy.engine import Engine
 import pyqrlew as qrl
 
 
-def dataset(
+def dataset_from_database(
     name: str,
     engine: Engine,
     schema_name: Optional[str]=None,
@@ -446,3 +446,6 @@ def dataset(
     logging.debug(json.dumps(size))
     # Return the result
     return qrl.Dataset(json.dumps(dataset), json.dumps(schema), json.dumps(size))
+
+# Make it a builder
+qrl.Dataset.from_database = dataset_from_database

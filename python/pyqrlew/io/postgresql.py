@@ -3,7 +3,7 @@ from pathlib import Path
 from sqlalchemy import select, column, table, text
 from qrlew_datasets.files import SQL
 from qrlew_datasets.databases import PostgreSQL as EmptyPostgreSQL
-from pyqrlew.io.dataset import dataset
+from pyqrlew.io.dataset import dataset_from_database
 import pyqrlew as qrl
 
 NAME: str = 'pyqrlew-db'
@@ -96,7 +96,7 @@ class PostgreSQL(EmptyPostgreSQL):
             qrl.Dataset: _description_
         """
         self.load_extract()
-        return dataset('extract', self.engine(), 'extract', ranges=True, possible_values_threshold=POSSIBLE_VALUES_THRESHOLD)
+        return dataset_from_database('extract', self.engine(), 'extract', ranges=True, possible_values_threshold=POSSIBLE_VALUES_THRESHOLD)
 
     def financial(self) -> qrl.Dataset:
         """_summary_
@@ -105,7 +105,7 @@ class PostgreSQL(EmptyPostgreSQL):
             qrl.Dataset: _description_
         """
         self.load_financial()
-        return dataset('financial', self.engine(), 'financial', ranges=True, possible_values_threshold=POSSIBLE_VALUES_THRESHOLD)
+        return dataset_from_database('financial', self.engine(), 'financial', ranges=True, possible_values_threshold=POSSIBLE_VALUES_THRESHOLD)
 
     def hepatitis(self) -> qrl.Dataset:
         """_summary_
@@ -114,7 +114,7 @@ class PostgreSQL(EmptyPostgreSQL):
             qrl.Dataset: _description_
         """
         self.load_hepatitis()
-        return dataset('hepatitis_std', self.engine(), 'hepatitis_std', ranges=True, possible_values_threshold=POSSIBLE_VALUES_THRESHOLD)
+        return dataset_from_database('hepatitis_std', self.engine(), 'hepatitis_std', ranges=True, possible_values_threshold=POSSIBLE_VALUES_THRESHOLD)
 
     def imdb(self) -> qrl.Dataset:
         """_summary_
@@ -123,7 +123,7 @@ class PostgreSQL(EmptyPostgreSQL):
             qrl.Dataset: _description_
         """
         self.load_imdb()
-        return dataset('imdb_ijs', self.engine(), 'imdb_ijs', ranges=True, possible_values_threshold=POSSIBLE_VALUES_THRESHOLD)
+        return dataset_from_database('imdb_ijs', self.engine(), 'imdb_ijs', ranges=True, possible_values_threshold=POSSIBLE_VALUES_THRESHOLD)
 
     def retail(self) -> qrl.Dataset:
         """_summary_
@@ -132,4 +132,4 @@ class PostgreSQL(EmptyPostgreSQL):
             qrl.Dataset: _description_
         """
         self.load_retail()
-        return dataset('retail', self.engine(), 'retail', ranges=True, possible_values_threshold=POSSIBLE_VALUES_THRESHOLD)
+        return dataset_from_database('retail', self.engine(), 'retail', ranges=True, possible_values_threshold=POSSIBLE_VALUES_THRESHOLD)

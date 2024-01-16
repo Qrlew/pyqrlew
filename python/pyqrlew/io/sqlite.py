@@ -2,7 +2,7 @@ import os
 import sqlalchemy
 from qrlew_datasets.database import Database
 import pyqrlew as qrl
-from pyqrlew.io.dataset import dataset
+from pyqrlew.io.dataset import dataset_from_database
 import pandas as pd
 
 dtype_to_sqlalchemy = {
@@ -147,7 +147,7 @@ class SQLite(Database):
 
     def dataset(self) -> qrl.Dataset:
         """Create and return a PyQrlew Dataset linked to the SQLite database."""
-        return dataset(self.db_file, self.engine(), ranges=self.ranges, possible_values_threshold=self.possible_values_threshold)
+        return dataset_from_database(self.db_file, self.engine(), ranges=self.ranges, possible_values_threshold=self.possible_values_threshold)
 
     def print_infos_metadata(self) -> None:
         """Print metadata information about tables and columns in the database."""

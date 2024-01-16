@@ -60,17 +60,17 @@ impl From<rewriting::Error> for Error {
 }
 
 #[derive(Debug, Clone)]
-pub struct MissingKeysError(pub String);
+pub struct MissingKeyError(pub String);
 
-impl error::Error for MissingKeysError {}
+impl error::Error for MissingKeyError {}
 
-impl From<MissingKeysError> for Error {
-    fn from(err: MissingKeysError) -> Error {
+impl From<MissingKeyError> for Error {
+    fn from(err: MissingKeyError) -> Error {
         Error(Box::new(err))
     }
 }
 
-impl fmt::Display for MissingKeysError {
+impl fmt::Display for MissingKeyError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "Missing {} key", self.0)
     }

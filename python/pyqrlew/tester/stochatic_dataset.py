@@ -2,7 +2,7 @@ from typing import List
 import numpy as np
 import pandas as pd
 from ..io.postgresql import EmptyPostgreSQL
-from pyqrlew.io.dataset import dataset
+from pyqrlew.io.dataset import dataset_from_database
 from sqlalchemy import text
 from enum import Enum
 
@@ -39,7 +39,7 @@ class StochasticDatabase:
         data.to_sql(name, schema=self.schema_name, con=self.engine, if_exists='replace', index=False)
 
     def dataset(self):
-        return dataset(self.schema_name, self.engine, self.schema_name)
+        return dataset_from_database(self.schema_name, self.engine, self.schema_name)
 
     def eval(self, relation) -> list:
         return self.execute(relation.render())
