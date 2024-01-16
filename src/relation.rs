@@ -1,20 +1,18 @@
 use crate::{
     dataset::Dataset,
     error::{MissingKeysError, Result},
-    dp_event::{DpEvent, RelationWithDpEvent},
+    dp_event::RelationWithDpEvent,
 };
 use pyo3::prelude::*;
 use qrlew::{
     ast,
-    differential_privacy::{budget::Budget, dp_event},
+    differential_privacy::budget::Budget,
     expr::Identifier,
     privacy_unit_tracking::PrivacyUnit,
     relation::{self, Variant},
-    rewriting::rewriting_rule,
     synthetic_data::SyntheticData,
-    dialect_translation::{RelationToQueryTranslator, RelationWithTranslator, postgres::PostgresTranslator, mssql::MSSQLTranslator}
+    dialect_translation::{RelationWithTranslator, postgres::PostgresTranslator, mssql::MSSQLTranslator}
 };
-use qrlew_sarus::protobuf::transform::transform::external::op_identifier::Op;
 use std::{collections::HashMap, ops::Deref, str, sync::Arc};
 
 

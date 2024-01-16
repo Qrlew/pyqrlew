@@ -3,7 +3,7 @@ use qrlew::{
     builder::With,
     hierarchy::Hierarchy,
     relation,
-    sql, dialect_translation::{postgres::PostgresTranslator, QueryToRelationTranslator, mssql::MSSQLTranslator, RelationToQueryTranslator},
+    sql, dialect_translation::{postgres::PostgresTranslator, QueryToRelationTranslator, mssql::MSSQLTranslator},
 };
 use qrlew_sarus::{data_spec, protobuf::print_to_string};
 use std::ops::Deref;
