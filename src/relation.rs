@@ -9,7 +9,7 @@ use qrlew::{
     synthetic_data::SyntheticData,
     dialect_translation::{
         RelationWithTranslator,
-        postgresql::PostgresSqlTranslator,
+        postgresql::PostgreSqlTranslator,
         mssql::MsSqlTranslator,
     }
 };
@@ -49,7 +49,7 @@ impl Relation {
     pub fn __str__(&self) -> String {
         // String representation of the relation in the default dialect
         let relation = self.0.as_ref();
-        let query = ast::Query::from(RelationWithTranslator(&relation, PostgresSqlTranslator)).to_string();
+        let query = ast::Query::from(RelationWithTranslator(&relation, PostgreSqlTranslator)).to_string();
         format!("{}", query)
     }
 
@@ -135,9 +135,9 @@ impl Relation {
 
     pub fn to_query(&self, dialect: Option<Dialect>) -> String {
         let relation = &*(self.0);
-        let dialect = dialect.unwrap_or(Dialect::PostgresSql);
+        let dialect = dialect.unwrap_or(Dialect::PostgreSql);
         match dialect {
-            Dialect::PostgresSql => ast::Query::from(RelationWithTranslator(&relation, PostgresSqlTranslator)).to_string(),
+            Dialect::PostgreSql => ast::Query::from(RelationWithTranslator(&relation, PostgreSqlTranslator)).to_string(),
             Dialect::MsSql => ast::Query::from(RelationWithTranslator(&relation, MsSqlTranslator)).to_string()
         }
     }

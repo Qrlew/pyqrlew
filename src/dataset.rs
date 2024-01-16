@@ -5,7 +5,7 @@ use qrlew::{
     sql,
     relation,
     dialect_translation::{
-        postgresql::PostgresSqlTranslator,
+        postgresql::PostgreSqlTranslator,
         mssql::MsSqlTranslator,
         QueryToRelationTranslator,
     },
@@ -85,11 +85,11 @@ impl Dataset {
     }
 
     pub fn relation(&self, query: &str, dialect: Option<Dialect>) -> Result<Relation> {
-        let dialect = dialect.unwrap_or(Dialect::PostgresSql);
+        let dialect = dialect.unwrap_or(Dialect::PostgreSql);
         let relations = self.deref().relations();
         match dialect {
-            Dialect::PostgresSql => {
-                let translator = PostgresSqlTranslator;
+            Dialect::PostgreSql => {
+                let translator = PostgreSqlTranslator;
                 let query = sql::relation::parse_with_dialect(query, translator.dialect())?;
                 let query_with_relations = query.with(&relations);
                 Ok(Relation::new(Arc::new(relation::Relation::try_from((query_with_relations, translator))?)))
@@ -105,14 +105,14 @@ impl Dataset {
 
     pub fn from_queries(&self, queries: Vec<(Vec<String>, String)>, dialect: Option<Dialect>) -> Result<Self> {
         let relations = self.deref().relations();
-        let dialect = dialect.unwrap_or(Dialect::PostgresSql);
+        let dialect = dialect.unwrap_or(Dialect::PostgreSql);
 
         let result_relations: Result<Hierarchy<Arc<relation::Relation>>> = queries
             .iter()
             .map(|(path, query)| {
                 match dialect {
-                    Dialect::PostgresSql => {
-                        let translator = PostgresSqlTranslator;
+                    Dialect::PostgreSql => {
+                        let translator = PostgreSqlTranslator;
                         let parsed = sql::relation::parse_with_dialect(query, translator.dialect())?;
                         let query_with_rel = parsed.with(&relations);
                         let rel = relation::Relation::try_from((query_with_rel, translator))?;
