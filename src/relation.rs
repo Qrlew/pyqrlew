@@ -1,6 +1,6 @@
 use crate::{
     dataset::Dataset,
-    error::{MissingKeysError, Result},
+    error::{MissingKeyError, Result},
     dp_event::{DpEvent, RelationWithDpEvent},
 };
 use pyo3::prelude::*;
@@ -75,10 +75,10 @@ impl Relation {
         let privacy_unit = PrivacyUnit::from(privacy_unit);
         let epsilon = epsilon_delta
             .get("epsilon")
-            .ok_or(MissingKeysError("epsilon".to_string()))?;
+            .ok_or(MissingKeyError("epsilon".to_string()))?;
         let delta = epsilon_delta
             .get("delta")
-            .ok_or(MissingKeysError("delta".to_string()))?;
+            .ok_or(MissingKeyError("delta".to_string()))?;
         let budget = Budget::new(*epsilon, *delta);
         let relation_with_dp_event = relation.rewrite_as_privacy_unit_preserving(
             &relations,
@@ -110,10 +110,10 @@ impl Relation {
         let privacy_unit = PrivacyUnit::from(privacy_unit);
         let epsilon = epsilon_delta
             .get("epsilon")
-            .ok_or(MissingKeysError("epsion".to_string()))?;
+            .ok_or(MissingKeyError("epsion".to_string()))?;
         let delta = epsilon_delta
             .get("delta")
-            .ok_or(MissingKeysError("delta".to_string()))?;
+            .ok_or(MissingKeyError("delta".to_string()))?;
         let budget = Budget::new(*epsilon, *delta);
         let relation_with_dp_event = relation.rewrite_with_differential_privacy(
             &relations,

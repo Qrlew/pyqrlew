@@ -1,15 +1,21 @@
-use pyo3::{pyclass, pymethods};
+use pyo3::prelude::*;
 use qrlew::{
     builder::With,
     hierarchy::Hierarchy,
     relation,
     sql,
 };
-use qrlew_sarus::{data_spec, protobuf::print_to_string};
-use std::ops::Deref;
+use qrlew_sarus::{
+    data_spec,
+    protobuf::{
+        print_to_string,
+        type_::{Type, type_},
+    },
+};
+use std::{ops::Deref, borrow::BorrowMut};
 use std::sync::Arc;
 
-use crate::{error::Result, relation::Relation};
+use crate::{error::{Result, Error, MissingKeyError}, relation::Relation};
 
 /// A Dataset is a set of SQL Tables
 #[pyclass]
@@ -51,6 +57,41 @@ impl Dataset {
             None => None,
         }
     }
+
+    // TODO use with_range from Sarus
+    // pub fn range(&self, schema_name: &str, table_name: &str, field_name: &str, min: f64, max: f64) -> Result<Self> {
+    //     let mut new_schema = self.0.schema().clone();
+    //     println!("DEBUG range {}", new_schema.mut_type());
+    //     let mut sarus_data = new_schema.mut_type().mut_struct().mut_fields().iter_mut().find(|field| field.name()=="sarus_data").ok_or_else(|| MissingKeyError(schema_name.into()))?;
+    //     let mut schema = sarus_data.mut_type().mut_union().mut_fields().iter_mut().find(|field| field.name()==schema_name).ok_or_else(|| MissingKeyError(schema_name.into()))?;
+    //     let mut table = schema.mut_type().mut_union().mut_fields().iter_mut().find(|field| field.name()==table_name).ok_or_else(|| MissingKeyError(table_name.into()))?;
+    //     let mut field = table.mut_type().mut_struct().mut_fields().iter_mut().find(|field| field.name()==field_name).ok_or_else(|| MissingKeyError(field_name.into()))?;
+    //     match &mut field.mut_type().type_ {
+    //         Some(type_::Type::Integer(integer)) => {
+    //             integer.set_min(min.round() as i64);
+    //             integer.set_max(max.round() as i64);
+    //         },
+    //         Some(type_::Type::Float(float)) => {
+    //             float.set_min(min);
+    //             float.set_max(max);
+    //         },
+    //         Some(type_::Type::Optional(optional)) => {
+    //             match &mut optional.mut_type().type_ {
+    //                 Some(type_::Type::Integer(integer)) => {
+    //                     integer.set_min(min.round() as i64);
+    //                     integer.set_max(max.round() as i64);
+    //                 },
+    //                 Some(type_::Type::Float(float)) => {
+    //                     float.set_min(min);
+    //                     float.set_max(max);
+    //                 },
+    //                 _ => (),
+    //             }
+    //         },
+    //         _ => (),
+    //     }
+    //     Ok(Dataset(data_spec::Dataset::new(self.0.dataset().clone(), new_schema, self.0.size().cloned())))
+    // }
 
     pub fn relations(&self) -> Vec<(Vec<String>, Relation)> {
         self.deref()
