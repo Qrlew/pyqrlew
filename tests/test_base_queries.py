@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from pyqrlew.io import PostgreSQL
 from termcolor import colored
+from pyqrlew import Dialect
 
 def are_dataframes_almost_equal(df1, df2, float_tolerance=1e-6):
     # Check if the shape is the same
@@ -89,3 +90,12 @@ def test_queries_differential_privacy(queries):
         dp_results = pd.read_sql(dp_relation.to_query(), database.engine())
         if len(dp_results) != 0:
             assert (results.columns == dp_results.columns).all()
+
+
+def test_simple_mssql_translation():
+    database = PostgreSQL()
+    dataset = database.extract()
+    query = "SELECT * FROM census LIMIT 10;"
+    relation = dataset.relation(query, Dialect.Postgres)
+    translated = relation.to_query(Dialect.Mssql)
+    assert "SELECT TOP (10) * FROM" in translated
