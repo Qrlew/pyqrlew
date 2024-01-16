@@ -49,8 +49,8 @@ def test_queries_consistency(queries):
         print(f"\n{colored(query, 'blue')}")
         replaced_query = query.replace("census", "extract.census").replace("beacon", "extract.beacon")
         result = pd.read_sql(replaced_query, database.engine())            
-        relation = dataset.sql(query)
-        new_query = relation.render()
+        relation = dataset.relation(query)
+        new_query = relation.to_query()
         print('===================')
         print(f"{colored(query, 'red')} -> {colored(new_query, 'green')}")
         try:
@@ -78,14 +78,14 @@ def test_queries_differential_privacy(queries):
     dataset = database.extract()
     for query in queries:
         print(f"{colored(query, 'blue')}")
-        relation = dataset.sql(query)
+        relation = dataset.relation(query)
         dp_relation = relation.rewrite_with_differential_privacy(
             dataset,
             privacy_unit,
             budget,
             synthetic_data,
         ).relation()
-        results = pd.read_sql(relation.render(), database.engine())
-        dp_results = pd.read_sql(dp_relation.render(), database.engine())
+        results = pd.read_sql(relation.to_query(), database.engine())
+        dp_results = pd.read_sql(dp_relation.to_query(), database.engine())
         if len(dp_results) != 0:
             assert (results.columns == dp_results.columns).all()
