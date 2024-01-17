@@ -54,8 +54,6 @@ jobs:
             matrix:
                 target: [x86_64, x86, aarch64, armv7, s390x, ppc64le]
         steps:
-            - name: Install OpenSSL
-              run: sudo apt-get install pkg-config libssl-dev
             - uses: actions/checkout@v3
             - uses: actions/setup-python@v4
               with:
