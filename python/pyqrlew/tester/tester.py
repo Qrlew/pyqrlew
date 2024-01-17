@@ -9,7 +9,7 @@ class StochasticTester:
 
     def compute_dp_relation(self, query, epsilon):
         budget = {"epsilon": epsilon, "delta": self.delta}
-        relation = self.database.dataset().sql(query)
+        relation = self.database.dataset().relation(query)
 
         relation_with_privatequeries = relation.rewrite_with_differential_privacy(
             self.database.dataset(),

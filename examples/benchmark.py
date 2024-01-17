@@ -1,4 +1,5 @@
 import pyqrlew as pq
+import pyqrlew.tester as tester
 
 DBNAME: str = 'pyqrlew-db'
 USER: str = 'postgres'
@@ -16,7 +17,7 @@ def test_sum(database, stochastic_tester, n_sim, distributions, name, row_privac
         inner_query = write_inner_query(d, a, b)
         query = f"SELECT SUM(x) AS my_sum FROM ({inner_query}) AS my_table"
         adj_query = lambda id: f"SELECT SUM(x) AS my_sum FROM ({inner_query} AND id != {id}) AS my_table"
-        pq.tester.run_test(database, stochastic_tester, query=query, adj_query_func=adj_query, name=f'{name}_{d}_{rp}', n_sim=n_sim)
+        tester.run_test(database, stochastic_tester, query=query, adj_query_func=adj_query, name=f'{name}_{d}_{rp}', n_sim=n_sim)
 
 def test_avg(database, stochastic_tester, n_sim, distributions, name, row_privacy=True):
     tablename = 'table1' if row_privacy else 'table2'
@@ -29,7 +30,7 @@ def test_avg(database, stochastic_tester, n_sim, distributions, name, row_privac
         inner_query = write_inner_query(d, a, b)
         query = f"SELECT AVG(x) AS my_sum FROM ({inner_query}) AS my_table"
         adj_query = lambda id: f"SELECT AVG(x) AS my_sum FROM ({inner_query} AND id != {id}) AS my_table"
-        pq.tester.run_test(database, stochastic_tester, query=query, adj_query_func=adj_query, name=f'{name}_{d}_{rp}', n_sim=n_sim)
+        tester.run_test(database, stochastic_tester, query=query, adj_query_func=adj_query, name=f'{name}_{d}_{rp}', n_sim=n_sim)
 
 def test_count(database, stochastic_tester, n_sim, name, row_privacy=True):
     tablename = 'table1' if row_privacy else 'table2'
@@ -37,31 +38,31 @@ def test_count(database, stochastic_tester, n_sim, name, row_privacy=True):
 
     query = f"SELECT COUNT(x) AS my_sum FROM (SELECT laplace AS x FROM testing.{tablename}) AS my_table"
     adj_query = lambda id: f"SELECT COUNT(x) AS my_sum FROM (SELECT laplace AS x FROM testing.{tablename} WHERE id != {id}) AS my_table"
-    pq.tester.run_test(database, stochastic_tester, query=query, adj_query_func=adj_query, name=f'{name}_{rp}', n_sim=n_sim)
+    tester.run_test(database, stochastic_tester, query=query, adj_query_func=adj_query, name=f'{name}_{rp}', n_sim=n_sim)
 
 def test_joins(database, stochastic_tester, n_sim, name):
     inner_query = "SELECT t1.halton + 2 * t2.halton as x FROM testing.table1 AS t1 JOIN testing.table2 AS t2 ON t1.id = t2.id WHERE t1.halton > -1 AND t1.halton < 1 AND t2.halton > -1 AND t2.halton < 1"
     query = f"SELECT SUM(x) AS my_sum FROM ({inner_query}) AS my_table"
     adj_query = lambda id: f"SELECT SUM(x) AS my_sum FROM ({inner_query} AND id != {id}) AS my_table"
-    pq.tester.run_test(database, stochastic_tester, query=query, adj_query_func=adj_query, name=name, n_sim=n_sim)
+    tester.run_test(database, stochastic_tester, query=query, adj_query_func=adj_query, name=name, n_sim=n_sim)
 
 if __name__ == "__main__":
-    database = pq.tester.StochasticDatabase('testing', DBNAME, USER, PASSWORD, PORT)
+    database = tester.StochasticDatabase('testing', DBNAME, USER, PASSWORD, PORT)
     print('creating tables ...')
     size = 1000
     ## create table
     column_specs = [
-        pq.tester.ColumnSpec(name="laplace", distribution=pq.tester.Distribution.LAPLACE, loc=0, scale=1),
-        pq.tester.ColumnSpec(name="uniform", distribution=pq.tester.Distribution.UNIFORM, low=-1, high=1),
-        pq.tester.ColumnSpec(name="gaussian", distribution=pq.tester.Distribution.GAUSSIAN, loc=0, scale=1),
-        pq.tester.ColumnSpec(name="halton", distribution=pq.tester.Distribution.HALTON, base=2, low=-1, high=1),
+        tester.ColumnSpec(name="laplace", distribution=tester.Distribution.LAPLACE, loc=0, scale=1),
+        tester.ColumnSpec(name="uniform", distribution=tester.Distribution.UNIFORM, low=-1, high=1),
+        tester.ColumnSpec(name="gaussian", distribution=tester.Distribution.GAUSSIAN, loc=0, scale=1),
+        tester.ColumnSpec(name="halton", distribution=tester.Distribution.HALTON, base=2, low=-1, high=1),
     ]
     database.create_table("table1", size, column_specs, True)
     column_specs = [
-        pq.tester.ColumnSpec(name="laplace", distribution=pq.tester.Distribution.LAPLACE, loc=0, scale=1),
-        pq.tester.ColumnSpec(name="uniform", distribution=pq.tester.Distribution.UNIFORM, low=-1, high=1),
-        pq.tester.ColumnSpec(name="gaussian", distribution=pq.tester.Distribution.GAUSSIAN, loc=0, scale=1),
-        pq.tester.ColumnSpec(name="halton", distribution=pq.tester.Distribution.HALTON, base=2, low=-1, high=1),
+        tester.ColumnSpec(name="laplace", distribution=tester.Distribution.LAPLACE, loc=0, scale=1),
+        tester.ColumnSpec(name="uniform", distribution=tester.Distribution.UNIFORM, low=-1, high=1),
+        tester.ColumnSpec(name="gaussian", distribution=tester.Distribution.GAUSSIAN, loc=0, scale=1),
+        tester.ColumnSpec(name="halton", distribution=tester.Distribution.HALTON, base=2, low=-1, high=1),
     ]
     database.create_table("table2", size, column_specs, False)
     print('done')
@@ -81,7 +82,7 @@ if __name__ == "__main__":
         ('halton', -1., 1.),
     ]
     row_privacy=False
-    stochastic_tester = pq.tester.StochasticTester(database, 1 / size, privacy_unit, synthetic_data)
+    stochastic_tester = tester.StochasticTester(database, 1 / size, privacy_unit, synthetic_data)
     n_sim = 10000
     #test_count(database, stochastic_tester, n_sim, name="figures/count", row_privacy=row_privacy)
     test_sum(database, stochastic_tester, n_sim, distributions=distributions, name="figures/sum", row_privacy=row_privacy)
