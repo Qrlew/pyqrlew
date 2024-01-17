@@ -7,7 +7,7 @@ pub mod dp_event;
 pub use crate::{
     dataset::Dataset,
     relation::Relation,
-    dialect::Dialect
+    dialect::Dialect,
 };
 use pyo3::prelude::*;
 

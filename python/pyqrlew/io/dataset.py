@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import logging
 from uuid import uuid4 as generate_uuid
 from typing import Optional, Tuple, List, Dict, Union
@@ -448,3 +449,52 @@ def dataset_from_database(
 
 # Make it a builder
 qrl.Dataset.from_database = dataset_from_database
+
+# Add a useful const
+qrl.Dataset.CONSTRAINT_UNIQUE: str = '_UNIQUE_'
+
+# A method to get select a schema
+def schema(dataset: qrl.Dataset, schema: str) -> 'Schema':
+    return Schema(dataset, schema)
+
+# Add the method
+qrl.Dataset.__getattr__ = schema
+
+@dataclass
+class Schema:
+    dataset: qrl.Dataset
+    schema: str
+
+    def __getattr__(self, table: str) -> 'Table':
+        return Table(self.dataset, self.schema, table)
+
+@dataclass
+class Table:
+    dataset: qrl.Dataset
+    schema: str
+    table: str
+
+    def __getattr__(self, column: str) -> 'Column':
+        return Column(self.dataset, self.schema, self.table, column)
+
+@dataclass
+class Column:
+    dataset: qrl.Dataset
+    schema: str
+    table: str
+    column: str
+
+    def with_range(self, min:float, max:float) -> qrl.Dataset:
+        return self.dataset.with_range(self.schema, self.table, self.column, min, max)
+    
+    def with_possible_values(self, with_possible_values: List[str]) -> qrl.Dataset:
+        return self.dataset.with_possible_values(self.schema, self.table, self.column, with_possible_values)
+    
+    def with_constraint(self, constraint: str) -> qrl.Dataset:
+        return self.dataset.with_constraint(self.schema, self.table, self.column, constraint)
+
+    def with_unique_constraint(self) -> qrl.Dataset:
+        return self.with_constraint(qrl.Dataset.CONSTRAINT_UNIQUE)
+    
+    def with_no_constraint(self) -> qrl.Dataset:
+        return self.with_constraint(None)

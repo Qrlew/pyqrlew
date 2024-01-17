@@ -16,13 +16,11 @@ use qrlew_sarus::{
 };
 use std::ops::Deref;
 use std::sync::Arc;
-
 use crate::{
     error::Result,
     relation::Relation,
     dialect::Dialect,
 };
-
 /// A Dataset is a set of SQL Tables
 #[pyclass]
 #[derive(Clone)]
