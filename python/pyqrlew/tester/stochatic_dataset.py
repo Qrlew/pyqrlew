@@ -42,7 +42,7 @@ class StochasticDatabase:
         return dataset_from_database(self.schema_name, self.engine, self.schema_name)
 
     def eval(self, relation) -> list:
-        return self.execute(relation.render())
+        return self.execute(relation.to_query())
 
     def execute(self, query: str) -> list:
         with self.engine.connect() as conn:
