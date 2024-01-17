@@ -33,3 +33,11 @@ def test_constraint():
     relation = new_dataset.relation('SELECT age FROM extract.census')
     print(relation.schema())
     assert(relation.schema()=='{age: int[20 90] (UNIQUE)}')
+
+# pytest -s tests/test_dataset.py::test_relation
+def test_relation():
+    """Test the consistency of results for queries stored in a file."""
+    database = PostgreSQL()
+    dataset = database.extract() # load the db        
+    relation = dataset.extract.census.relation()
+    print(relation.schema())
