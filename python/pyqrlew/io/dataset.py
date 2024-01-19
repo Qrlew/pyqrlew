@@ -477,6 +477,9 @@ class Table:
     def __getattr__(self, column: str) -> 'Column':
         return Column(self.dataset, self.schema, self.table, column)
 
+    def relation(self) -> qrl.Relation:
+        return next(rel for path, rel in self.dataset.relations() if path[1]==self.schema and path[2]==self.table)
+
 @dataclass
 class Column:
     dataset: qrl.Dataset
