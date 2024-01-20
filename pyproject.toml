@@ -36,7 +36,7 @@ dependencies = [
   "psycopg2 < 3.0",
   "pymysql ~= 1.0",
   "qrlew-datasets ~= 0.5",
-  "pandas ~= 2.0",
+  "pandas >= 2.0, < 2.2",
   "numpy ~= 1.24",
 ]
 
