@@ -137,7 +137,7 @@ class SQLite(Database):
 
     def eval(self, relation: qrl.Relation) -> list:
         """Convert a PyQrlew relation into a sql query string, send it to the database and return the result."""
-        return self.execute(relation.render())
+        return self.execute(relation.to_query())
 
     def execute(self, query: str) -> list:
         """Execute a raw SQL query and return the result."""
