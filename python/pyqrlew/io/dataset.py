@@ -171,8 +171,8 @@ def dataset_from_database(
         ]
 
         if ranges and len(interval_cols) != 0:
-            min_query = select([func.cast(func.min(col), String).label(col.name) for col in interval_cols]).select_from(tab)
-            max_query = select([func.cast(func.max(col), String).label(col.name) for col in interval_cols]).select_from(tab)
+            min_query = select(*[func.cast(func.min(col), String).label(col.name) for col in interval_cols]).select_from(tab)
+            max_query = select(*[func.cast(func.max(col), String).label(col.name) for col in interval_cols]).select_from(tab)
 
             with engine.connect() as conn:
                 min_results = conn.execute(min_query).fetchone()

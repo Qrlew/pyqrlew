@@ -6,7 +6,7 @@ build-backend = "maturin"
 name = "pyqrlew"
 description = "A library to manipulate SQL queries, designed with privacy application in mind."
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = { file = "LICENSE" }
 authors = [{ name = "Nicolas Grislain", email = "ng@sarus.tech" }]
 keywords = [
@@ -23,9 +23,9 @@ classifiers = [
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
   "Topic :: Scientific/Engineering",
@@ -35,7 +35,7 @@ dependencies = [
   "SQLAlchemy ~= 2.0",
   "psycopg2 < 3.0",
   "pymysql ~= 1.0",
-  "qrlew-datasets ~= 0.5",
+  "qrlew-datasets ~= 0.9",
   "pandas ~= 2.0",
   "numpy ~= 1.24",
 ]
