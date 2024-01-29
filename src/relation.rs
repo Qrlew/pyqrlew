@@ -2,15 +2,13 @@ use std::{collections::HashMap, ops::Deref, str, sync::Arc};
 use pyo3::prelude::*;
 use qrlew::{
     ast,
-    differential_privacy::budget::Budget,
+    differential_privacy::DpParameters,
     expr::Identifier,
     privacy_unit_tracking::PrivacyUnit,
     relation::{self, Variant},
     synthetic_data::SyntheticData,
     dialect_translation::{
-        RelationWithTranslator,
-        postgresql::PostgreSqlTranslator,
-        mssql::MsSqlTranslator,
+        bigquery::BigQueryTranslator, mssql::MsSqlTranslator, postgresql::PostgreSqlTranslator, RelationWithTranslator
     }
 };
 use crate::{
@@ -86,7 +84,7 @@ impl Relation {
         let delta = epsilon_delta
             .get("delta")
             .ok_or(MissingKeyError("delta".to_string()))?;
-        let budget = Budget::new(*epsilon, *delta);
+        let budget = DpParameters::from_epsilon_delta(*epsilon, *delta);
         let relation_with_dp_event = relation.rewrite_as_privacy_unit_preserving(
             &relations,
             synthetic_data,
@@ -121,7 +119,7 @@ impl Relation {
         let delta = epsilon_delta
             .get("delta")
             .ok_or(MissingKeyError("delta".to_string()))?;
-        let budget = Budget::new(*epsilon, *delta);
+        let budget = DpParameters::from_epsilon_delta(*epsilon, *delta);
         let relation_with_dp_event = relation.rewrite_with_differential_privacy(
             &relations,
             synthetic_data,
@@ -138,13 +136,16 @@ impl Relation {
         let dialect = dialect.unwrap_or(Dialect::PostgreSql);
         match dialect {
             Dialect::PostgreSql => ast::Query::from(RelationWithTranslator(&relation, PostgreSqlTranslator)).to_string(),
-            Dialect::MsSql => ast::Query::from(RelationWithTranslator(&relation, MsSqlTranslator)).to_string()
+            Dialect::MsSql => ast::Query::from(RelationWithTranslator(&relation, MsSqlTranslator)).to_string(),
+            Dialect::BigQuery => ast::Query::from(RelationWithTranslator(&relation, BigQueryTranslator)).to_string(),
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
+
+    use qrlew::{ast, dialect_translation::{postgresql::PostgreSqlTranslator, RelationWithTranslator}};
 
     use crate::{
         dataset::Dataset,
@@ -193,5 +194,18 @@ mod tests {
             let dp_query = dp_relation.relation().to_query(None);
             println!("\n\n{dp_query}");
         }
+    }
+
+    #[test]
+    fn test_quoting() {
+        let dataset = Dataset::new(DATASET, SCHEMA, SIZE).unwrap();
+        println!("{:?}", dataset.relations()[1].0) ;
+
+        let tr = PostgreSqlTranslator;
+        let query = r#"SELECT "age" AS s1 FROM census;"#;
+        let relation = Relation::from_query(query, &dataset, None).unwrap();
+
+        let trans = ast::Query::from(RelationWithTranslator(&relation, PostgreSqlTranslator)).to_string();
+        println!("{}",trans);
     }
 }

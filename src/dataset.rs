@@ -5,9 +5,7 @@ use qrlew::{
     sql,
     relation,
     dialect_translation::{
-        postgresql::PostgreSqlTranslator,
-        mssql::MsSqlTranslator,
-        QueryToRelationTranslator,
+        bigquery::BigQueryTranslator, mssql::MsSqlTranslator, postgresql::PostgreSqlTranslator, QueryToRelationTranslator
     },
 };
 use qrlew_sarus::{
@@ -98,6 +96,12 @@ impl Dataset {
                 let query_with_relations = query.with(&relations);
                 Ok(Relation::new(Arc::new(relation::Relation::try_from((query_with_relations, translator))?)))
             },
+            Dialect::BigQuery => {
+                let translator = BigQueryTranslator;
+                let query = sql::relation::parse_with_dialect(query, translator.dialect())?;
+                let query_with_relations = query.with(&relations);
+                Ok(Relation::new(Arc::new(relation::Relation::try_from((query_with_relations, translator))?)))
+            },
         }  
     }
 
@@ -118,6 +122,13 @@ impl Dataset {
                     },
                     Dialect::MsSql => {
                         let translator = MsSqlTranslator;
+                        let parsed = sql::relation::parse_with_dialect(query, translator.dialect())?;
+                        let query_with_rel = parsed.with(&relations);
+                        let rel = relation::Relation::try_from((query_with_rel, translator))?;
+                        Ok((path.clone(), Arc::new(rel)))
+                    },
+                    Dialect::BigQuery => {
+                        let translator = BigQueryTranslator;
                         let parsed = sql::relation::parse_with_dialect(query, translator.dialect())?;
                         let query_with_rel = parsed.with(&relations);
                         let rel = relation::Relation::try_from((query_with_rel, translator))?;
