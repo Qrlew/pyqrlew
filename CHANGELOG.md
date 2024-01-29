@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## [0.9.7] - 2024-01-29
+### Added
+- support for bigquery dialect [MR42](https://github.com/Qrlew/pyqrlew/pull/42)
+### Fixed
+- quoting of query identifiers [MR42](https://github.com/Qrlew/pyqrlew/pull/42)
+### Changed
+- low for clipping bounds when DP rewriting [MR42](https://github.com/Qrlew/pyqrlew/pull/42)
+
+## [0.9.6] - 2024-01-29
 ### Fixed
 Fixing the example notebooks [MR40](https://github.com/Qrlew/pyqrlew/pull/40)
 ### Added
