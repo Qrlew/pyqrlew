@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - quoting of query identifiers [MR42](https://github.com/Qrlew/pyqrlew/pull/42)
 ### Changed
-- low for clipping bounds when DP rewriting [MR42](https://github.com/Qrlew/pyqrlew/pull/42)
+- law for clipping bounds when DP rewriting [MR42](https://github.com/Qrlew/pyqrlew/pull/42)
 
 ## [0.9.6] - 2024-01-29
 ### Fixed
