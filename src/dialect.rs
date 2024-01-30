@@ -5,4 +5,5 @@ use pyo3::prelude::*;
 pub enum Dialect {
     PostgreSql,
     MsSql,
+    BigQuery
 }

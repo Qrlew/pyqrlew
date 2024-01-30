@@ -45,7 +45,7 @@ def test_queries_consistency(queries):
     """Test the consistency of results for queries stored in a file."""
     database = PostgreSQL()
     dataset = database.extract() # load the db
-    
+
     for query in queries:
         print(f"\n{colored(query, 'blue')}")
         replaced_query = query.replace("census", "extract.census").replace("beacon", "extract.beacon")
@@ -99,3 +99,21 @@ def test_simple_mssql_translation():
     relation = dataset.relation(query, Dialect.PostgreSql)
     translated = relation.to_query(Dialect.MsSql)
     assert "SELECT TOP (10) * FROM" in translated
+
+
+def test_quoting():
+    database = PostgreSQL()
+    dataset = database.extract()
+    query = """
+    SELECT 
+        age AS "my age"
+    FROM census;"""
+    relation = dataset.relation(query, Dialect.PostgreSql)
+    translated = relation.to_query(Dialect.PostgreSql)
+    assert translated.replace(' ', '')=='''
+        WITH "map_p5al" ("my age") AS (
+            SELECT "age" AS "my age" FROM "extract"."census"
+        ) SELECT * FROM "map_p5al"
+    '''.replace('\n', '').replace(' ', '')
+    results = pd.read_sql(relation.to_query(), database.engine())
+

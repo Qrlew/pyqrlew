@@ -15,7 +15,7 @@ SELECT marital_status, SUM(capital_loss / 100000) AS my_sum, SUM(education_num) 
 SELECT POWER(AVG(age), 2) AS my_res FROM census;
 SELECT 1 + AVG(age) AS my_res FROM census;
 SELECT SUM(age)  AS my_res FROM census as p;
--- SELECT COUNT(*) AS count_all FROM census WHERE workclass LIKE 'Married%'
+-- SELECT COUNT(*) AS count_all FROM census WHERE workclass LIKE 'Married%';
 SELECT SUM(education_num) AS my_sum FROM census GROUP BY LOG(CASE WHEN age < 50 THEN 50 ELSE 1 END);
 SELECT COUNT(education_num) As my_sum FROM census GROUP BY CASE WHEN age < 50 THEN 50 ELSE 1 END;
 SELECT CASE WHEN age < 50 THEN 50 ELSE 1 END AS case_age, COUNT(education_num) AS my_sum FROM census GROUP BY CASE WHEN age < 50 THEN 50 ELSE 1 END;
@@ -32,7 +32,7 @@ SELECT capital_loss, COUNT(1) AS my_count FROM census GROUP BY capital_loss;
 SELECT capital_loss, COUNT(age) AS count_all FROM census GROUP BY capital_loss;
 -- SELECT EXTRACT( YEAR FROM "検知日時" ) AS _year, COUNT(*) AS my_count FROM beacon GROUP BY EXTRACT(YEAR FROM "検知日時");
 -- SELECT age AS "my age", 3 * COS(COUNT(*)) AS my_ln_count, AVG(education_num) AS "my avg" FROM census GROUP BY age ORDER BY age, "my avg";
--- SELECT age AS "my age", 3 * COS(COUNT(*)) AS my_ln_count, AVG(education_num) AS "my avg" FROM census GROUP BY "my age" ORDER BY "my age", "my avg";
+SELECT age AS "my age", 3 * COS(COUNT(*)) AS my_ln_count, AVG(education_num) AS "my avg" FROM census GROUP BY "my age" ORDER BY "my age", "my avg";
 SELECT age, COUNT(*) AS my_count FROM census WHERE age BETWEEN 18 AND 30 GROUP BY age;
 SELECT age, COUNT(*) AS my_count FROM census WHERE age NOT BETWEEN 18 AND 30 GROUP BY age;
 SELECT COUNT(*) AS my_count FROM census WHERE native_country IN ('Holand-Netherlands', 'Cuba', 'Italy', 'England');
