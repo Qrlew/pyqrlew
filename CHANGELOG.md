@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [0.9.10] - 2024-01-29
+- Support manual multiplicity clipping
+- Added more explicit error
+
 ## [0.9.7] - 2024-01-29
 ### Added
 - support for bigquery dialect [MR42](https://github.com/Qrlew/pyqrlew/pull/42)

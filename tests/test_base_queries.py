@@ -84,6 +84,8 @@ def test_queries_differential_privacy(queries):
             dataset,
             privacy_unit,
             budget,
+            None,
+            None,
             synthetic_data,
         ).relation()
         results = pd.read_sql(relation.to_query(), database.engine())

@@ -39,33 +39,39 @@ impl Relation {
 
 #[pymethods]
 impl Relation {
+    /// Builds a `Relation` from a query and a dataset 
     #[staticmethod]
     pub fn from_query(query: &str, dataset: &Dataset, dialect: Option<Dialect>) -> Result<Self> {
         dataset.relation(query, dialect)
     }
 
+    /// String representation of the `Relation` in the default dialect
     pub fn __str__(&self) -> String {
-        // String representation of the relation in the default dialect
         let relation = self.0.as_ref();
         let query = ast::Query::from(RelationWithTranslator(&relation, PostgreSqlTranslator)).to_string();
         format!("{}", query)
     }
 
+    /// GraphViz representation of the `Relation`
     pub fn dot(&self) -> Result<String> {
         let mut out: Vec<u8> = vec![];
         self.0.as_ref().dot(&mut out, &[]).unwrap();
         Ok(String::from_utf8(out).unwrap())
     }
 
+    /// Returns the schema of the `Relation`
     pub fn schema(&self) -> String {
         (*self.0).schema().to_string()
     }
 
+    /// Returns as PUP
     pub fn rewrite_as_privacy_unit_preserving<'a>(
         &'a self,
         dataset: &'a Dataset,
         privacy_unit: Vec<(&'a str, Vec<(&'a str, &'a str, &'a str)>, &'a str)>,
         epsilon_delta: HashMap<&'a str, f64>,
+        max_multiplicity: Option<f64>,
+        max_multiplicity_share: Option<f64>,
         synthetic_data: Option<Vec<(Vec<&'a str>, Vec<&'a str>)>>,
     ) -> Result<RelationWithDpEvent> {
         let relation = self.deref().clone();
@@ -84,23 +90,35 @@ impl Relation {
         let delta = epsilon_delta
             .get("delta")
             .ok_or(MissingKeyError("delta".to_string()))?;
-        let budget = DpParameters::from_epsilon_delta(*epsilon, *delta);
+        let dp_parameters = {
+            let mut dp_parameters = DpParameters::from_epsilon_delta(*epsilon, *delta);
+            if let Some(max_multiplicity) = max_multiplicity {
+                dp_parameters = dp_parameters.with_privacy_unit_max_multiplicity(max_multiplicity);
+            }
+            if let Some(max_multiplicity_share) = max_multiplicity_share {
+                dp_parameters = dp_parameters.with_privacy_unit_max_multiplicity_share(max_multiplicity_share);
+            }
+            dp_parameters
+        };
         let relation_with_dp_event = relation.rewrite_as_privacy_unit_preserving(
             &relations,
             synthetic_data,
             privacy_unit,
-            budget,
+            dp_parameters,
         )?;
         Ok(RelationWithDpEvent::new(Arc::new(
             relation_with_dp_event,
         )))
     }
 
+    /// Returns as DP
     pub fn rewrite_with_differential_privacy<'a>(
         &'a self,
         dataset: &'a Dataset,
         privacy_unit: Vec<(&'a str, Vec<(&'a str, &'a str, &'a str)>, &'a str)>,
         epsilon_delta: HashMap<&'a str, f64>,
+        max_multiplicity: Option<f64>,
+        max_multiplicity_share: Option<f64>,
         synthetic_data: Option<Vec<(Vec<&'a str>, Vec<&'a str>)>>,
     ) -> Result<RelationWithDpEvent> {
         let relation = self.deref().clone();
@@ -119,12 +137,21 @@ impl Relation {
         let delta = epsilon_delta
             .get("delta")
             .ok_or(MissingKeyError("delta".to_string()))?;
-        let budget = DpParameters::from_epsilon_delta(*epsilon, *delta);
+        let dp_parameters = {
+            let mut dp_parameters = DpParameters::from_epsilon_delta(*epsilon, *delta);
+            if let Some(max_multiplicity) = max_multiplicity {
+                dp_parameters = dp_parameters.with_privacy_unit_max_multiplicity(max_multiplicity);
+            }
+            if let Some(max_multiplicity_share) = max_multiplicity_share {
+                dp_parameters = dp_parameters.with_privacy_unit_max_multiplicity_share(max_multiplicity_share);
+            }
+            dp_parameters
+        };
         let relation_with_dp_event = relation.rewrite_with_differential_privacy(
             &relations,
             synthetic_data,
             privacy_unit,
-            budget,
+            dp_parameters,
         )?;
         Ok(RelationWithDpEvent::new(Arc::new(
             relation_with_dp_event,
@@ -178,7 +205,7 @@ mod tests {
             let relation = Relation::from_query(query, &dataset, None).unwrap();
             println!("{}", relation.0);
             let dp_relation = relation.rewrite_with_differential_privacy(
-                &dataset, privacy_unit.clone(), budget.clone(), synthetic_data.clone()
+                &dataset, privacy_unit.clone(), budget.clone(), None, None, synthetic_data.clone()
             ).unwrap();
             let dp_query = dp_relation.relation().to_query(None);
             println!("\n\n{dp_query}");
@@ -189,7 +216,7 @@ mod tests {
             let relation = Relation::from_query(query, &dataset, None).unwrap();
             println!("{}", relation.0);
             let dp_relation = relation.rewrite_with_differential_privacy(
-                &dataset, privacy_unit.clone(), budget.clone(), None
+                &dataset, privacy_unit.clone(), budget.clone(), None, None, None
             ).unwrap();
             let dp_query = dp_relation.relation().to_query(None);
             println!("\n\n{dp_query}");
