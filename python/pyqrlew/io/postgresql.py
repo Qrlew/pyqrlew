@@ -151,45 +151,41 @@ class PostgreSQL(EmptyPostgreSQL):
         return self.load_resource('retail', SQL('retail').local())
 
     def extract(self) -> qrl.Dataset:
-        """It loads the extract dataset in the database and it creates a qrlew
-        Dataset from it and computing data ranges and with possible values for i and
-        if the unique values are less than POSSIBLE_VALUES_THRESHOLD.
+        """It loads the extract dataset in the database and it returns a qrlew
+        Dataset with data ranges and categorical possible values if the unique
+        column values are less than POSSIBLE_VALUES_THRESHOLD.
         """
         self.load_extract()
         return dataset_from_database('extract', self.engine(), 'extract', ranges=True, possible_values_threshold=POSSIBLE_VALUES_THRESHOLD)
 
     def financial(self) -> qrl.Dataset:
-        """_summary_
-
-        Returns:
-            qrl.Dataset: _description_
+        """It loads the financial dataset in the database and it returns a qrlew
+        Dataset with data ranges and categorical possible values if the unique
+        column values are less than POSSIBLE_VALUES_THRESHOLD.
         """
         self.load_financial()
         return dataset_from_database('financial', self.engine(), 'financial', ranges=True, possible_values_threshold=POSSIBLE_VALUES_THRESHOLD)
 
     def hepatitis(self) -> qrl.Dataset:
-        """_summary_
-
-        Returns:
-            qrl.Dataset: _description_
+        """It loads the hepatitis dataset in the database and it returns a qrlew
+        Dataset with data ranges and categorical possible values if the unique
+        column values are less than POSSIBLE_VALUES_THRESHOLD.
         """
         self.load_hepatitis()
         return dataset_from_database('hepatitis_std', self.engine(), 'hepatitis_std', ranges=True, possible_values_threshold=POSSIBLE_VALUES_THRESHOLD)
 
     def imdb(self) -> qrl.Dataset:
-        """_summary_
-
-        Returns:
-            qrl.Dataset: _description_
+        """It loads the imdb dataset in the database and it returns a qrlew
+        Dataset with data ranges and categorical possible values if the unique
+        column values are less than POSSIBLE_VALUES_THRESHOLD.
         """
         self.load_imdb()
         return dataset_from_database('imdb_ijs', self.engine(), 'imdb_ijs', ranges=True, possible_values_threshold=POSSIBLE_VALUES_THRESHOLD)
 
     def retail(self) -> qrl.Dataset:
-        """_summary_
-
-        Returns:
-            qrl.Dataset: _description_
+        """It loads the retail dataset in the database and it returns a qrlew
+        Dataset with data ranges and categorical possible values if the unique
+        column values are less than POSSIBLE_VALUES_THRESHOLD.
         """
         self.load_retail()
         return dataset_from_database('retail', self.engine(), 'retail', ranges=True, possible_values_threshold=POSSIBLE_VALUES_THRESHOLD)
