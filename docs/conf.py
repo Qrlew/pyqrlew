@@ -39,7 +39,7 @@ myst_dmath_allow_labels = True
 myst_dmath_double_inline = True
 
 # Controls notebook execution
-nb_execution_mode = 'cache'#'off'/'cache'
+nb_execution_mode = 'off'#'off'/'cache'
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
