@@ -8,6 +8,14 @@ title: Pyqrlew API Documentation
 - {doc}`api`
 - {doc}`compilation_rules`
 
+# Examples
+- {doc}`examples/dataset_from_queries`
+- {doc}`examples/mssql_translator`
+- {doc}`examples/postgres_simple_table`
+- {doc}`examples/range_propagation`
+- {doc}`examples/rewrite_with_dp`
+
+
 # Indices and tables
 
 - {ref}`genindex`
