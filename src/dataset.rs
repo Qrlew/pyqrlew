@@ -52,6 +52,7 @@ impl Dataset {
         Ok(print_to_string(self.0.schema())?)
     }
 
+    /// The size of the Dataset
     #[getter]
     pub fn size(&self) -> Option<String> {
         match self.0.size() {
