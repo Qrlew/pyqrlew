@@ -41,6 +41,7 @@ impl Relation {
 impl Relation {
     /// Builds a `Relation` from a query and a dataset 
     #[staticmethod]
+    #[pyo3(text_signature = "query: str, dataset: Dataset, dialect: t.Optional[Dialect]")]
     pub fn from_query(query: &str, dataset: &Dataset, dialect: Option<Dialect>) -> Result<Self> {
         dataset.relation(query, dialect)
     }
@@ -64,7 +65,16 @@ impl Relation {
         (*self.0).schema().to_string()
     }
 
-    /// Returns as PUP
+    /// Returns as RelationWithDpEvent where it's relation propagates the privacy unit
+    /// through thq query.
+    /// 
+    /// Args:
+    ///     dataset (Dataset):
+    ///         Dataset with needed relations
+    ///     privacy_unit (t.Iterable[t.Tuple[str, t.Iterable[t.Tuple[str, str, str]], str]]):
+    ///         privacy unit to be propagated
+    ///     epsilon_delta (t.Mapping[str, float]):
+    ///         budget
     pub fn rewrite_as_privacy_unit_preserving<'a>(
         &'a self,
         dataset: &'a Dataset,

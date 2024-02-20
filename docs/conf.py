@@ -38,6 +38,12 @@ myst_enable_extensions = [
 myst_dmath_allow_labels = True
 myst_dmath_double_inline = True
 
+# not working well
+autodoc_typehints = 'both'
+# autodoc_typehints_description_target = 'documented_params'
+# not really working
+autodoc_docstring_signature = True
+
 # Controls notebook execution
 nb_execution_mode = 'off'#'off'/'cache'
 

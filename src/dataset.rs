@@ -61,6 +61,7 @@ impl Dataset {
         }
     }
 
+    #[pyo3(text_signature = "schema_name: str, table_name: str, field_name: str, min: float, max: float")]
     pub fn with_range(&self, schema_name: &str, table_name: &str, field_name: &str, min: f64, max: f64) -> Result<Self> {
         Ok(Dataset(self.0.with_range(schema_name, table_name, field_name, min, max)?))
     }
