@@ -39,9 +39,16 @@ impl Relation {
 
 #[pymethods]
 impl Relation {
-    /// Builds a `Relation` from a query and a dataset 
     #[staticmethod]
-    #[pyo3(text_signature = "query: str, dataset: Dataset, dialect: t.Optional[Dialect]")]
+    /// Builds a `Relation` from a query and a dataset
+    ///
+    /// Args:
+    ///     query (str): sql query.
+    ///     dataset (Dataset): the Dataset.
+    ///     dialect (Optional[Dialect]): query's dialect. If not provided, it is assumed to be PostgreSql
+    ///
+    /// Returns:
+    ///     Relation: 
     pub fn from_query(query: &str, dataset: &Dataset, dialect: Option<Dialect>) -> Result<Self> {
         dataset.relation(query, dialect)
     }
@@ -60,21 +67,35 @@ impl Relation {
         Ok(String::from_utf8(out).unwrap())
     }
 
-    /// Returns the schema of the `Relation`
+    /// Returns a string representation of the Relation's schema.
+    ///
+    /// Returns:
+    ///     str:
     pub fn schema(&self) -> String {
         (*self.0).schema().to_string()
     }
 
     /// Returns as RelationWithDpEvent where it's relation propagates the privacy unit
-    /// through thq query.
+    /// through the query.
     /// 
     /// Args:
     ///     dataset (Dataset):
     ///         Dataset with needed relations
-    ///     privacy_unit (t.Iterable[t.Tuple[str, t.Iterable[t.Tuple[str, str, str]], str]]):
-    ///         privacy unit to be propagated
-    ///     epsilon_delta (t.Mapping[str, float]):
-    ///         budget
+    ///     privacy_unit (Sequence[Tuple[str, Sequence[Tuple[str, str, str]], str]]):
+    ///         privacy unit to be propagated.
+    ///         example to better understand the structure of privacy_unit
+    ///     epsilon_delta (Mapping[str, float]): epsilon and delta budget
+    ///     max_multiplicity (Optional[float]): maximum number of rows per privacy unit in absolute terms
+    ///     max_multiplicity_share (Optional[float]): maximum number of rows per privacy unit in relative terms
+    ///         w.r.t. the dataset size. The actual max_multiplicity used to bound the PU contribution will be
+    ///         minimum(max_multiplicity, max_multiplicity_share*dataset.size).
+    ///     synthetic_data (Optional[Sequence[Tuple[Sequence[str],Sequence[str]]]]): Sequence of pairs 
+    ///         of original table path and its corresponding synthetic version. Each table must be specified.
+    ///         (e.g.: (["retail_schema", "features"], ["retail_schema", "features_synthetic"])).
+    ///
+    /// Returns:
+    ///     RelationWithDpEvent: 
+    ///
     pub fn rewrite_as_privacy_unit_preserving<'a>(
         &'a self,
         dataset: &'a Dataset,
@@ -121,7 +142,26 @@ impl Relation {
         )))
     }
 
-    /// Returns as DP
+    /// It transforms a Relation into its differentially private equivalent.
+    /// 
+    /// Args:
+    ///     dataset (Dataset):
+    ///         Dataset with needed relations
+    ///     privacy_unit (Sequence[Tuple[str, Sequence[Tuple[str, str, str]], str]]):
+    ///         privacy unit to be propagated.
+    ///         example to better understand the structure of privacy_unit
+    ///     epsilon_delta (Mapping[str, float]): epsilon and delta budget
+    ///     max_multiplicity (Optional[float]): maximum number of rows per privacy unit in absolute terms
+    ///     max_multiplicity_share (Optional[float]): maximum number of rows per privacy unit in relative terms
+    ///         w.r.t. the dataset size. The actual max_multiplicity used to bound the PU contribution will be
+    ///         minimum(max_multiplicity, max_multiplicity_share*dataset.size).
+    ///     synthetic_data (Optional[Sequence[Tuple[Sequence[str],Sequence[str]]]]): Sequence of pairs 
+    ///         of original table path and its corresponding synthetic version. Each table must be specified.
+    ///         (e.g.: (["retail_schema", "features"], ["retail_schema", "features_synthetic"])).
+    ///
+    /// Returns:
+    ///     RelationWithDpEvent: 
+    ///
     pub fn rewrite_with_differential_privacy<'a>(
         &'a self,
         dataset: &'a Dataset,
@@ -168,6 +208,14 @@ impl Relation {
         )))
     }
 
+    /// Returns an SQL representation of the Relation.
+    /// 
+    /// Args:
+    ///     dialect (Optional[Dialect]): dialect of generated sql query. If no dialect is provided,
+    ///         the query will be in PostgreSql. 
+    ///
+    /// Returns:
+    ///     str:
     pub fn to_query(&self, dialect: Option<Dialect>) -> String {
         let relation = &*(self.0);
         let dialect = dialect.unwrap_or(Dialect::PostgreSql);

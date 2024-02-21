@@ -20,30 +20,6 @@ class PostgreSQL(EmptyPostgreSQL):
     This class provides methods for interacting with an PostgreSQL database
     using the PyQrlew library.
 
-    Parameters
-    ----------
-        name: str
-            The name of the instance
-        user: str
-            user name in the database
-        password: str
-            password used to connect to the service
-        port: str
-            port at which the database listens
-
-    Attributes
-    ----------
-        name: str
-            The name of the instance
-        user: str
-            user name in the database
-        password: str
-            password used to connect to the service
-        port: int
-            port number at which the database listens
-        net: str
-            a docker network name created if docker is installed in the system
-
     Example
     ----------
         >>> import pyqrlew as qrl

@@ -23,16 +23,6 @@ class SQLite(Database):
     This class provides methods for interacting with an SQLite database using the
     PyQrlew library.
 
-    Parameters
-    ----------
-        db_file: str
-            The path to the SQLite database file.
-
-    Attributes
-    ----------
-        db_file: str
-            The path to the SQLite database file.
-
     Example
     ----------
         >>> import pandas as pd

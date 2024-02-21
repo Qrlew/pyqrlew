@@ -2,13 +2,14 @@
 title: Pyqrlew API Documentation
 ---
 
-# Pyqrlew API Documentation
+This page gives an overview of all public pyqrlew objects, functions and methods.
 
-# Dataset
+# API reference
+
 - {doc}`api`
-- {doc}`compilation_rules`
 
 # Examples
+
 - {doc}`examples/dataset_from_queries`
 - {doc}`examples/mssql_translator`
 - {doc}`examples/postgres_simple_table`

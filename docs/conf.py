@@ -18,6 +18,8 @@ extensions = [
     'myst_nb',
     'sphinx.ext.doctest',
     'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon', # it understands google and numpy style doc strings
+    'sphinx.ext.intersphinx', # it add links to objects
     'sphinx.ext.autosummary',
     'sphinx.ext.mathjax',
     'sphinxcontrib.bibtex',
@@ -38,12 +40,11 @@ myst_enable_extensions = [
 myst_dmath_allow_labels = True
 myst_dmath_double_inline = True
 
-# not working well
-autodoc_typehints = 'both'
-# autodoc_typehints_description_target = 'documented_params'
-# not really working
-autodoc_docstring_signature = True
 
+autodoc_typehints = 'both' # type hints both in the signature and in the docstring 
+# autodoc_typehints_description_target = 'documented'
+autodoc_docstring_signature = False
+autodoc_member_order = 'bysource' # show members by their source order (it doesn't seem to have an effect)
 # Controls notebook execution
 nb_execution_mode = 'off'#'off'/'cache'
 

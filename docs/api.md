@@ -3,26 +3,23 @@
 
 ```{eval-rst}
 .. autoclass:: pyqrlew.Dataset
-    :members: from_database
-
-    .. method:: boil(time: Optional[int]) -> int
-    Boil for *time* sec is good
-    Args:
-        time (Optional[int]):
-            time needed
-    Returns:
-        int
+    :members:
 ```
 
 ```{eval-rst}
 .. autoclass:: pyqrlew.Relation
     :members:
+```
+
+```{eval-rst}
+.. autoclass:: pyqrlew.Dialect
+    :members:
     :undoc-members:
 ```
 
-<!-- ```{eval-rst}
+```{eval-rst}
 .. autoclass:: pyqrlew.io.PostgreSQL
-    :members:
+    :members: extract, financial, hepatitis, imdb, retail, load_extract, load_financial, load_hepatitis, load_imdb, load_retail
 ```
 
 ```{eval-rst}
@@ -30,7 +27,4 @@
     :members:
 ```
 
-```{eval-rst}
-.. autofunction:: pyqrlew.io.dataset
-``` -->
 

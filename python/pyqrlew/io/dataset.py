@@ -29,7 +29,7 @@ def dataset_from_database(
             Use the actual observed values as range. **This is unsafe from a privacy perspective**. Defaults to None.
 
     Returns:
-        qrl.Dataset: A Qrlew `Dataset` object
+        Dataset:
     """
     metadata = MetaData()
     metadata.reflect(engine, schema=schema_name)
