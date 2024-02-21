@@ -2,8 +2,6 @@
 title: Pyqrlew API Documentation
 ---
 
-This page gives an overview of all public pyqrlew objects, functions and methods.
-
 # API reference
 
 - {doc}`api`
