@@ -2,9 +2,14 @@
 title: Pyqrlew API Documentation
 ---
 
+# PyQrlew
+
+This page gives an overview of the public PyQrlew objects and utils. Check out the [Qrlew](https://qrlew.readthedocs.io/en/latest/) documentation for a more exhaustive explanation of its capabilities and features.
+
 # API reference
 
 - {doc}`api`
+- {doc}`io`
 
 # Examples
 

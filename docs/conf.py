@@ -3,12 +3,26 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+# Configuration file for the Sphinx documentation builder.
+# https://www.sphinx-doc.org/en/master/usage/configuration.html
+
+from __future__ import annotations
+
+import inspect
+import os
+import sys
+import warnings
+from pathlib import Path
+from typing import Any
+
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'Pyqrlew'
 copyright = '2023, Sarus Technologies'
 author = 'Sarus Technologies'
+github_root = "https://github.com/Qrlew/pyqrlew"
+git_ref = 'main'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -23,6 +37,7 @@ extensions = [
     'sphinx.ext.autosummary',
     'sphinx.ext.mathjax',
     'sphinxcontrib.bibtex',
+    "sphinx.ext.linkcode",
 ]
 
 templates_path = ['_templates']
@@ -47,6 +62,7 @@ autodoc_docstring_signature = False
 autodoc_member_order = 'bysource' # show members by their source order (it doesn't seem to have an effect)
 # Controls notebook execution
 nb_execution_mode = 'off'#'off'/'cache'
+
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
@@ -87,3 +103,62 @@ html_theme_options = {
         },
     ],
 }
+
+
+# sphinx-ext-linkcode - Add external links to source code
+# https://www.sphinx-doc.org/en/master/usage/extensions/linkcode.html
+def linkcode_resolve(domain: str, info: dict[str, Any]) -> str | None:
+    """
+    Determine the URL corresponding to Python object.
+
+    Based on pandas equivalent:
+    https://github.com/pandas-dev/pandas/blob/main/doc/source/conf.py#L629-L686
+    """
+    if domain != "py":
+        return None
+
+    modname = info["module"]
+    fullname = info["fullname"]
+
+    submod = sys.modules.get(modname)
+    if submod is None:
+        return None
+
+    obj = submod
+    for part in fullname.split("."):
+        try:
+            with warnings.catch_warnings():
+                # Accessing deprecated objects will generate noisy warnings
+                warnings.simplefilter("ignore", FutureWarning)
+                obj = getattr(obj, part)
+        except AttributeError:
+            return None
+
+    try:
+        fn = inspect.getsourcefile(inspect.unwrap(obj))
+    except TypeError:
+        try:  # property
+            fn = inspect.getsourcefile(inspect.unwrap(obj.fget))
+        except (AttributeError, TypeError):
+            fn = None
+    if not fn:
+        return None
+
+    try:
+        source, lineno = inspect.getsourcelines(obj)
+    except TypeError:
+        try:  # property
+            source, lineno = inspect.getsourcelines(obj.fget)
+        except (AttributeError, TypeError):
+            lineno = None
+    except OSError:
+        lineno = None
+
+    linespec = f"#L{lineno}-L{lineno + len(source) - 1}" if lineno else ""
+
+    conf_dir_path = Path(__file__).absolute().parent
+    pyqrlew_root = (conf_dir_path.parent.parent / "pyqrlew").absolute()
+    # https://github.com/Qrlew/pyqrlew/blob/main/pyqrlew/python/pyqrlew/io/postgresql.py#L16-L167
+    # https://github.com/Qrlew/pyqrlew/blob/main/python/pyqrlew/io/postgresql.py
+    fn = os.path.relpath(fn, start=pyqrlew_root)
+    return f"{github_root}/blob/{git_ref}/{fn}{linespec}"
