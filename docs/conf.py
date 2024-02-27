@@ -43,6 +43,20 @@ extensions = [
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
+# -- Extension settings  -----------------------------------------------------
+
+# sphinx.ext.intersphinx - link to other projects' documentation
+# https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+}
+
+# Sphinx-copybutton - add copy button to code blocks
+# https://sphinx-copybutton.readthedocs.io/en/latest/index.html
+# strip the '>>>' and '...' prompt/continuation prefixes.
+copybutton_prompt_text = r">>> |\.\.\. "
+copybutton_prompt_is_regexp = True
+
 # Enable numref
 numfig = True
 bibtex_bibfiles = ['qrlew.bib']
