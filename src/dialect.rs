@@ -1,5 +1,6 @@
 use pyo3::prelude::*;
 
+/// An Enum with supported SQL Datasets
 #[pyclass]
 #[derive(Clone)]
 pub enum Dialect {

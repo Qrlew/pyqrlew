@@ -8,3 +8,4 @@ if hasattr(pyqrlew, "__all__"):
 # Import python modules
 from pyqrlew import io
 from pyqrlew import tester
+from pyqrlew.relation_with_dp_event import *

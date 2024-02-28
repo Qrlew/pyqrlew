@@ -17,14 +17,19 @@ def dataset_from_database(
     """Builds a `Dataset` from a sqlalchemy `Engine`
 
     Args:
-        name (str): Name of the Dataset
-        engine (Engine): The sqlalchemy `Engine` to use
-        schema_name (Optional[str], optional): The DB schema to use. Defaults to None.
-        ranges (bool, optional): Use the actual min and max of the data as ranges. **This is unsafe from a privacy perspective**. Defaults to False.
-        possible_values_threshold (Optional[int], optional): Use the actual observed values as range. **This is unsafe from a privacy perspective**. Defaults to None.
+        name (str):
+            Name of the Dataset
+        engine (Engine):
+            The sqlalchemy `Engine` to use
+        schema_name (Optional[str], optional):
+            The DB schema to use. Defaults to None.
+        ranges (bool, optional):
+            Use the actual min and max of the data as ranges. **This is unsafe from a privacy perspective**. Defaults to False.
+        possible_values_threshold (Optional[int], optional):
+            Use the actual observed values as range. **This is unsafe from a privacy perspective**. Defaults to None.
 
     Returns:
-        qrl.Dataset: A Qrlew `Dataset` object
+        Dataset:
     """
     metadata = MetaData()
     metadata.reflect(engine, schema=schema_name)
@@ -39,7 +44,9 @@ def dataset_from_database(
         )
 
     def dataset() -> dict:
-        """Return a (dataset, schema) pair or (dataset, schema, size) triplet """
+        """Returns a Json representation compatible with [Protocol Buffers](https://protobuf.dev/reference/protobuf/google.protobuf/#google.protobuf.Struct)
+        of the dataset
+        """
         return {
             '@type': 'sarus_data_spec/sarus_data_spec.Dataset',
             'uuid': generate_uuid().hex,
@@ -56,6 +63,9 @@ def dataset_from_database(
         }
 
     def schema(dataset: dict) -> dict:
+        """Returns a Json representation compatible with [Protocol Buffers](https://protobuf.dev/reference/protobuf/google.protobuf/#google.protobuf.Struct)
+        of the schema
+        """
         tables = {"fields": [table(metadata.tables[name]) for name in metadata.tables]}
 
         if schema_name is not None:

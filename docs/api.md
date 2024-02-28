@@ -2,25 +2,29 @@
 # API
 
 ```{eval-rst}
-.. automodule:: pyqrlew
+.. autoclass:: pyqrlew.Dataset
     :members:
 ```
 
 ```{eval-rst}
-.. autoclass:: pyqrlew.io.PostgreSQL
-    :members:
-```
-
-```{eval-rst}
-.. autoclass:: pyqrlew.io.SQLite
-    :members:
-```
-
-```{eval-rst}
-.. autofunction:: pyqrlew.io.dataset
-```
-
-<!-- ```{eval-rst}
 .. autoclass:: pyqrlew.Relation
     :members:
-``` -->
+```
+
+```{eval-rst}
+.. autoclass:: pyqrlew.RelationWithDpEvent
+    :members:
+```
+
+```{eval-rst}
+.. autoclass:: pyqrlew.DpEvent
+    :members:
+```
+
+```{eval-rst}
+.. autoclass:: pyqrlew.Dialect
+    :members:
+    :undoc-members:
+```
+
+
