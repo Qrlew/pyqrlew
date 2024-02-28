@@ -104,10 +104,10 @@ def from_csv_dict(csv_dict: t.Dict[str, str], db_name:str ="my_sqlite.db", range
         - col3, Type: BOOLEAN
     """
     db = SQLite(db_name, ranges)
-    _ = {
+    
+    for table_name, csv_file in csv_dict.items():
         db.load_csv(table_name, csv_file)
-        for table_name, csv_file in csv_dict.items()
-    }
+
     return db
 
 def from_pandas(table_name: str, data: pd.DataFrame, db_name:str ="my_sqlite.db", ranges: bool=False) -> 'SQLite':
@@ -185,8 +185,6 @@ def from_pandas_dict(data_dict: t.Dict[str, pd.DataFrame], db_name:str ="my_sqli
         - colB, Type: BIGINT
     """
     db = SQLite(db_name, ranges)
-    _ = {
+    for table_name, df in data_dict.items():
         db.load_pandas(table_name, df)
-        for table_name, df in data_dict.items()
-    }
     return db

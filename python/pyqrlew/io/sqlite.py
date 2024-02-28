@@ -4,6 +4,7 @@ from qrlew_datasets.database import Database
 import pyqrlew as qrl
 from pyqrlew.io.dataset import dataset_from_database
 import pandas as pd
+import typing as t
 
 dtype_to_sqlalchemy = {
     'object': sqlalchemy.String,
@@ -105,7 +106,7 @@ class SQLite(Database):
         }
         metadata = sqlalchemy.MetaData()
         columns = [
-            sqlalchemy.Column(col_name, col_type)
+            sqlalchemy.Column(col_name, col_type)  # type: ignore
             for col_name, col_type in column_types.items()
         ]
         _ = sqlalchemy.Table(table_name, metadata, *columns)
@@ -125,15 +126,15 @@ class SQLite(Database):
         """Create and return an SQLAlchemy Engine instance for the SQLite database."""
         return sqlalchemy.create_engine(self.url(), echo=True)
 
-    def eval(self, relation: qrl.Relation) -> list:
+    def eval(self, relation: qrl.Relation) -> t.Sequence[list]:
         """Convert a PyQrlew relation into a sql query string, send it to the database and return the result."""
-        return self.execute(relation.to_query())
+        return self.execute(relation.to_query(None))
 
-    def execute(self, query: str) -> list:
+    def execute(self, query: str) -> t.Sequence[list]:
         """Execute a raw SQL query and return the result."""
         with self.engine().connect() as conn:
             result = conn.execute(sqlalchemy.text(query)).all()
-        return result
+        return t.cast(t.Sequence[list], result)
 
     def dataset(self) -> qrl.Dataset:
         """Create and return a PyQrlew Dataset linked to the SQLite database."""

@@ -12,23 +12,23 @@ try:
 except ImportError:
     plt = None
 
-def divergence(array1: np.array, array2: np.array, epsilon: float) -> float:
+def divergence(array1: np.ndarray, array2: np.ndarray, epsilon: float) -> float:
     arr = [max(l1 - np.exp(epsilon)*l2, 0) for (l1, l2) in zip(array1, array2)]
-    return np.sum(arr)
+    return float(np.sum(arr))
 
-def privacy_profile(ref_results: np.array, adj_results: List[np.array], epsilon: float) -> float:
+def privacy_profile(ref_results: np.ndarray, adj_results: List[np.ndarray], epsilon: float) -> float:
     divergences = [
         divergence(ref_results, adj_res, epsilon)
         for adj_res in adj_results
     ]
-    return max(divergences)
+    return float(max(divergences))
 
-def compute_distribution(my_list: list, bins: int) -> np.array:
+def compute_distribution(my_list: list, bins: int) -> np.ndarray:
     values, _ = np.histogram(my_list, bins=bins)
     values = values / np.sum(values)
     return values
 
-def plot_utility(dp_results: List[float], true_res: float):
+def plot_utility(dp_results: dict, true_res: float) -> None:
     if plt is None:
         raise ModuleNotFoundError
     [
@@ -39,12 +39,12 @@ def plot_utility(dp_results: List[float], true_res: float):
     plt.grid(True, linestyle='--', alpha=0.7)
     plt.legend()
 
-def plot_adjacent_histograms(array1: List[float], array2: List[float], epsilon:float, delta: float, nbins:float=20, alpha=0.5, color1='blue', color2='orange'):
+def plot_adjacent_histograms(array1: List[float], array2: List[float], epsilon:float, delta: float, nbins:float=20, alpha:float=0.5, color1:str='blue', color2:str='orange') -> None:
     if plt is None:
         raise ModuleNotFoundError
     xmin = max(min(array1), min(array2))
     xmax = min(max(array1), max(array2))
-    bins = np.linspace(xmin, xmax, nbins)
+    bins = np.linspace(xmin, xmax, nbins)  #type: ignore
     values1 = compute_distribution(array1, bins)
     values2 = compute_distribution(array2, bins)
     x = bins[1:] + (bins[1] -bins[0])
@@ -54,12 +54,12 @@ def plot_adjacent_histograms(array1: List[float], array2: List[float], epsilon:f
     plt.grid(True, linestyle='--', alpha=0.7)
     plt.legend()
 
-def plot_privacy_profile(array: List[float], arrays: List[List[float]], nbins:float=20, epsilons: List[float]=list(np.linspace(0, 3, 100))):
+def plot_privacy_profile(array: List[float], arrays: List[List[float]], nbins:float=20, epsilons: List[float]=list(np.linspace(0, 3, 100))) -> None:
     if plt is None:
         raise ModuleNotFoundError
     xmin = max(min([min(a) for a in arrays]), min(array))
     xmax = min(max([max(a) for a in arrays]), max(array))
-    bins = np.linspace(xmin, xmax, nbins)
+    bins = np.linspace(xmin, xmax, nbins)  #type: ignore
 
     ref_distribution = compute_distribution(array, bins)
     adj_distributions = [
@@ -74,7 +74,7 @@ def plot_privacy_profile(array: List[float], arrays: List[List[float]], nbins:fl
     plt.xlabel(r'$\varepsilon$')
     plt.ylabel(r'$\delta$')
 
-def save_data(filename: str, arr_ref: List[float], arr_adj: List[List[float]]):
+def save_data(filename: str, arr_ref: List[float], arr_adj: List[List[float]]) -> None:
     df = pd.DataFrame()
     df['ref'] = arr_ref
     for i, adj in enumerate(arr_adj):
@@ -82,7 +82,7 @@ def save_data(filename: str, arr_ref: List[float], arr_adj: List[List[float]]):
     df.to_csv(filename, index=False)
     print(f"file {filename} written.")
 
-def run_test(database: StochasticDatabase, stochastic_tester: StochasticTester, query: str, adj_query_func: Callable[[int], str], name: str, n_sim: int):
+def run_test(database: StochasticDatabase, stochastic_tester: StochasticTester, query: str, adj_query_func: Callable[[int], str], name: str, n_sim: int)-> None:
     if plt is None:
         raise ModuleNotFoundError
     print(f"Query = {query}")
@@ -95,7 +95,11 @@ def run_test(database: StochasticDatabase, stochastic_tester: StochasticTester, 
     epsilon = 1.
     ref_res = stochastic_tester.compute_results(query, epsilon=epsilon, n_sim=n_sim)
     adj_res = [
-        stochastic_tester.compute_results(adj_query_func(i), epsilon=epsilon, n_sim=n_sim)
+        stochastic_tester.compute_results(
+            adj_query_func(int(i)),
+            epsilon=epsilon,
+            n_sim=n_sim
+        )
         for i in [np.random.uniform(0, 100) for _ in range(10)]
     ]
     save_data(f"{name}.txt", ref_res, adj_res)

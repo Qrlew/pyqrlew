@@ -8,5 +8,6 @@ graphviz ~= 0.2.2
 termcolor ~= 2.0
 pytest ~= 7.0
 pandas ~= 2.0
+pandas-stubs ~= 2.0
 matplotlib ~= 3.7.3
 dp-accounting ~= 0.4.3

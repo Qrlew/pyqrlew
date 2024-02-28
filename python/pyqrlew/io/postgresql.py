@@ -38,7 +38,7 @@ class PostgreSQL(EmptyPostgreSQL):
         	avg_age
         0	48.005155
     """
-    def __init__(self, name=NAME, user=USER, password=PASSWORD, port=PORT) -> None:
+    def __init__(self, name:str=NAME, user:str=USER, password:str=PASSWORD, port:int=PORT) -> None:
         """Initialize an SQLite instance.
 
         Args:
@@ -68,7 +68,12 @@ class PostgreSQL(EmptyPostgreSQL):
             allowing for method chaining.
         """
         with self.engine().connect() as conn:
-            res = list(conn.execute(select(column('schema_name')).select_from(table('schemata', schema='information_schema')).where(column('schema_name') == schema)))
+            res = list(
+                conn.execute(
+                    select(column('schema_name'))  #type: ignore
+                    .select_from(table('schemata', schema='information_schema'))  #type: ignore
+                    .where(column('schema_name') == schema))
+            )
             schema_exists = len(res)==1
         if not schema_exists:
             dst = Path('/tmp') / schema

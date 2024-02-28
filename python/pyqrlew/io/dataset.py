@@ -3,9 +3,12 @@ import logging
 from uuid import uuid4 as generate_uuid
 from typing import Optional, Tuple, List, Dict, Union
 import json
-from sqlalchemy import MetaData, Table, Column, types, select, func, literal, String, ARRAY, case, text
 from sqlalchemy.engine import Engine
+from sqlalchemy import types
+import sqlalchemy as sa
 import pyqrlew as qrl
+import typing as t 
+
 
 def dataset_from_database(
     name: str,
@@ -31,7 +34,7 @@ def dataset_from_database(
     Returns:
         Dataset:
     """
-    metadata = MetaData()
+    metadata = sa.MetaData()
     metadata.reflect(engine, schema=schema_name)
 
     def dataset_schema_size() -> Tuple[dict, dict, Optional[dict]]:
@@ -150,22 +153,35 @@ def dataset_from_database(
             }
         }
 
-    def table(tab: Table) -> dict:
+    def table(tab: sa.Table) -> dict:
         min_max_possible_values = compute_min_max_possible_values(tab)
         return {
             'name': tab.name,
             'type': {
                 'name': 'Struct',
                 'struct': {
-                    'fields': [column(col, **min_max_possible_values[col.name]) for col in tab.columns],
+                    'fields': [
+                        column(
+                            col,
+                            min=t.cast(t.Optional[str], min_max_possible_values[col.name]["min"]),
+                            max=t.cast(t.Optional[str], min_max_possible_values[col.name]["max"]),
+                            possible_values=t.cast(t.List[str], min_max_possible_values[col.name]["possible_values"])
+                        ) for col in tab.columns
+                    ],
                 },
                 'properties': {},
             }
         }
 
-    def compute_min_max_possible_values(tab: Table) -> Dict[str, Dict[str, Union[str, List[str]]]]:
+    def compute_min_max_possible_values(tab: sa.Table) -> Dict[str, Dict[str, Union[t.Optional[str], List[str]]]]:
         """Send 3 SQL queries for loading the bounds"""
-        values = {col.name: {'min': None, 'max': None, 'possible_values': []} for col in tab.columns}
+        values: Dict[str, Dict[str, Union[t.Optional[str], List[str]]]] = {
+            col.name: {
+                'min': None,
+                'max': None,
+                'possible_values': []
+            } for col in tab.columns
+        }
         intervals_types = [
             types.Integer, types.BigInteger,
             types.Float, types.Numeric,
@@ -178,20 +194,22 @@ def dataset_from_database(
         ]
 
         if ranges and len(interval_cols) != 0:
-            min_query = select(*[func.cast(func.min(col), String).label(col.name) for col in interval_cols]).select_from(tab)
-            max_query = select(*[func.cast(func.max(col), String).label(col.name) for col in interval_cols]).select_from(tab)
+            min_query = sa.select(*[sa.func.cast(sa.func.min(col), sa.String).label(col.name) for col in interval_cols]).select_from(tab)
+            max_query = sa.select(*[sa.func.cast(sa.func.max(col), sa.String).label(col.name) for col in interval_cols]).select_from(tab)
 
             with engine.connect() as conn:
                 min_results = conn.execute(min_query).fetchone()
                 max_results = conn.execute(max_query).fetchone()
 
-            for col, min_val, max_val in zip(interval_cols, min_results, max_results):
+            for col, min_val, max_val in zip(
+                    interval_cols, t.cast(t.Iterable[t.Any], min_results), t.cast(t.Iterable[t.Any], max_results)
+                ):
                 values[col.name]['min'] = min_val
                 values[col.name]['max'] = max_val
 
         if possible_values_threshold is not None and len(interval_cols) != 0:
             tablename = f"\"{tab.name}\"" if tab.schema is None else f"\"{tab.schema}\".\"{tab.name}\""
-            values_query = text(
+            values_query = sa.text(
                 "SELECT " + ','.join([
                     f"CASE WHEN COUNT(DISTINCT \"{col.name}\") <= {possible_values_threshold} "
                     f"THEN array_agg(DISTINCT CAST(\"{col.name}\" AS Text)) ELSE ARRAY[]::VARCHAR[] "
@@ -204,12 +222,12 @@ def dataset_from_database(
             with engine.connect() as conn:
                 values_results = conn.execute(values_query).fetchone()
 
-            for col, possible_values in zip(interval_cols, values_results):
+            for col, possible_values in zip(interval_cols, t.cast(t.Iterable[t.Any], values_results)):
                 values[col.name]['possible_values'] = [str(v) for v in possible_values]
 
         return values
 
-    def column(col: Column, min:Optional[str]=None, max:Optional[str]=None, possible_values:List[str]=[]) -> dict:
+    def column(col: sa.Column, min:Optional[str]=None, max:Optional[str]=None, possible_values:List[str]=[]) -> dict:
         if isinstance(col.type, types.Integer) or isinstance(col.type, types.BigInteger):
             min = '-9223372036854775808' if min is None else min
             max = '9223372036854775807' if max is None else max
@@ -321,10 +339,10 @@ def dataset_from_database(
             'properties': {},
         }
 
-    def table_size(tab: Table) -> dict:
+    def table_size(tab: sa.Table) -> dict:
         with engine.connect() as conn:
-            result = conn.execute(select(func.count()).select_from(tab))
-            size = result.scalar()
+            result = conn.execute(sa.select(sa.func.count()).select_from(tab))
+            size = t.cast(int, result.scalar())
         multiplicity = 1.0
         return {
             'name': tab.name,
@@ -339,7 +357,7 @@ def dataset_from_database(
             }
         }
 
-    def column_size(col: Column, size: int, multiplicity: float) -> dict:
+    def column_size(col: sa.Column, size: int, multiplicity: float) -> dict:
         if isinstance(col.type, types.Integer) or isinstance(col.type, types.BigInteger):
             return {
                 'name': col.name,
@@ -446,7 +464,7 @@ def dataset_from_database(
             raise NotImplementedError(f"SQL -> Sarus Conversion not supported for {col.type} SQL type")
 
     # Gather protobufs
-    dataset, schema, size = dataset_schema_size()
+    dataset, schema, size = dataset_schema_size()  # type: ignore
     # Display when debugging
     logging.debug(json.dumps(dataset))
     logging.debug(json.dumps(schema))
@@ -454,18 +472,20 @@ def dataset_from_database(
     # Return the result
     return qrl.Dataset(json.dumps(dataset), json.dumps(schema), json.dumps(size))
 
+# The following statements make mypy to fail. Adding a python class wrapper
+# around qrl.Dataset it would be beneficial both for mypy and for the doc.
 # Make it a builder
-qrl.Dataset.from_database = dataset_from_database
+qrl.Dataset.from_database = dataset_from_database  # type: ignore
 
 # Add a useful const
-qrl.Dataset.CONSTRAINT_UNIQUE: str = '_UNIQUE_'
+qrl.Dataset.CONSTRAINT_UNIQUE: str = '_UNIQUE_'  # type: ignore
 
 # A method to get select a schema
 def schema(dataset: qrl.Dataset, schema: str) -> 'Schema':
     return Schema(dataset, schema)
 
 # Add the method
-qrl.Dataset.__getattr__ = schema
+qrl.Dataset.__getattr__ = schema  # type: ignore
 
 @dataclass
 class Schema:
@@ -485,7 +505,7 @@ class Table:
         return Column(self.dataset, self.schema, self.table, column)
 
     def relation(self) -> qrl.Relation:
-        return next(rel for path, rel in self.dataset.relations() if path[1]==self.schema and path[2]==self.table)
+        return next(rel for path, rel in self.dataset.relations() if path[1]==self.schema and path[2]==self.table)  # type: ignore
 
 @dataclass
 class Column:
@@ -500,11 +520,11 @@ class Column:
     def with_possible_values(self, with_possible_values: List[str]) -> qrl.Dataset:
         return self.dataset.with_possible_values(self.schema, self.table, self.column, with_possible_values)
     
-    def with_constraint(self, constraint: str) -> qrl.Dataset:
+    def with_constraint(self, constraint: t.Optional[str]) -> qrl.Dataset:
         return self.dataset.with_constraint(self.schema, self.table, self.column, constraint)
 
     def with_unique_constraint(self) -> qrl.Dataset:
-        return self.with_constraint(qrl.Dataset.CONSTRAINT_UNIQUE)
+        return self.with_constraint(qrl.Dataset.CONSTRAINT_UNIQUE)  # type: ignore
     
     def with_no_constraint(self) -> qrl.Dataset:
         return self.with_constraint(None)

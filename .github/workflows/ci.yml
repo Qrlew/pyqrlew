@@ -48,6 +48,22 @@ jobs:
             - run: pip freeze
             - run: pytest
 
+    mypy-check:
+        name: Run mypy type checks
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - name: Set up Python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: '3.9'
+            - name: Install dependencies
+              run: |
+                  pip install -r tests/requirements.txt
+                  pip install mypy==1.8.0;
+            - name: Run mypy
+              run: mypy --config-file .tools-cfg/mypy.ini --package pyqrlew
+
     linux:
         runs-on: ubuntu-latest
         if: startsWith(github.ref, 'refs/tags/')
