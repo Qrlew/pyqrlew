@@ -12,6 +12,16 @@
 ```
 
 ```{eval-rst}
+.. autoclass:: pyqrlew.RelationWithDpEvent
+    :members:
+```
+
+```{eval-rst}
+.. autoclass:: pyqrlew.DpEvent
+    :members:
+```
+
+```{eval-rst}
 .. autoclass:: pyqrlew.Dialect
     :members:
     :undoc-members:
