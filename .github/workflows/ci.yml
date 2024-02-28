@@ -60,6 +60,7 @@ jobs:
             - name: Install dependencies
               run: |
                   pip install -r tests/requirements.txt
+                  pip install -e .
                   pip install mypy==1.8.0;
             - name: Run mypy
               run: mypy --config-file .tools-cfg/mypy.ini --package pyqrlew
