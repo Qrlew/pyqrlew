@@ -1,8 +1,7 @@
 import os
 import sqlalchemy
-from qrlew_datasets.database import Database
-import pyqrlew as qrl
-from pyqrlew.io.dataset import dataset_from_database
+from qrlew_datasets.database import Database  # type: ignore  #module is installed, but missing library stubs or py.typed marker 
+from pyqrlew import Dataset, Relation, dataset_from_database
 import pandas as pd
 import typing as t
 
@@ -126,7 +125,7 @@ class SQLite(Database):
         """Create and return an SQLAlchemy Engine instance for the SQLite database."""
         return sqlalchemy.create_engine(self.url(), echo=True)
 
-    def eval(self, relation: qrl.Relation) -> t.Sequence[list]:
+    def eval(self, relation: Relation) -> t.Sequence[list]:
         """Convert a PyQrlew relation into a sql query string, send it to the database and return the result."""
         return self.execute(relation.to_query(None))
 
@@ -136,7 +135,7 @@ class SQLite(Database):
             result = conn.execute(sqlalchemy.text(query)).all()
         return t.cast(t.Sequence[list], result)
 
-    def dataset(self) -> qrl.Dataset:
+    def dataset(self) -> Dataset:
         """Create and return a PyQrlew Dataset linked to the SQLite database."""
         return dataset_from_database(self.db_file, self.engine(), ranges=self.ranges, possible_values_threshold=self.possible_values_threshold)
 

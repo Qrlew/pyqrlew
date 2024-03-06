@@ -19,7 +19,7 @@ use crate::{
 };
 
 /// A Relation is a Dataset transformed by a SQL query
-#[pyclass]
+#[pyclass(name="_Relation")]
 #[derive(Clone)]
 pub struct Relation(Arc<relation::Relation>);
 

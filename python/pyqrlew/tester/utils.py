@@ -7,7 +7,7 @@ import pandas as pd
 
 # Optionally import matplotlib
 try:
-    import matplotlib.pylab as plt
+    import matplotlib.pylab as plt  # type: ignore  # module is installed, but missing library stubs or py.typed marker 
     plt.rcParams['text.usetex'] = True
 except ImportError:
     plt = None

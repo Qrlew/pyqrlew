@@ -1,13 +1,102 @@
+from .pyqrlew import _Dataset, _Relation, Dialect
+import typing as t 
+from sqlalchemy.engine import Engine
+
 from dataclasses import dataclass
 import logging
 from uuid import uuid4 as generate_uuid
 from typing import Optional, Tuple, List, Dict, Union
 import json
-from sqlalchemy.engine import Engine
 from sqlalchemy import types
 import sqlalchemy as sa
-import pyqrlew as qrl
-import typing as t 
+import typing as t
+
+
+class Dataset:
+    """A wrapper around rust's _Dataset"""
+
+    CONSTRAINT_UNIQUE: str = '_UNIQUE_' 
+
+
+    def __init__(self, dataset: _Dataset) -> None:
+        self._dataset = dataset
+
+
+    @staticmethod
+    def from_str(dataset: str, schema: str, size: t.Optional[str]=None):
+        """Factory method to create a Dataset wrapper from an existing _Dataset instance."""
+        return Dataset(_Dataset(dataset, schema, size))
+
+    @staticmethod
+    def from_database(
+        name: str,
+        engine: Engine,
+        schema_name: t.Optional[str]=None,
+        ranges: bool=False,
+        possible_values_threshold: t.Optional[int]=None
+    ) -> 'Dataset':
+        """Builds a `Dataset` from a sqlalchemy `Engine`
+
+        Args:
+            name (str):
+                Name of the Dataset
+            engine (Engine):
+                The sqlalchemy `Engine` to use
+            schema_name (Optional[str], optional):
+                The DB schema to use. Defaults to None.
+            ranges (bool, optional):
+                Use the actual min and max of the data as ranges. **This is unsafe from a privacy perspective**. Defaults to False.
+            possible_values_threshold (Optional[int], optional):
+                Use the actual observed values as range. **This is unsafe from a privacy perspective**. Defaults to None.
+
+        Returns:
+            Dataset:
+        """
+        return dataset_from_database(name, engine, schema_name, ranges, possible_values_threshold)
+
+    @property
+    def schema(self) -> str:
+        return self._dataset.schema()
+
+    @property
+    def size(self) -> t.Optional[str]:
+        return self._dataset.size()
+    
+    def with_range(self, schema_name: str, table_name: str, field_name: str, min: float, max: float) -> 'Dataset':
+        return self._dataset.with_range(schema_name, table_name, field_name, min, max)
+    
+    def with_possible_values(self, schema_name: str, table_name: str, field_name: str, possible_values: t.Iterable[str]) -> 'Dataset':
+        return self._dataset.with_possible_values(schema_name, table_name, field_name, possible_values)
+    
+    def with_constraint(self, schema_name: str, table_name: str, field_name: str, constraint: t.Optional[str]) -> 'Dataset':
+        return self._dataset.with_constraint(schema_name, table_name, field_name, constraint)
+    
+    def relations(self) -> t.Iterable['Relation']:
+        return self._dataset.relations()
+
+    def relation(self, query: str, dialect: t.Optional['Dialect']=None) -> 'Relation':
+        return self._dataset.relation(query, dialect)
+
+    def from_queries(self, queries: t.Iterable[t.Tuple[t.Iterable[str], str]], dialect: t.Optional['Dialect']=None) -> 'Dataset':
+        return self._dataset.from_queries(queries, dialect)
+
+
+class Relation:
+    def __init__(self, *args, **kwargs):
+        self._rust_relation = _Relation(*args, **kwargs)
+
+    def __getattr__(self, name):
+        """
+        Delegate attribute access to the Rust object.
+        """
+        attr = getattr(self._rust_relation, name)
+
+        if callable(attr):
+            def wrapper(*args, **kwargs):
+                return attr(*args, **kwargs)
+            return wrapper
+        else:
+            return attr
 
 
 def dataset_from_database(
@@ -16,24 +105,8 @@ def dataset_from_database(
     schema_name: Optional[str]=None,
     ranges: bool=False,
     possible_values_threshold: Optional[int]=None
-) -> qrl.Dataset:
-    """Builds a `Dataset` from a sqlalchemy `Engine`
+) -> Dataset:
 
-    Args:
-        name (str):
-            Name of the Dataset
-        engine (Engine):
-            The sqlalchemy `Engine` to use
-        schema_name (Optional[str], optional):
-            The DB schema to use. Defaults to None.
-        ranges (bool, optional):
-            Use the actual min and max of the data as ranges. **This is unsafe from a privacy perspective**. Defaults to False.
-        possible_values_threshold (Optional[int], optional):
-            Use the actual observed values as range. **This is unsafe from a privacy perspective**. Defaults to None.
-
-    Returns:
-        Dataset:
-    """
     metadata = sa.MetaData()
     metadata.reflect(engine, schema=schema_name)
 
@@ -470,26 +543,31 @@ def dataset_from_database(
     logging.debug(json.dumps(schema))
     logging.debug(json.dumps(size))
     # Return the result
-    return qrl.Dataset(json.dumps(dataset), json.dumps(schema), json.dumps(size))
+    return Dataset(json.dumps(dataset), json.dumps(schema), json.dumps(size))
 
 # The following statements make mypy to fail. Adding a python class wrapper
 # around qrl.Dataset it would be beneficial both for mypy and for the doc.
 # Make it a builder
-qrl.Dataset.from_database = dataset_from_database  # type: ignore
+# qrl.Dataset.from_database = dataset_from_database  # type: ignore
 
-# Add a useful const
-qrl.Dataset.CONSTRAINT_UNIQUE: str = '_UNIQUE_'  # type: ignore
+# # Add a useful const
+# qrl.Dataset.CONSTRAINT_UNIQUE: str = '_UNIQUE_'  # type: ignore
+
+
+# # Add the method
+# qrl.Dataset.__getattr__ = schema  # type: ignore
+
+
+
 
 # A method to get select a schema
-def schema(dataset: qrl.Dataset, schema: str) -> 'Schema':
+def schema(dataset: Dataset, schema: str) -> 'Schema':
     return Schema(dataset, schema)
 
-# Add the method
-qrl.Dataset.__getattr__ = schema  # type: ignore
 
 @dataclass
 class Schema:
-    dataset: qrl.Dataset
+    dataset:Dataset
     schema: str
 
     def __getattr__(self, table: str) -> 'Table':
@@ -497,34 +575,35 @@ class Schema:
 
 @dataclass
 class Table:
-    dataset: qrl.Dataset
+    dataset: Dataset
     schema: str
     table: str
 
     def __getattr__(self, column: str) -> 'Column':
         return Column(self.dataset, self.schema, self.table, column)
 
-    def relation(self) -> qrl.Relation:
+    def relation(self) -> _Relation:
         return next(rel for path, rel in self.dataset.relations() if path[1]==self.schema and path[2]==self.table)  # type: ignore
 
 @dataclass
 class Column:
-    dataset: qrl.Dataset
+    dataset: Dataset
     schema: str
     table: str
     column: str
 
-    def with_range(self, min:float, max:float) -> qrl.Dataset:
+    def with_range(self, min:float, max:float) -> Dataset:
         return self.dataset.with_range(self.schema, self.table, self.column, min, max)
     
-    def with_possible_values(self, with_possible_values: List[str]) -> qrl.Dataset:
+    def with_possible_values(self, with_possible_values: List[str]) -> Dataset:
         return self.dataset.with_possible_values(self.schema, self.table, self.column, with_possible_values)
     
-    def with_constraint(self, constraint: t.Optional[str]) -> qrl.Dataset:
+    def with_constraint(self, constraint: t.Optional[str]) -> Dataset:
         return self.dataset.with_constraint(self.schema, self.table, self.column, constraint)
 
-    def with_unique_constraint(self) -> qrl.Dataset:
-        return self.with_constraint(qrl.Dataset.CONSTRAINT_UNIQUE)  # type: ignore
+    def with_unique_constraint(self) -> Dataset:
+        return self.with_constraint(Dataset.CONSTRAINT_UNIQUE)  # type: ignore
     
-    def with_no_constraint(self) -> qrl.Dataset:
+    def with_no_constraint(self) -> Dataset:
         return self.with_constraint(None)
+    

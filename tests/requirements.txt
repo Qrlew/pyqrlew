@@ -11,4 +11,3 @@ pandas ~= 2.0
 pandas-stubs ~= 2.0
 matplotlib ~= 3.7.3
 dp-accounting ~= 0.4.3
-sqlalchemy_stubs == 0.4
