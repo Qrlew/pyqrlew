@@ -60,7 +60,7 @@ jobs:
             - name: Install dependencies
               run: |
                   pip install "maturin>=1.0,<2.0"
-                  maturin develop
+                  maturin build && pip install .
             - name: Run mypy
               run: mypy --package pyqrlew
 
