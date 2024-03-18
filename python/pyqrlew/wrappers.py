@@ -15,7 +15,7 @@ import typing as t
 
 
 class Dataset:
-    """A wrapper around rust's _Dataset"""
+    """A wrapper around rust's Dataset object"""
 
     CONSTRAINT_UNIQUE: str = '_UNIQUE_' 
 
@@ -68,33 +68,42 @@ class Dataset:
         return self._dataset.size()
     
     def with_range(self, schema_name: str, table_name: str, field_name: str, min: float, max: float) -> 'Dataset':
+        """Method that..."""
         return Dataset(self._dataset.with_range(schema_name, table_name, field_name, min, max))
     
     def with_possible_values(self, schema_name: str, table_name: str, field_name: str, possible_values: t.Iterable[str]) -> 'Dataset':
+        """Method that..."""
         return Dataset(self._dataset.with_possible_values(schema_name, table_name, field_name, possible_values))
     
     def with_constraint(self, schema_name: str, table_name: str, field_name: str, constraint: t.Optional[str]) -> 'Dataset':
+        """Method that..."""
         return Dataset(self._dataset.with_constraint(schema_name, table_name, field_name, constraint))
     
     def relations(self) -> t.Iterable[t.Tuple[t.List[str], 'Relation']]:
+        """Method that..."""
         return [(path, Relation(rel)) for (path, rel) in self._dataset.relations()]
 
     def relation(self, query: str, dialect: t.Optional['Dialect']=None) -> 'Relation':
+        """Method that..."""
         return Relation(self._dataset.relation(query, dialect))
 
     def from_queries(self, queries: t.Iterable[t.Tuple[t.Iterable[str], str]], dialect: t.Optional['Dialect']=None) -> 'Dataset':
+        """Method that..."""
         return Dataset(self._dataset.from_queries(queries, dialect))
 
 
 class Relation:
+    """A wrapper around rust's Relation object"""
     def __init__(self, relation: _Relation) -> None:
         self._relation = relation
 
     @staticmethod
     def from_query(query: str, dataset: Dataset, dialect: t.Optional['Dialect']) -> 'Relation':
+        """Method that..."""
         return Relation(_Relation.from_query(query, dataset._dataset, dialect))
 
     def to_query(self, dialect: t.Optional[Dialect]=None) -> str:
+        """Method that..."""
         return self._relation.to_query(dialect)
 
     def rewrite_as_privacy_unit_preserving(
@@ -106,6 +115,7 @@ class Relation:
         max_multiplicity_share: t.Optional[float]=None,
         synthetic_data: t.Optional[SyntheticData]=None,
     ) -> RelationWithDpEvent:
+        """Method that..."""
         return self._relation.rewrite_as_privacy_unit_preserving(
             dataset._dataset,
             privacy_unit,
@@ -124,6 +134,7 @@ class Relation:
         max_multiplicity_share: t.Optional[float]=None,
         synthetic_data: t.Optional[SyntheticData]=None,
     ) -> RelationWithDpEvent:
+        """Method that..."""
         return self._relation.rewrite_with_differential_privacy(
             dataset._dataset,
             privacy_unit,
@@ -155,6 +166,7 @@ def dataset_from_database(
     ranges: bool=False,
     possible_values_threshold: Optional[int]=None
 ) -> Dataset:
+    """Method that..."""
 
     metadata = sa.MetaData()
     metadata.reflect(engine, schema=schema_name)
