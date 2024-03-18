@@ -2,6 +2,8 @@ from __future__ import annotations
 import typing as t
 import enum
 
+from pyqrlew.typing import PrivacyUnit, SyntheticData
+
 class _Dataset:
     """Class that ...."""
     def __new__(self, dataset: str, schema: str, size: str) -> '_Dataset': ...
@@ -24,6 +26,34 @@ class _Relation:
     def dot(self) -> str: ...
     def schema(self) -> str: ...
     def to_query(self, dialect: t.Optional['Dialect']=None) -> str: ...
+    def rewrite_as_privacy_unit_preserving(
+        self,
+        dataset: _Dataset,
+        privacy_unit: PrivacyUnit,
+        epsilon_delta: t.Dict[str, float],
+        max_multiplicity: t.Optional[float]=None,
+        max_multiplicity_share: t.Optional[float]=None,
+        synthetic_data: t.Optional[SyntheticData]=None
+    ) -> 'RelationWithDpEvent': ...
+    def rewrite_with_differential_privacy(
+        self,
+        dataset: _Dataset,
+        privacy_unit: PrivacyUnit,
+        epsilon_delta: t.Dict[str, float],
+        max_multiplicity: t.Optional[float]=None,
+        max_multiplicity_share: t.Optional[float]=None,
+        synthetic_data: t.Optional[SyntheticData]=None
+    ) -> 'RelationWithDpEvent': ...
+
+
+class RelationWithDpEvent:
+    def relation(self) -> _Relation: ...
+    def dp_event(self) -> DpEvent: ...
+
+
+class DpEvent:
+    def to_dict(self) -> t.Mapping[str, t.Union[str, float]]: ...
+    def to_named_tuple(self) -> t.NamedTuple: ...
 
 
 class Dialect(enum.Enum):

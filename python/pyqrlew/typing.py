@@ -1,8 +1,10 @@
 """Module with the definition of some rust objects that are not exposed to
 python. This is only for documentation purposes."""
-import pyqrlew as qrl
+from .pyqrlew import _Relation
 import typing as t
 
+PrivacyUnit = t.Sequence[t.Tuple[str, t.Sequence[t.Tuple[str, str, str]], str]]
+SyntheticData = t.Sequence[t.Tuple[t.Sequence[str], t.Sequence[str]]]
 
 
 class DpEvent(t.Protocol):
@@ -27,7 +29,7 @@ class RelationWithDpEvent(t.Protocol):
     """Internal object containing a differentially private (DP) or privacy unit
     preserving (PUP) relation and the associated DpEvent."""
 
-    def relation(self) -> qrl.Relation:
+    def relation(self) -> _Relation:
         """Returns the DP or PUP relation.
         """
         ...

@@ -1,3 +1,5 @@
+"""Module containing wrappers around rust objects and some utils"""
+from pyqrlew.typing import RelationWithDpEvent, PrivacyUnit, SyntheticData
 from .pyqrlew import _Dataset, _Relation, Dialect
 import typing as t 
 from sqlalchemy.engine import Engine
@@ -54,6 +56,9 @@ class Dataset:
         """
         return dataset_from_database(name, engine, schema_name, ranges, possible_values_threshold)
 
+    def __getattr__(dataset: 'Dataset', schema: str) -> 'Schema':
+        return Schema(dataset, schema)
+
     @property
     def schema(self) -> str:
         return self._dataset.schema()
@@ -82,14 +87,58 @@ class Dataset:
 
 
 class Relation:
-    def __init__(self, relation: _Relation):
+    def __init__(self, relation: _Relation) -> None:
         self._relation = relation
+
+    @staticmethod
+    def from_query(query: str, dataset: Dataset, dialect: t.Optional['Dialect']) -> 'Relation':
+        return Relation(_Relation.from_query(query, dataset._dataset, dialect))
+
+    def to_query(self, dialect: t.Optional[Dialect]=None) -> str:
+        return self._relation.to_query(dialect)
+
+    def rewrite_as_privacy_unit_preserving(
+        self,
+        dataset: Dataset,
+        privacy_unit: PrivacyUnit,
+        epsilon_delta: t.Dict[str, float],
+        max_multiplicity: t.Optional[float]=None,
+        max_multiplicity_share: t.Optional[float]=None,
+        synthetic_data: t.Optional[SyntheticData]=None,
+    ) -> RelationWithDpEvent:
+        return self._relation.rewrite_as_privacy_unit_preserving(
+            dataset._dataset,
+            privacy_unit,
+            epsilon_delta,
+            max_multiplicity,
+            max_multiplicity_share,
+            synthetic_data
+        )
+
+    def rewrite_with_differential_privacy(
+        self,
+        dataset: Dataset,
+        privacy_unit: PrivacyUnit,
+        epsilon_delta: t.Dict[str, float],
+        max_multiplicity: t.Optional[float]=None,
+        max_multiplicity_share: t.Optional[float]=None,
+        synthetic_data: t.Optional[SyntheticData]=None,
+    ) -> RelationWithDpEvent:
+        return self._relation.rewrite_with_differential_privacy(
+            dataset._dataset,
+            privacy_unit,
+            epsilon_delta,
+            max_multiplicity,
+            max_multiplicity_share,
+            synthetic_data
+        )
+    
 
     def __getattr__(self, name):
         """
         Delegate attribute access to the Rust object.
         """
-        attr = getattr(self._rust_relation, name)
+        attr = getattr(self._relation, name)
 
         if callable(attr):
             def wrapper(*args, **kwargs):
@@ -554,7 +603,7 @@ def schema(dataset: Dataset, schema: str) -> 'Schema':
 
 @dataclass
 class Schema:
-    dataset:Dataset
+    dataset: Dataset
     schema: str
 
     def __getattr__(self, table: str) -> 'Table':

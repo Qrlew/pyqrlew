@@ -1,7 +1,7 @@
 import typing as t
 import pyqrlew as qrl
 import qrlew_datasets.database as db  # type: ignore   #module is installed, but missing library stubs or py.typed marker 
-from pyqrlew.type_aliases import PrivacyUnit, SyntheticData
+from pyqrlew.typing import PrivacyUnit, SyntheticData
 
 
 class StochasticTester:
