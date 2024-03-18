@@ -69,8 +69,8 @@ class PostgreSQL(EmptyPostgreSQL):
         with self.engine().connect() as conn:
             res = list(
                 conn.execute(
-                    select(column('schema_name'))  #type: ignore
-                    .select_from(table('schemata', schema='information_schema'))  #type: ignore
+                    select(column('schema_name'))
+                    .select_from(table('schemata', schema='information_schema'))
                     .where(column('schema_name') == schema))
             )
             schema_exists = len(res)==1

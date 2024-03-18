@@ -104,8 +104,8 @@ class SQLite(Database):
             for column in df.columns
         }
         metadata = sqlalchemy.MetaData()
-        columns = [
-            sqlalchemy.Column(col_name, col_type)  # type: ignore
+        columns: t.List[sqlalchemy.Column] = [
+            sqlalchemy.Column(col_name, col_type)
             for col_name, col_type in column_types.items()
         ]
         _ = sqlalchemy.Table(table_name, metadata, *columns)

@@ -15,7 +15,7 @@ class Distribution(Enum):
     HALTON = "halton"
 
 class ColumnSpec:
-    def __init__(self, name: str, distribution: Distribution, nan_probability: float = 0.0, **kwargs: dict) -> None:
+    def __init__(self, name: str, distribution: Distribution, nan_probability: float = 0.0, **kwargs: float) -> None:
         self.name = name
         self.distribution = distribution
         self.nan_probability = nan_probability
@@ -66,17 +66,16 @@ class RandomTableGenerator:
         distribution = spec.distribution
         kwargs = spec.kwargs
         nan_probability = spec.nan_probability
-        print
 
-        random_numbers = np.zeros(self.size)
+        random_numbers: np.ndarray = np.zeros(self.size)
         if distribution == Distribution.LAPLACE:
-            random_numbers =  np.random.laplace(**kwargs, size=self.size)  # type: ignore
+            random_numbers =  np.random.laplace(**kwargs, size=self.size)
         elif distribution == Distribution.UNIFORM:
-            random_numbers =  np.random.uniform(**kwargs, size=self.size)  # type: ignore
+            random_numbers =  np.random.uniform(**kwargs, size=self.size)
         elif distribution == Distribution.GAUSSIAN:
-            random_numbers =  np.random.normal(**kwargs, size=self.size)  # type: ignore
+            random_numbers =  np.random.normal(**kwargs, size=self.size)
         elif distribution == Distribution.HALTON:
-            random_numbers =  self.halton_sequence(**kwargs)  # type: ignore
+            random_numbers =  self.halton_sequence(**t.cast(dict[str, int], kwargs))
         if  nan_probability > 0:
             random_numbers =  self.add_nan(random_numbers, nan_probability)
         return random_numbers

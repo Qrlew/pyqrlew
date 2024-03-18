@@ -1,5 +1,6 @@
 import numpy as np
-from typing import List, Callable
+from typing import List, Callable, Union
+import typing as t
 import textwrap
 from .stochatic_dataset import StochasticDatabase
 from .tester import StochasticTester
@@ -23,7 +24,7 @@ def privacy_profile(ref_results: np.ndarray, adj_results: List[np.ndarray], epsi
     ]
     return float(max(divergences))
 
-def compute_distribution(my_list: list, bins: int) -> np.ndarray:
+def compute_distribution(my_list: list, bins: Union[int, List[int]]) -> np.ndarray:
     values, _ = np.histogram(my_list, bins=bins)
     values = values / np.sum(values)
     return values
@@ -44,9 +45,9 @@ def plot_adjacent_histograms(array1: List[float], array2: List[float], epsilon:f
         raise ModuleNotFoundError
     xmin = max(min(array1), min(array2))
     xmax = min(max(array1), max(array2))
-    bins = np.linspace(xmin, xmax, nbins)  #type: ignore
-    values1 = compute_distribution(array1, bins)
-    values2 = compute_distribution(array2, bins)
+    bins = np.linspace(xmin, xmax, int(nbins))
+    values1 = compute_distribution(array1, t.cast(List[int], bins))
+    values2 = compute_distribution(array2, t.cast(List[int], bins))
     x = bins[1:] + (bins[1] -bins[0])
 
     plt.bar(x, np.exp(epsilon) * values2 + delta, width=bins[1]-bins[0], alpha=alpha, color=color2, label=r'$e^{\varepsilon}P(f(\mathcal{D}_2)) + \delta$')
@@ -54,12 +55,12 @@ def plot_adjacent_histograms(array1: List[float], array2: List[float], epsilon:f
     plt.grid(True, linestyle='--', alpha=0.7)
     plt.legend()
 
-def plot_privacy_profile(array: List[float], arrays: List[List[float]], nbins:float=20, epsilons: List[float]=list(np.linspace(0, 3, 100))) -> None:
+def plot_privacy_profile(array: List[float], arrays: List[List[float]], nbins:int=20, epsilons: List[float]=list(np.linspace(0, 3, 100))) -> None:
     if plt is None:
         raise ModuleNotFoundError
     xmin = max(min([min(a) for a in arrays]), min(array))
     xmax = min(max([max(a) for a in arrays]), max(array))
-    bins = np.linspace(xmin, xmax, nbins)  #type: ignore
+    bins = int(np.linspace(xmin, xmax, nbins))
 
     ref_distribution = compute_distribution(array, bins)
     adj_distributions = [

@@ -71,8 +71,8 @@ class Dataset:
     def with_constraint(self, schema_name: str, table_name: str, field_name: str, constraint: t.Optional[str]) -> 'Dataset':
         return Dataset(self._dataset.with_constraint(schema_name, table_name, field_name, constraint))
     
-    def relations(self) -> t.Iterable['Relation']:
-        return [Relation(r) for r in self._dataset.relations()]
+    def relations(self) -> t.Iterable[t.Tuple[t.List[str], 'Relation']]:
+        return [(path, Relation(rel)) for (path, rel) in self._dataset.relations()]
 
     def relation(self, query: str, dialect: t.Optional['Dialect']=None) -> 'Relation':
         return Relation(self._dataset.relation(query, dialect))
@@ -537,26 +537,13 @@ def dataset_from_database(
             raise NotImplementedError(f"SQL -> Sarus Conversion not supported for {col.type} SQL type")
 
     # Gather protobufs
-    dataset, schema, size = dataset_schema_size()  # type: ignore
+    dataset_dict, schema_dict, size_dict = dataset_schema_size()
     # Display when debugging
-    logging.debug(json.dumps(dataset))
-    logging.debug(json.dumps(schema))
-    logging.debug(json.dumps(size))
+    logging.debug(json.dumps(dataset_dict))
+    logging.debug(json.dumps(schema_dict))
+    logging.debug(json.dumps(size_dict))
     # Return the result
-    return Dataset.from_str(json.dumps(dataset), json.dumps(schema), json.dumps(size))
-
-# The following statements make mypy to fail. Adding a python class wrapper
-# around qrl.Dataset it would be beneficial both for mypy and for the doc.
-# Make it a builder
-# qrl.Dataset.from_database = dataset_from_database  # type: ignore
-
-# # Add a useful const
-# qrl.Dataset.CONSTRAINT_UNIQUE: str = '_UNIQUE_'  # type: ignore
-
-
-# # Add the method
-# qrl.Dataset.__getattr__ = schema  # type: ignore
-
+    return Dataset.from_str(json.dumps(dataset_dict), json.dumps(schema_dict), json.dumps(size_dict))
 
 
 
@@ -582,8 +569,12 @@ class Table:
     def __getattr__(self, column: str) -> 'Column':
         return Column(self.dataset, self.schema, self.table, column)
 
-    def relation(self) -> _Relation:
-        return next(rel for path, rel in self.dataset.relations() if path[1]==self.schema and path[2]==self.table)  # type: ignore
+    def relation(self) -> Relation:
+        return next(
+            rel
+            for (path, rel) in self.dataset.relations()
+            if path[1]==self.schema and path[2]==self.table
+        )
 
 @dataclass
 class Column:
@@ -602,7 +593,7 @@ class Column:
         return self.dataset.with_constraint(self.schema, self.table, self.column, constraint)
 
     def with_unique_constraint(self) -> Dataset:
-        return self.with_constraint(Dataset.CONSTRAINT_UNIQUE)  # type: ignore
+        return self.with_constraint(Dataset.CONSTRAINT_UNIQUE)
     
     def with_no_constraint(self) -> Dataset:
         return self.with_constraint(None)
