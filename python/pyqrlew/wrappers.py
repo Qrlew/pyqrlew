@@ -23,7 +23,7 @@ class Dataset:
 
 
     @staticmethod
-    def from_str(dataset: str, schema: str, size: t.Optional[str]=None):
+    def from_str(dataset: str, schema: str, size: str):
         """Factory method to create a Dataset wrapper from an existing _Dataset instance."""
         return Dataset(_Dataset(dataset, schema, size))
 
@@ -63,27 +63,27 @@ class Dataset:
         return self._dataset.size()
     
     def with_range(self, schema_name: str, table_name: str, field_name: str, min: float, max: float) -> 'Dataset':
-        return self._dataset.with_range(schema_name, table_name, field_name, min, max)
+        return Dataset(self._dataset.with_range(schema_name, table_name, field_name, min, max))
     
     def with_possible_values(self, schema_name: str, table_name: str, field_name: str, possible_values: t.Iterable[str]) -> 'Dataset':
-        return self._dataset.with_possible_values(schema_name, table_name, field_name, possible_values)
+        return Dataset(self._dataset.with_possible_values(schema_name, table_name, field_name, possible_values))
     
     def with_constraint(self, schema_name: str, table_name: str, field_name: str, constraint: t.Optional[str]) -> 'Dataset':
-        return self._dataset.with_constraint(schema_name, table_name, field_name, constraint)
+        return Dataset(self._dataset.with_constraint(schema_name, table_name, field_name, constraint))
     
     def relations(self) -> t.Iterable['Relation']:
-        return self._dataset.relations()
+        return [Relation(r) for r in self._dataset.relations()]
 
     def relation(self, query: str, dialect: t.Optional['Dialect']=None) -> 'Relation':
-        return self._dataset.relation(query, dialect)
+        return Relation(self._dataset.relation(query, dialect))
 
     def from_queries(self, queries: t.Iterable[t.Tuple[t.Iterable[str], str]], dialect: t.Optional['Dialect']=None) -> 'Dataset':
-        return self._dataset.from_queries(queries, dialect)
+        return Dataset(self._dataset.from_queries(queries, dialect))
 
 
 class Relation:
-    def __init__(self, *args, **kwargs):
-        self._rust_relation = _Relation(*args, **kwargs)
+    def __init__(self, relation: _Relation):
+        self._relation = relation
 
     def __getattr__(self, name):
         """
@@ -543,7 +543,7 @@ def dataset_from_database(
     logging.debug(json.dumps(schema))
     logging.debug(json.dumps(size))
     # Return the result
-    return Dataset(json.dumps(dataset), json.dumps(schema), json.dumps(size))
+    return Dataset.from_str(json.dumps(dataset), json.dumps(schema), json.dumps(size))
 
 # The following statements make mypy to fail. Adding a python class wrapper
 # around qrl.Dataset it would be beneficial both for mypy and for the doc.

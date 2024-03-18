@@ -62,7 +62,7 @@ jobs:
                   pip install "maturin>=1.0,<2.0"
                   maturin develop
             - name: Run mypy
-              run: mypy --config-file .tools-cfg/mypy.ini --package pyqrlew
+              run: mypy --package pyqrlew
 
     linux:
         runs-on: ubuntu-latest

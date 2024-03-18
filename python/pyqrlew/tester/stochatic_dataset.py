@@ -1,8 +1,8 @@
 from typing import List
 import numpy as np
 import pandas as pd
-from qrlew_datasets.databases import PostgreSQL as EmptyPostgreSQL
-from pyqrlew.dataset import dataset_from_database
+from qrlew_datasets.databases import PostgreSQL as EmptyPostgreSQL # type: ignore
+from pyqrlew import dataset_from_database
 import pyqrlew as qrl
 from sqlalchemy import text
 from enum import Enum
