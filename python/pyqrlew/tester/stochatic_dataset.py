@@ -1,6 +1,6 @@
 from typing import List
 import numpy as np
-import pandas as pd
+import pandas as pd # type: ignore
 from qrlew_datasets.databases import PostgreSQL as EmptyPostgreSQL # type: ignore
 from pyqrlew import dataset_from_database
 import pyqrlew as qrl

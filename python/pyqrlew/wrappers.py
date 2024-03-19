@@ -15,7 +15,7 @@ import typing as t
 
 
 class Dataset:
-    """A wrapper around rust's Dataset object"""
+    """A wrapper around rust's Dataset object. A Dataset is a set of SQL Tables."""
 
     CONSTRAINT_UNIQUE: str = '_UNIQUE_' 
 
@@ -68,42 +68,102 @@ class Dataset:
         return self._dataset.size()
     
     def with_range(self, schema_name: str, table_name: str, field_name: str, min: float, max: float) -> 'Dataset':
-        """Method that..."""
+        """Returns a new Dataset with a defined range for a given numeric column.
+
+        Args:
+            schema_name (str): schema
+            table_name (str): table
+            field_name (str): column
+            min (float): min range
+            max (float): max range
+        Returns:
+            Dataset:
+        """
         return Dataset(self._dataset.with_range(schema_name, table_name, field_name, min, max))
     
     def with_possible_values(self, schema_name: str, table_name: str, field_name: str, possible_values: t.Iterable[str]) -> 'Dataset':
-        """Method that..."""
+        """Returns a new Dataset with a defined possible values for a given text column.
+
+        Args:
+            schema_name (str): schema
+            table_name (str): table
+            field_name (str): column
+            possible_values (Sequence[str]): a sequence with wanted possible values
+        Returns:
+            Dataset:
+        """
         return Dataset(self._dataset.with_possible_values(schema_name, table_name, field_name, possible_values))
     
     def with_constraint(self, schema_name: str, table_name: str, field_name: str, constraint: t.Optional[str]) -> 'Dataset':
-        """Method that..."""
+        """Returns a new Dataset with a constraint on given column.
+        
+        Args:
+            schema_name (str): schema
+            table_name (str): table
+            field_name (str): column
+            constraint (Optional[str]):  Unique or PrimaryKey
+        Returns:
+            Dataset:
+        """
         return Dataset(self._dataset.with_constraint(schema_name, table_name, field_name, constraint))
     
     def relations(self) -> t.Iterable[t.Tuple[t.List[str], 'Relation']]:
-        """Method that..."""
+        """Returns the Dataset's Relations and their corresponding path"""
         return [(path, Relation(rel)) for (path, rel) in self._dataset.relations()]
 
     def relation(self, query: str, dialect: t.Optional['Dialect']=None) -> 'Relation':
-        """Method that..."""
+        """Returns a Relation from am SQL query.
+        
+        Args:
+            query (str): SQL query used to build the Relation.
+            dialect (Optional[Dialect]): query's dialect. If not provided, it is assumed to be PostgreSql.
+        Returns:
+            Relation:
+        """
         return Relation(self._dataset.relation(query, dialect))
 
     def from_queries(self, queries: t.Iterable[t.Tuple[t.Iterable[str], str]], dialect: t.Optional['Dialect']=None) -> 'Dataset':
-        """Method that..."""
+        """Returns a dataset from queries.
+        
+        Args:
+            queries (Iterable[Tuple[Iterable[str], str]]): A sequence of (path, SQL query).
+                The resulting Dataset will have a Relation for each query identified in the dataset
+                by the corresponding path.
+            dialect (Optional[Dialect]): queries dialect. If not provided, it is assumed to be PostgreSql.
+        Returns:
+            Dataset:
+        """
         return Dataset(self._dataset.from_queries(queries, dialect))
 
 
 class Relation:
-    """A wrapper around rust's Relation object"""
+    """A wrapper around rust's Relation. A Relation is a Dataset transformed by a SQL query"""
     def __init__(self, relation: _Relation) -> None:
         self._relation = relation
 
     @staticmethod
     def from_query(query: str, dataset: Dataset, dialect: t.Optional['Dialect']) -> 'Relation':
-        """Method that..."""
+        """Builds a `Relation` from a query and a dataset
+        Args:
+            query (str): sql query.
+            dataset (Dataset): the Dataset.
+            dialect (Optional[Dialect]): query's dialect.
+                If not provided, it is assumed to be PostgreSql
+        
+        Returns:
+            Relation:
+        """
         return Relation(_Relation.from_query(query, dataset._dataset, dialect))
 
     def to_query(self, dialect: t.Optional[Dialect]=None) -> str:
-        """Method that..."""
+        """Returns an SQL representation of the Relation.
+            Args:
+                dialect (Optional[Dialect]): dialect of generated sql query. If no dialect is provided,
+                    the query will be in PostgreSql. 
+
+            Returns:
+                str:
+        """
         return self._relation.to_query(dialect)
 
     def rewrite_as_privacy_unit_preserving(
@@ -115,7 +175,27 @@ class Relation:
         max_multiplicity_share: t.Optional[float]=None,
         synthetic_data: t.Optional[SyntheticData]=None,
     ) -> RelationWithDpEvent:
-        """Method that..."""
+        """Returns as RelationWithDpEvent where it's relation propagates the privacy unit
+        through the query.
+        
+        Args:
+            dataset (Dataset):
+                Dataset with needed relations
+            privacy_unit (Sequence[Tuple[str, Sequence[Tuple[str, str, str]], str]]):
+                privacy unit to be propagated.
+                example to better understand the structure of privacy_unit
+            epsilon_delta (Mapping[str, float]): epsilon and delta budget
+            max_multiplicity (Optional[float]): maximum number of rows per privacy unit in absolute terms
+            max_multiplicity_share (Optional[float]): maximum number of rows per privacy unit in relative terms
+                w.r.t. the dataset size. The actual max_multiplicity used to bound the PU contribution will be
+                minimum(max_multiplicity, max_multiplicity_share*dataset.size).
+            synthetic_data (Optional[Sequence[Tuple[Sequence[str],Sequence[str]]]]): Sequence of pairs 
+                of original table path and its corresponding synthetic version. Each table must be specified.
+                (e.g.: (["retail_schema", "features"], ["retail_schema", "features_synthetic"])).
+        
+        Returns:
+            RelationWithDpEvent: 
+        """
         return self._relation.rewrite_as_privacy_unit_preserving(
             dataset._dataset,
             privacy_unit,
@@ -134,7 +214,26 @@ class Relation:
         max_multiplicity_share: t.Optional[float]=None,
         synthetic_data: t.Optional[SyntheticData]=None,
     ) -> RelationWithDpEvent:
-        """Method that..."""
+        """It transforms a Relation into its differentially private equivalent.
+
+        Args:
+            dataset (Dataset):
+                Dataset with needed relations
+            privacy_unit (Sequence[Tuple[str, Sequence[Tuple[str, str, str]], str]]):
+                privacy unit to be propagated.
+                example to better understand the structure of privacy_unit
+            epsilon_delta (Mapping[str, float]): epsilon and delta budget
+            max_multiplicity (Optional[float]): maximum number of rows per privacy unit in absolute terms
+            max_multiplicity_share (Optional[float]): maximum number of rows per privacy unit in relative terms
+                w.r.t. the dataset size. The actual max_multiplicity used to bound the PU contribution will be
+                minimum(max_multiplicity, max_multiplicity_share*dataset.size).
+            synthetic_data (Optional[Sequence[Tuple[Sequence[str],Sequence[str]]]]): Sequence of pairs 
+                of original table path and its corresponding synthetic version. Each table must be specified.
+                (e.g.: (["retail_schema", "features"], ["retail_schema", "features_synthetic"])).
+
+        Returns:
+            RelationWithDpEvent: 
+        """
         return self._relation.rewrite_with_differential_privacy(
             dataset._dataset,
             privacy_unit,
@@ -143,20 +242,14 @@ class Relation:
             max_multiplicity_share,
             synthetic_data
         )
-    
 
-    def __getattr__(self, name):
-        """
-        Delegate attribute access to the Rust object.
-        """
-        attr = getattr(self._relation, name)
+    def schema(self) -> str:
+        "Returns a string representation of the Relation's schema."
+        return self._relation.schema()
 
-        if callable(attr):
-            def wrapper(*args, **kwargs):
-                return attr(*args, **kwargs)
-            return wrapper
-        else:
-            return attr
+    def dot(self) -> str:
+        "GraphViz representation of the `Relation`"
+        return self._relation.dot()
 
 
 def dataset_from_database(
@@ -166,7 +259,23 @@ def dataset_from_database(
     ranges: bool=False,
     possible_values_threshold: Optional[int]=None
 ) -> Dataset:
-    """Method that..."""
+    """Builds a `Dataset` from a sqlalchemy `Engine`
+
+    Args:
+        name (str):
+            Name of the Dataset
+        engine (Engine):
+            The sqlalchemy `Engine` to use
+        schema_name (Optional[str], optional):
+            The DB schema to use. Defaults to None.
+        ranges (bool, optional):
+            Use the actual min and max of the data as ranges. **This is unsafe from a privacy perspective**. Defaults to False.
+        possible_values_threshold (Optional[int], optional):
+            Use the actual observed values as range. **This is unsafe from a privacy perspective**. Defaults to None.
+
+    Returns:
+        Dataset:
+    """
 
     metadata = sa.MetaData()
     metadata.reflect(engine, schema=schema_name)

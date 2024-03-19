@@ -4,7 +4,7 @@ import typing as t
 import textwrap
 from .stochatic_dataset import StochasticDatabase
 from .tester import StochasticTester
-import pandas as pd
+import pandas as pd # type: ignore
 
 # Optionally import matplotlib
 try:

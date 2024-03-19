@@ -1,6 +1,6 @@
 import typing as t
 from .sqlite import SQLite
-import pandas as pd
+import pandas as pd # type: ignore
 
 def from_csv(table_name: str, csv_file: str, db_name:str ="my_sqlite.db", ranges: bool=False) -> 'SQLite':
     """

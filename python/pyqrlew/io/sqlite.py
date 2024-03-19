@@ -2,7 +2,7 @@ import os
 import sqlalchemy
 from qrlew_datasets.database import Database  # type: ignore  #module is installed, but missing library stubs or py.typed marker 
 from pyqrlew import Dataset, Relation, dataset_from_database
-import pandas as pd
+import pandas as pd # type: ignore
 import typing as t
 
 dtype_to_sqlalchemy = {
