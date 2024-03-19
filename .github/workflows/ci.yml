@@ -64,6 +64,7 @@ jobs:
                   source .venv/bin/activate
                   pip install "maturin>=1.0,<2.0"
                   maturin develop
+                  pip install '.[test]'
             - name: Run mypy
               run: mypy --package pyqrlew
 
