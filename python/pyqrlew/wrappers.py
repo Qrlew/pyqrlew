@@ -25,8 +25,9 @@ class Dataset:
 
 
     @staticmethod
-    def from_str(dataset: str, schema: str, size: str):
+    def from_str(dataset: str, schema: str, size: str) -> 'Dataset':
         """Factory method to create a Dataset wrapper from an string representation of an existing _Dataset instance.
+        
         Args:
             dataset (str): string representation of a dataset
             schema (str): string representation of the dataset's schema
@@ -42,7 +43,7 @@ class Dataset:
         ranges: bool=False,
         possible_values_threshold: t.Optional[int]=None
     ) -> 'Dataset':
-        """Builds a `Dataset` from a sqlalchemy `Engine`
+        """Builds a `Dataset` from a sqlalchemy `Engine`.
 
         Args:
             name (str):
