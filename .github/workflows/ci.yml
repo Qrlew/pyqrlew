@@ -41,8 +41,7 @@ jobs:
               uses: actions/setup-python@v4
               with:
                   python-version: ${{ matrix.python-version }}
-            - run: pip install -r tests/requirements.txt
-            - run: pip install -e .
+            - run: pip install -e '.[test]'
               env:
                   RUST_BACKTRACE: 1
             - run: pip freeze
@@ -58,17 +57,9 @@ jobs:
               with:
                   python-version: '3.9'
             - name: Install dependencies
-              # maturin develop needs to run in virtual environment.
-              run: |
-                  python -m venv .venv
-                  source .venv/bin/activate
-                  pip install "maturin>=1.0,<2.0"
-                  maturin develop
-                  pip install '.[test]'
+              run: pip install '.[test]'
             - name: Run mypy
-              run: |
-                source .venv/bin/activate
-                mypy --package pyqrlew
+              run: mypy --package pyqrlew
 
     linux:
         runs-on: ubuntu-latest
