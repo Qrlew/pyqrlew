@@ -66,7 +66,9 @@ jobs:
                   maturin develop
                   pip install '.[test]'
             - name: Run mypy
-              run: mypy --package pyqrlew
+              run: |
+                source .venv/bin/activate
+                mypy --package pyqrlew
 
     linux:
         runs-on: ubuntu-latest
