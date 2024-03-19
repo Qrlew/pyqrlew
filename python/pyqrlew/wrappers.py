@@ -26,7 +26,12 @@ class Dataset:
 
     @staticmethod
     def from_str(dataset: str, schema: str, size: str):
-        """Factory method to create a Dataset wrapper from an existing _Dataset instance."""
+        """Factory method to create a Dataset wrapper from an string representation of an existing _Dataset instance.
+        Args:
+            dataset (str): string representation of a dataset
+            schema (str): string representation of the dataset's schema
+            size (str): string representation of the dataset's size
+        """
         return Dataset(_Dataset(dataset, schema, size))
 
     @staticmethod
@@ -88,7 +93,7 @@ class Dataset:
             schema_name (str): schema
             table_name (str): table
             field_name (str): column
-            possible_values (Sequence[str]): a sequence with wanted possible values
+            possible_values (Iterable[str]): a sequence with wanted possible values
         Returns:
             Dataset:
         """
@@ -144,6 +149,7 @@ class Relation:
     @staticmethod
     def from_query(query: str, dataset: Dataset, dialect: t.Optional['Dialect']) -> 'Relation':
         """Builds a `Relation` from a query and a dataset
+
         Args:
             query (str): sql query.
             dataset (Dataset): the Dataset.
@@ -157,12 +163,13 @@ class Relation:
 
     def to_query(self, dialect: t.Optional[Dialect]=None) -> str:
         """Returns an SQL representation of the Relation.
-            Args:
-                dialect (Optional[Dialect]): dialect of generated sql query. If no dialect is provided,
-                    the query will be in PostgreSql. 
 
-            Returns:
-                str:
+        Args:
+            dialect (Optional[Dialect]): dialect of generated sql query. If no dialect is provided,
+                the query will be in PostgreSql. 
+
+        Returns:
+            str:
         """
         return self._relation.to_query(dialect)
 
