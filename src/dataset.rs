@@ -20,7 +20,7 @@ use crate::{
     dialect::Dialect,
 };
 
-#[pyclass]
+#[pyclass(name="_Dataset")]
 #[derive(Clone)]
 /// A Dataset is a set of SQL Tables.
 /// 

@@ -1,10 +1,9 @@
 import shutil
 from pathlib import Path
 from sqlalchemy import select, column, table, text
-from qrlew_datasets.files import SQL
-from qrlew_datasets.databases import PostgreSQL as EmptyPostgreSQL
-from pyqrlew.io.dataset import dataset_from_database
-import pyqrlew as qrl
+from qrlew_datasets.files import SQL  # type: ignore  # module is installed, but missing library stubs or py.typed marker 
+from qrlew_datasets.databases import PostgreSQL as EmptyPostgreSQL  # type: ignore  # module is installed, but missing library stubs or py.typed marker 
+from pyqrlew import dataset_from_database, Dataset
 
 NAME: str = 'pyqrlew-db'
 USER: str = 'postgres'
@@ -27,7 +26,7 @@ class PostgreSQL(EmptyPostgreSQL):
         >>> import pandas as pd
         >>> DB = PostgreSQL() # Setup a default database
         >>> DB.load_extract() # Insert a demo dataset
-        >>> dataset = qrl.Dataset.from_database(name='extract', engine=DB.engine(), schema_name='extract')
+        >>> dataset = Dataset.from_database(name='extract', engine=DB.engine(), schema_name='extract')
         >>> dataset.relations()
         [(['extract', 'extract', 'beacon'], <Relation at 0x784b78176fd0>),
         (['extract', 'extract', 'census'], <Relation at 0x784b78177490>)]
@@ -38,7 +37,7 @@ class PostgreSQL(EmptyPostgreSQL):
         	avg_age
         0	48.005155
     """
-    def __init__(self, name=NAME, user=USER, password=PASSWORD, port=PORT) -> None:
+    def __init__(self, name:str=NAME, user:str=USER, password:str=PASSWORD, port:int=PORT) -> None:
         """Initialize an SQLite instance.
 
         Args:
@@ -68,7 +67,12 @@ class PostgreSQL(EmptyPostgreSQL):
             allowing for method chaining.
         """
         with self.engine().connect() as conn:
-            res = list(conn.execute(select(column('schema_name')).select_from(table('schemata', schema='information_schema')).where(column('schema_name') == schema)))
+            res = list(
+                conn.execute(
+                    select(column('schema_name'))
+                    .select_from(table('schemata', schema='information_schema'))
+                    .where(column('schema_name') == schema))
+            )
             schema_exists = len(res)==1
         if not schema_exists:
             dst = Path('/tmp') / schema
@@ -126,7 +130,7 @@ class PostgreSQL(EmptyPostgreSQL):
         """
         return self.load_resource('retail', SQL('retail').local())
 
-    def extract(self) -> qrl.Dataset:
+    def extract(self) -> Dataset:
         """It loads the extract dataset in the database and it returns a qrlew
         Dataset with data ranges and categorical possible values if the unique
         column values are less than POSSIBLE_VALUES_THRESHOLD.
@@ -134,7 +138,7 @@ class PostgreSQL(EmptyPostgreSQL):
         self.load_extract()
         return dataset_from_database('extract', self.engine(), 'extract', ranges=True, possible_values_threshold=POSSIBLE_VALUES_THRESHOLD)
 
-    def financial(self) -> qrl.Dataset:
+    def financial(self) -> Dataset:
         """It loads the financial dataset in the database and it returns a qrlew
         Dataset with data ranges and categorical possible values if the unique
         column values are less than POSSIBLE_VALUES_THRESHOLD.
@@ -142,7 +146,7 @@ class PostgreSQL(EmptyPostgreSQL):
         self.load_financial()
         return dataset_from_database('financial', self.engine(), 'financial', ranges=True, possible_values_threshold=POSSIBLE_VALUES_THRESHOLD)
 
-    def hepatitis(self) -> qrl.Dataset:
+    def hepatitis(self) -> Dataset:
         """It loads the hepatitis dataset in the database and it returns a qrlew
         Dataset with data ranges and categorical possible values if the unique
         column values are less than POSSIBLE_VALUES_THRESHOLD.
@@ -150,7 +154,7 @@ class PostgreSQL(EmptyPostgreSQL):
         self.load_hepatitis()
         return dataset_from_database('hepatitis_std', self.engine(), 'hepatitis_std', ranges=True, possible_values_threshold=POSSIBLE_VALUES_THRESHOLD)
 
-    def imdb(self) -> qrl.Dataset:
+    def imdb(self) -> Dataset:
         """It loads the imdb dataset in the database and it returns a qrlew
         Dataset with data ranges and categorical possible values if the unique
         column values are less than POSSIBLE_VALUES_THRESHOLD.
@@ -158,7 +162,7 @@ class PostgreSQL(EmptyPostgreSQL):
         self.load_imdb()
         return dataset_from_database('imdb_ijs', self.engine(), 'imdb_ijs', ranges=True, possible_values_threshold=POSSIBLE_VALUES_THRESHOLD)
 
-    def retail(self) -> qrl.Dataset:
+    def retail(self) -> Dataset:
         """It loads the retail dataset in the database and it returns a qrlew
         Dataset with data ranges and categorical possible values if the unique
         column values are less than POSSIBLE_VALUES_THRESHOLD.

@@ -1,11 +1,264 @@
+"""Module containing wrappers around rust objects and some utils"""
+from pyqrlew.typing import RelationWithDpEvent, PrivacyUnit, SyntheticData
+from .pyqrlew import _Dataset, _Relation, Dialect
+import typing as t 
+from sqlalchemy.engine import Engine
+
 from dataclasses import dataclass
 import logging
 from uuid import uuid4 as generate_uuid
 from typing import Optional, Tuple, List, Dict, Union
 import json
-from sqlalchemy import MetaData, Table, Column, types, select, func, literal, String, ARRAY, case, text
-from sqlalchemy.engine import Engine
-import pyqrlew as qrl
+from sqlalchemy import types
+import sqlalchemy as sa
+import typing as t
+
+
+class Dataset:
+    """A wrapper around rust's Dataset object. A Dataset is a set of SQL Tables."""
+
+    CONSTRAINT_UNIQUE: str = '_UNIQUE_' 
+
+
+    def __init__(self, dataset: _Dataset) -> None:
+        self._dataset = dataset
+
+
+    @staticmethod
+    def from_str(dataset: str, schema: str, size: str) -> 'Dataset':
+        """Factory method to create a Dataset wrapper from an string representation of an existing _Dataset instance.
+        
+        Args:
+            dataset (str): string representation of a dataset
+            schema (str): string representation of the dataset's schema
+            size (str): string representation of the dataset's size
+        """
+        return Dataset(_Dataset(dataset, schema, size))
+
+    @staticmethod
+    def from_database(
+        name: str,
+        engine: Engine,
+        schema_name: t.Optional[str]=None,
+        ranges: bool=False,
+        possible_values_threshold: t.Optional[int]=None
+    ) -> 'Dataset':
+        """Builds a `Dataset` from a sqlalchemy `Engine`.
+
+        Args:
+            name (str):
+                Name of the Dataset
+            engine (Engine):
+                The sqlalchemy `Engine` to use
+            schema_name (Optional[str], optional):
+                The DB schema to use. Defaults to None.
+            ranges (bool, optional):
+                Use the actual min and max of the data as ranges. **This is unsafe from a privacy perspective**. Defaults to False.
+            possible_values_threshold (Optional[int], optional):
+                Use the actual observed values as range. **This is unsafe from a privacy perspective**. Defaults to None.
+
+        Returns:
+            Dataset:
+        """
+        return dataset_from_database(name, engine, schema_name, ranges, possible_values_threshold)
+
+    def __getattr__(dataset: 'Dataset', schema: str) -> 'Schema':
+        return Schema(dataset, schema)
+
+    @property
+    def schema(self) -> str:
+        return self._dataset.schema()
+
+    @property
+    def size(self) -> t.Optional[str]:
+        return self._dataset.size()
+    
+    def with_range(self, schema_name: str, table_name: str, field_name: str, min: float, max: float) -> 'Dataset':
+        """Returns a new Dataset with a defined range for a given numeric column.
+
+        Args:
+            schema_name (str): schema
+            table_name (str): table
+            field_name (str): column
+            min (float): min range
+            max (float): max range
+        Returns:
+            Dataset:
+        """
+        return Dataset(self._dataset.with_range(schema_name, table_name, field_name, min, max))
+    
+    def with_possible_values(self, schema_name: str, table_name: str, field_name: str, possible_values: t.Iterable[str]) -> 'Dataset':
+        """Returns a new Dataset with a defined possible values for a given text column.
+
+        Args:
+            schema_name (str): schema
+            table_name (str): table
+            field_name (str): column
+            possible_values (Iterable[str]): a sequence with wanted possible values
+        Returns:
+            Dataset:
+        """
+        return Dataset(self._dataset.with_possible_values(schema_name, table_name, field_name, possible_values))
+    
+    def with_constraint(self, schema_name: str, table_name: str, field_name: str, constraint: t.Optional[str]) -> 'Dataset':
+        """Returns a new Dataset with a constraint on given column.
+        
+        Args:
+            schema_name (str): schema
+            table_name (str): table
+            field_name (str): column
+            constraint (Optional[str]):  Unique or PrimaryKey
+        Returns:
+            Dataset:
+        """
+        return Dataset(self._dataset.with_constraint(schema_name, table_name, field_name, constraint))
+    
+    def relations(self) -> t.Iterable[t.Tuple[t.List[str], 'Relation']]:
+        """Returns the Dataset's Relations and their corresponding path"""
+        return [(path, Relation(rel)) for (path, rel) in self._dataset.relations()]
+
+    def relation(self, query: str, dialect: t.Optional['Dialect']=None) -> 'Relation':
+        """Returns a Relation from am SQL query.
+        
+        Args:
+            query (str): SQL query used to build the Relation.
+            dialect (Optional[Dialect]): query's dialect. If not provided, it is assumed to be PostgreSql.
+        Returns:
+            Relation:
+        """
+        return Relation(self._dataset.relation(query, dialect))
+
+    def from_queries(self, queries: t.Iterable[t.Tuple[t.Iterable[str], str]], dialect: t.Optional['Dialect']=None) -> 'Dataset':
+        """Returns a dataset from queries.
+        
+        Args:
+            queries (Iterable[Tuple[Iterable[str], str]]): A sequence of (path, SQL query).
+                The resulting Dataset will have a Relation for each query identified in the dataset
+                by the corresponding path.
+            dialect (Optional[Dialect]): queries dialect. If not provided, it is assumed to be PostgreSql.
+        Returns:
+            Dataset:
+        """
+        return Dataset(self._dataset.from_queries(queries, dialect))
+
+
+class Relation:
+    """A wrapper around rust's Relation. A Relation is a Dataset transformed by a SQL query"""
+    def __init__(self, relation: _Relation) -> None:
+        self._relation = relation
+
+    @staticmethod
+    def from_query(query: str, dataset: Dataset, dialect: t.Optional['Dialect']) -> 'Relation':
+        """Builds a `Relation` from a query and a dataset
+
+        Args:
+            query (str): sql query.
+            dataset (Dataset): the Dataset.
+            dialect (Optional[Dialect]): query's dialect.
+                If not provided, it is assumed to be PostgreSql
+        
+        Returns:
+            Relation:
+        """
+        return Relation(_Relation.from_query(query, dataset._dataset, dialect))
+
+    def to_query(self, dialect: t.Optional[Dialect]=None) -> str:
+        """Returns an SQL representation of the Relation.
+
+        Args:
+            dialect (Optional[Dialect]): dialect of generated sql query. If no dialect is provided,
+                the query will be in PostgreSql. 
+
+        Returns:
+            str:
+        """
+        return self._relation.to_query(dialect)
+
+    def rewrite_as_privacy_unit_preserving(
+        self,
+        dataset: Dataset,
+        privacy_unit: PrivacyUnit,
+        epsilon_delta: t.Dict[str, float],
+        max_multiplicity: t.Optional[float]=None,
+        max_multiplicity_share: t.Optional[float]=None,
+        synthetic_data: t.Optional[SyntheticData]=None,
+    ) -> RelationWithDpEvent:
+        """Returns as RelationWithDpEvent where it's relation propagates the privacy unit
+        through the query.
+        
+        Args:
+            dataset (Dataset):
+                Dataset with needed relations
+            privacy_unit (Sequence[Tuple[str, Sequence[Tuple[str, str, str]], str]]):
+                privacy unit to be propagated.
+                example to better understand the structure of privacy_unit
+            epsilon_delta (Mapping[str, float]): epsilon and delta budget
+            max_multiplicity (Optional[float]): maximum number of rows per privacy unit in absolute terms
+            max_multiplicity_share (Optional[float]): maximum number of rows per privacy unit in relative terms
+                w.r.t. the dataset size. The actual max_multiplicity used to bound the PU contribution will be
+                minimum(max_multiplicity, max_multiplicity_share*dataset.size).
+            synthetic_data (Optional[Sequence[Tuple[Sequence[str],Sequence[str]]]]): Sequence of pairs 
+                of original table path and its corresponding synthetic version. Each table must be specified.
+                (e.g.: (["retail_schema", "features"], ["retail_schema", "features_synthetic"])).
+        
+        Returns:
+            RelationWithDpEvent: 
+        """
+        return self._relation.rewrite_as_privacy_unit_preserving(
+            dataset._dataset,
+            privacy_unit,
+            epsilon_delta,
+            max_multiplicity,
+            max_multiplicity_share,
+            synthetic_data
+        )
+
+    def rewrite_with_differential_privacy(
+        self,
+        dataset: Dataset,
+        privacy_unit: PrivacyUnit,
+        epsilon_delta: t.Dict[str, float],
+        max_multiplicity: t.Optional[float]=None,
+        max_multiplicity_share: t.Optional[float]=None,
+        synthetic_data: t.Optional[SyntheticData]=None,
+    ) -> RelationWithDpEvent:
+        """It transforms a Relation into its differentially private equivalent.
+
+        Args:
+            dataset (Dataset):
+                Dataset with needed relations
+            privacy_unit (Sequence[Tuple[str, Sequence[Tuple[str, str, str]], str]]):
+                privacy unit to be propagated.
+                example to better understand the structure of privacy_unit
+            epsilon_delta (Mapping[str, float]): epsilon and delta budget
+            max_multiplicity (Optional[float]): maximum number of rows per privacy unit in absolute terms
+            max_multiplicity_share (Optional[float]): maximum number of rows per privacy unit in relative terms
+                w.r.t. the dataset size. The actual max_multiplicity used to bound the PU contribution will be
+                minimum(max_multiplicity, max_multiplicity_share*dataset.size).
+            synthetic_data (Optional[Sequence[Tuple[Sequence[str],Sequence[str]]]]): Sequence of pairs 
+                of original table path and its corresponding synthetic version. Each table must be specified.
+                (e.g.: (["retail_schema", "features"], ["retail_schema", "features_synthetic"])).
+
+        Returns:
+            RelationWithDpEvent: 
+        """
+        return self._relation.rewrite_with_differential_privacy(
+            dataset._dataset,
+            privacy_unit,
+            epsilon_delta,
+            max_multiplicity,
+            max_multiplicity_share,
+            synthetic_data
+        )
+
+    def schema(self) -> str:
+        "Returns a string representation of the Relation's schema."
+        return self._relation.schema()
+
+    def dot(self) -> str:
+        "GraphViz representation of the `Relation`"
+        return self._relation.dot()
+
 
 def dataset_from_database(
     name: str,
@@ -13,7 +266,7 @@ def dataset_from_database(
     schema_name: Optional[str]=None,
     ranges: bool=False,
     possible_values_threshold: Optional[int]=None
-) -> qrl.Dataset:
+) -> Dataset:
     """Builds a `Dataset` from a sqlalchemy `Engine`
 
     Args:
@@ -31,7 +284,8 @@ def dataset_from_database(
     Returns:
         Dataset:
     """
-    metadata = MetaData()
+
+    metadata = sa.MetaData()
     metadata.reflect(engine, schema=schema_name)
 
     def dataset_schema_size() -> Tuple[dict, dict, Optional[dict]]:
@@ -150,22 +404,35 @@ def dataset_from_database(
             }
         }
 
-    def table(tab: Table) -> dict:
+    def table(tab: sa.Table) -> dict:
         min_max_possible_values = compute_min_max_possible_values(tab)
         return {
             'name': tab.name,
             'type': {
                 'name': 'Struct',
                 'struct': {
-                    'fields': [column(col, **min_max_possible_values[col.name]) for col in tab.columns],
+                    'fields': [
+                        column(
+                            col,
+                            min=t.cast(t.Optional[str], min_max_possible_values[col.name]["min"]),
+                            max=t.cast(t.Optional[str], min_max_possible_values[col.name]["max"]),
+                            possible_values=t.cast(t.List[str], min_max_possible_values[col.name]["possible_values"])
+                        ) for col in tab.columns
+                    ],
                 },
                 'properties': {},
             }
         }
 
-    def compute_min_max_possible_values(tab: Table) -> Dict[str, Dict[str, Union[str, List[str]]]]:
+    def compute_min_max_possible_values(tab: sa.Table) -> Dict[str, Dict[str, Union[t.Optional[str], List[str]]]]:
         """Send 3 SQL queries for loading the bounds"""
-        values = {col.name: {'min': None, 'max': None, 'possible_values': []} for col in tab.columns}
+        values: Dict[str, Dict[str, Union[t.Optional[str], List[str]]]] = {
+            col.name: {
+                'min': None,
+                'max': None,
+                'possible_values': []
+            } for col in tab.columns
+        }
         intervals_types = [
             types.Integer, types.BigInteger,
             types.Float, types.Numeric,
@@ -178,20 +445,22 @@ def dataset_from_database(
         ]
 
         if ranges and len(interval_cols) != 0:
-            min_query = select(*[func.cast(func.min(col), String).label(col.name) for col in interval_cols]).select_from(tab)
-            max_query = select(*[func.cast(func.max(col), String).label(col.name) for col in interval_cols]).select_from(tab)
+            min_query = sa.select(*[sa.func.cast(sa.func.min(col), sa.String).label(col.name) for col in interval_cols]).select_from(tab)
+            max_query = sa.select(*[sa.func.cast(sa.func.max(col), sa.String).label(col.name) for col in interval_cols]).select_from(tab)
 
             with engine.connect() as conn:
                 min_results = conn.execute(min_query).fetchone()
                 max_results = conn.execute(max_query).fetchone()
 
-            for col, min_val, max_val in zip(interval_cols, min_results, max_results):
+            for col, min_val, max_val in zip(
+                    interval_cols, t.cast(t.Iterable[t.Any], min_results), t.cast(t.Iterable[t.Any], max_results)
+                ):
                 values[col.name]['min'] = min_val
                 values[col.name]['max'] = max_val
 
         if possible_values_threshold is not None and len(interval_cols) != 0:
             tablename = f"\"{tab.name}\"" if tab.schema is None else f"\"{tab.schema}\".\"{tab.name}\""
-            values_query = text(
+            values_query = sa.text(
                 "SELECT " + ','.join([
                     f"CASE WHEN COUNT(DISTINCT \"{col.name}\") <= {possible_values_threshold} "
                     f"THEN array_agg(DISTINCT CAST(\"{col.name}\" AS Text)) ELSE ARRAY[]::VARCHAR[] "
@@ -204,12 +473,12 @@ def dataset_from_database(
             with engine.connect() as conn:
                 values_results = conn.execute(values_query).fetchone()
 
-            for col, possible_values in zip(interval_cols, values_results):
+            for col, possible_values in zip(interval_cols, t.cast(t.Iterable[t.Any], values_results)):
                 values[col.name]['possible_values'] = [str(v) for v in possible_values]
 
         return values
 
-    def column(col: Column, min:Optional[str]=None, max:Optional[str]=None, possible_values:List[str]=[]) -> dict:
+    def column(col: sa.Column, min:Optional[str]=None, max:Optional[str]=None, possible_values:List[str]=[]) -> dict:
         if isinstance(col.type, types.Integer) or isinstance(col.type, types.BigInteger):
             min = '-9223372036854775808' if min is None else min
             max = '9223372036854775807' if max is None else max
@@ -321,10 +590,10 @@ def dataset_from_database(
             'properties': {},
         }
 
-    def table_size(tab: Table) -> dict:
+    def table_size(tab: sa.Table) -> dict:
         with engine.connect() as conn:
-            result = conn.execute(select(func.count()).select_from(tab))
-            size = result.scalar()
+            result = conn.execute(sa.select(sa.func.count()).select_from(tab))
+            size = t.cast(int, result.scalar())
         multiplicity = 1.0
         return {
             'name': tab.name,
@@ -339,7 +608,7 @@ def dataset_from_database(
             }
         }
 
-    def column_size(col: Column, size: int, multiplicity: float) -> dict:
+    def column_size(col: sa.Column, size: int, multiplicity: float) -> dict:
         if isinstance(col.type, types.Integer) or isinstance(col.type, types.BigInteger):
             return {
                 'name': col.name,
@@ -446,30 +715,24 @@ def dataset_from_database(
             raise NotImplementedError(f"SQL -> Sarus Conversion not supported for {col.type} SQL type")
 
     # Gather protobufs
-    dataset, schema, size = dataset_schema_size()
+    dataset_dict, schema_dict, size_dict = dataset_schema_size()
     # Display when debugging
-    logging.debug(json.dumps(dataset))
-    logging.debug(json.dumps(schema))
-    logging.debug(json.dumps(size))
+    logging.debug(json.dumps(dataset_dict))
+    logging.debug(json.dumps(schema_dict))
+    logging.debug(json.dumps(size_dict))
     # Return the result
-    return qrl.Dataset(json.dumps(dataset), json.dumps(schema), json.dumps(size))
+    return Dataset.from_str(json.dumps(dataset_dict), json.dumps(schema_dict), json.dumps(size_dict))
 
-# Make it a builder
-qrl.Dataset.from_database = dataset_from_database
 
-# Add a useful const
-qrl.Dataset.CONSTRAINT_UNIQUE: str = '_UNIQUE_'
 
 # A method to get select a schema
-def schema(dataset: qrl.Dataset, schema: str) -> 'Schema':
+def schema(dataset: Dataset, schema: str) -> 'Schema':
     return Schema(dataset, schema)
 
-# Add the method
-qrl.Dataset.__getattr__ = schema
 
 @dataclass
 class Schema:
-    dataset: qrl.Dataset
+    dataset: Dataset
     schema: str
 
     def __getattr__(self, table: str) -> 'Table':
@@ -477,34 +740,39 @@ class Schema:
 
 @dataclass
 class Table:
-    dataset: qrl.Dataset
+    dataset: Dataset
     schema: str
     table: str
 
     def __getattr__(self, column: str) -> 'Column':
         return Column(self.dataset, self.schema, self.table, column)
 
-    def relation(self) -> qrl.Relation:
-        return next(rel for path, rel in self.dataset.relations() if path[1]==self.schema and path[2]==self.table)
+    def relation(self) -> Relation:
+        return next(
+            rel
+            for (path, rel) in self.dataset.relations()
+            if path[1]==self.schema and path[2]==self.table
+        )
 
 @dataclass
 class Column:
-    dataset: qrl.Dataset
+    dataset: Dataset
     schema: str
     table: str
     column: str
 
-    def with_range(self, min:float, max:float) -> qrl.Dataset:
+    def with_range(self, min:float, max:float) -> Dataset:
         return self.dataset.with_range(self.schema, self.table, self.column, min, max)
     
-    def with_possible_values(self, with_possible_values: List[str]) -> qrl.Dataset:
+    def with_possible_values(self, with_possible_values: List[str]) -> Dataset:
         return self.dataset.with_possible_values(self.schema, self.table, self.column, with_possible_values)
     
-    def with_constraint(self, constraint: str) -> qrl.Dataset:
+    def with_constraint(self, constraint: t.Optional[str]) -> Dataset:
         return self.dataset.with_constraint(self.schema, self.table, self.column, constraint)
 
-    def with_unique_constraint(self) -> qrl.Dataset:
-        return self.with_constraint(qrl.Dataset.CONSTRAINT_UNIQUE)
+    def with_unique_constraint(self) -> Dataset:
+        return self.with_constraint(Dataset.CONSTRAINT_UNIQUE)
     
-    def with_no_constraint(self) -> qrl.Dataset:
+    def with_no_constraint(self) -> Dataset:
         return self.with_constraint(None)
+    
