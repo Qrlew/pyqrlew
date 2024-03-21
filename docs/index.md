@@ -8,7 +8,7 @@ This page gives an overview of the public PyQrlew objects and utils. Check out t
 
 # API reference
 
-- {doc}`api`
+- {doc}`core`
 - {doc}`io`
 
 # Examples
@@ -34,6 +34,6 @@ maxdepth: 2
 hidden:
 titlesonly:
 ---
-api
+core
 io
 ```
