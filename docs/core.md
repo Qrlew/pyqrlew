@@ -1,13 +1,13 @@
 
-# API
+# CORE
 
 ```{eval-rst}
-.. autoclass:: pyqrlew.Dataset
+.. autoclass:: pyqrlew.Dataset()
     :members:
 ```
 
 ```{eval-rst}
-.. autoclass:: pyqrlew.Relation
+.. autoclass:: pyqrlew.Relation()
     :members:
 ```
 
@@ -26,5 +26,3 @@
     :members:
     :undoc-members:
 ```
-
-

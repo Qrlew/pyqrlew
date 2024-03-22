@@ -14,8 +14,31 @@ import sqlalchemy as sa
 import typing as t
 
 
+MAX_NUMERIC_RANGE = 2**50
+
+
 class Dataset:
-    """A wrapper around rust's Dataset object. A Dataset is a set of SQL Tables."""
+    """A Dataset is a set of SQL Tables.
+    
+    Examples
+    ----------
+
+    Creating a Dataset from an existing database with an sqlalchemy engine
+
+        >>> import pyqrlew as qrl
+        >>> from sqlalchemy import create_engine
+        >>> engine = create_engine("postgresql+psycopg2://****/mydatabase") 
+        >>> dataset = Dataset.from_database(name='extract', engine=DB.engine(), schema_name='extract', range=False, possible_values_threshold=None)
+
+    Creating a Dataset from queries and a previous dataset. Here with WHERE statement we also determine the bounds on the age column.
+
+        >>> queries = [
+        >>>    (("ds_name", "new_schema", "tab1"), 'SELECT * FROM extract.census WHERE age < 18 AND age > 0'),
+        >>>    (("ds_name", "new_schema", "tab2"), 'SELECT * FROM extract.census WHERE age >= 18  AND age < 120'),
+        >>> ]
+        >>> new_dataset = dataset.from_queries(queries)
+
+    """
 
     CONSTRAINT_UNIQUE: str = '_UNIQUE_' 
 
@@ -23,10 +46,13 @@ class Dataset:
     def __init__(self, dataset: _Dataset) -> None:
         self._dataset = dataset
 
+    def __str__(self) -> str:
+        return self._dataset.__str__()
 
     @staticmethod
     def from_str(dataset: str, schema: str, size: str) -> 'Dataset':
-        """Factory method to create a Dataset wrapper from an string representation of an existing _Dataset instance.
+        """Factory method to create a Dataset from string representations
+        compatible with protocol buffers defined `here. <https://github.com/Qrlew/sarus/tree/main/sarus_data_spec/protobuf>`_
         
         Args:
             dataset (str): string representation of a dataset
@@ -54,6 +80,7 @@ class Dataset:
                 The DB schema to use. Defaults to None.
             ranges (bool, optional):
                 Use the actual min and max of the data as ranges. **This is unsafe from a privacy perspective**. Defaults to False.
+                If False numeric values ranges will be considered between -2.0^50 to 2.0^50.
             possible_values_threshold (Optional[int], optional):
                 Use the actual observed values as range. **This is unsafe from a privacy perspective**. Defaults to None.
 
@@ -67,14 +94,14 @@ class Dataset:
 
     @property
     def schema(self) -> str:
-        return self._dataset.schema()
+        return self._dataset.schema
 
     @property
     def size(self) -> t.Optional[str]:
-        return self._dataset.size()
+        return self._dataset.size
     
     def with_range(self, schema_name: str, table_name: str, field_name: str, min: float, max: float) -> 'Dataset':
-        """Returns a new Dataset with a defined range for a given numeric column.
+        """Returns a new Dataset with a defined range for a given numeric column. Check out more `here! <https://qrlew.readthedocs.io/en/latest/tutorials/getting_started.html#optionally-declare-value-ranges-and-unique-constraints>`_
 
         Args:
             schema_name (str): schema
@@ -88,7 +115,7 @@ class Dataset:
         return Dataset(self._dataset.with_range(schema_name, table_name, field_name, min, max))
     
     def with_possible_values(self, schema_name: str, table_name: str, field_name: str, possible_values: t.Iterable[str]) -> 'Dataset':
-        """Returns a new Dataset with a defined possible values for a given text column.
+        """Returns a new Dataset with a defined possible values for a given text column. Check out more `here! <https://qrlew.readthedocs.io/en/latest/tutorials/getting_started.html#optionally-declare-value-ranges-and-unique-constraints>`_
 
         Args:
             schema_name (str): schema
@@ -101,7 +128,7 @@ class Dataset:
         return Dataset(self._dataset.with_possible_values(schema_name, table_name, field_name, possible_values))
     
     def with_constraint(self, schema_name: str, table_name: str, field_name: str, constraint: t.Optional[str]) -> 'Dataset':
-        """Returns a new Dataset with a constraint on given column.
+        """Returns a new Dataset with a constraint on given column. Check out more `here! <https://qrlew.readthedocs.io/en/latest/tutorials/getting_started.html#optionally-declare-value-ranges-and-unique-constraints>`_
         
         Args:
             schema_name (str): schema
@@ -143,9 +170,29 @@ class Dataset:
 
 
 class Relation:
-    """A wrapper around rust's Relation. A Relation is a Dataset transformed by a SQL query"""
+    """A Relation is a Dataset transformed by a SQL query.
+    
+    Example
+    ----------
+
+    Create a relation from a dataset
+
+    >>> from pyqrlew import Dialect
+    >>> query = "SELECT AVG(age), sex FROM extract.census GROUP BY sex"
+    >>> relation = dataset.relation(query, Dialect.PostgreSql)
+
+    Or alternatively 
+
+    >>> from pyqrlew import Relation
+    >>> relation = Relation.from_query(query=query, dataset=dataset, dialect=Dialect.PostgreSql) 
+
+    """
+    
     def __init__(self, relation: _Relation) -> None:
         self._relation = relation
+
+    def __str__(self) -> str:
+        return self._relation.__str__()
 
     @staticmethod
     def from_query(query: str, dataset: Dataset, dialect: t.Optional['Dialect']) -> 'Relation':
@@ -184,14 +231,13 @@ class Relation:
         synthetic_data: t.Optional[SyntheticData]=None,
     ) -> RelationWithDpEvent:
         """Returns as RelationWithDpEvent where it's relation propagates the privacy unit
-        through the query.
+        through the query. Check out more `here! <https://qrlew.readthedocs.io/en/latest/tutorials/rewrite_with_dp.html#rewritting-with-dp>`_
         
         Args:
             dataset (Dataset):
                 Dataset with needed relations
             privacy_unit (Sequence[Tuple[str, Sequence[Tuple[str, str, str]], str]]):
-                privacy unit to be propagated.
-                example to better understand the structure of privacy_unit
+                Definition of privacy unit to be protected. Check out more `here <https://qrlew.readthedocs.io/en/latest/tutorials/rewrite_with_dp.html#the-privacy-unit>`_
             epsilon_delta (Mapping[str, float]): epsilon and delta budget
             max_multiplicity (Optional[float]): maximum number of rows per privacy unit in absolute terms
             max_multiplicity_share (Optional[float]): maximum number of rows per privacy unit in relative terms
@@ -222,14 +268,13 @@ class Relation:
         max_multiplicity_share: t.Optional[float]=None,
         synthetic_data: t.Optional[SyntheticData]=None,
     ) -> RelationWithDpEvent:
-        """It transforms a Relation into its differentially private equivalent.
+        """It transforms a Relation into its differentially private equivalent. Check out more `here! <https://qrlew.readthedocs.io/en/latest/tutorials/rewrite_with_dp.html#rewritting-with-dp>`_
 
         Args:
             dataset (Dataset):
                 Dataset with needed relations
             privacy_unit (Sequence[Tuple[str, Sequence[Tuple[str, str, str]], str]]):
-                privacy unit to be propagated.
-                example to better understand the structure of privacy_unit
+                Definition of privacy unit to be protected. Check out more `here <https://qrlew.readthedocs.io/en/latest/tutorials/rewrite_with_dp.html#the-privacy-unit>`_
             epsilon_delta (Mapping[str, float]): epsilon and delta budget
             max_multiplicity (Optional[float]): maximum number of rows per privacy unit in absolute terms
             max_multiplicity_share (Optional[float]): maximum number of rows per privacy unit in relative terms
@@ -496,8 +541,8 @@ def dataset_from_database(
                 },
             }
         elif isinstance(col.type, types.Float) or isinstance(col.type, types.Numeric):
-            min = '-1.7976931348623157e+308' if min is None else min
-            max = '1.7976931348623157e+308' if max is None else max
+            min = f'{-MAX_NUMERIC_RANGE}' if min is None else min
+            max = f'{MAX_NUMERIC_RANGE}' if max is None else max
             return {
                 'name': col.name,
                 'type': {
@@ -636,8 +681,8 @@ def dataset_from_database(
                     "float": {
                         "distribution": {
                             "double": {
-                                "max": '1.7976931348623157e+308',
-                                "min": '-1.7976931348623157e+308',
+                                "max": f'{MAX_NUMERIC_RANGE}',
+                                "min": f'{-MAX_NUMERIC_RANGE}',
                                 "points": []
                             },
                             "properties": {}

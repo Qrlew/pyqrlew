@@ -105,7 +105,7 @@ html_theme_options = {
         },
         {
             'name': 'Discord',
-            'url': 'https://discord.gg/JbvSPgyp',
+            'url': 'https://discord.com/invite/XQ9jYshj2p',
             'icon': 'fa-brands fa-discord',
             'type': 'fontawesome',
         },
@@ -171,7 +171,7 @@ def linkcode_resolve(domain: str, info: dict[str, Any]) -> str | None:
     linespec = f"#L{lineno}-L{lineno + len(source) - 1}" if lineno else ""
 
     conf_dir_path = Path(__file__).absolute().parent
-    pyqrlew_root = (conf_dir_path.parent.parent / "pyqrlew").absolute()
+    pyqrlew_root = (conf_dir_path.parent.parent / "pyqrlew")
     # https://github.com/Qrlew/pyqrlew/blob/main/pyqrlew/python/pyqrlew/io/postgresql.py#L16-L167
     # https://github.com/Qrlew/pyqrlew/blob/main/python/pyqrlew/io/postgresql.py
     fn = os.path.relpath(fn, start=pyqrlew_root)
