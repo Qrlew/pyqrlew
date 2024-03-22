@@ -1,5 +1,5 @@
 
-# CORE
+# Pyqrlew core
 
 ```{eval-rst}
 .. autoclass:: pyqrlew.Dataset()
