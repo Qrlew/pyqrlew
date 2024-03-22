@@ -270,7 +270,6 @@ class Relation:
     ) -> RelationWithDpEvent:
         """It transforms a Relation into its differentially private equivalent. Check out more `here! <https://qrlew.readthedocs.io/en/latest/tutorials/rewrite_with_dp.html#rewritting-with-dp>`_
 
-        Notice that aggregation functions 
         Args:
             dataset (Dataset):
                 Dataset with needed relations
