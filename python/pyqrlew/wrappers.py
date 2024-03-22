@@ -51,7 +51,8 @@ class Dataset:
 
     @staticmethod
     def from_str(dataset: str, schema: str, size: str) -> 'Dataset':
-        """Factory method to create a Dataset string representations of an existing _Dataset instance.
+        """Factory method to create a Dataset from string representations
+        compatible with protocol buffers defined `here. <https://github.com/Qrlew/sarus/tree/main/sarus_data_spec/protobuf>`_
         
         Args:
             dataset (str): string representation of a dataset
