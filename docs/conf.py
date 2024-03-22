@@ -22,7 +22,7 @@ project = 'Pyqrlew'
 copyright = '2023, Sarus Technologies'
 author = 'Sarus Technologies'
 github_root = "https://github.com/Qrlew/pyqrlew"
-git_ref = 'main'
+git_branch = 'main'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -174,6 +174,6 @@ def linkcode_resolve(domain: str, info: dict[str, Any]) -> str | None:
     # https://github.com/Qrlew/pyqrlew/blob/main/pyqrlew/python/pyqrlew/io/postgresql.py#L16-L167
     # https://github.com/Qrlew/pyqrlew/blob/main/python/pyqrlew/io/postgresql.py
     # fn is the absolute path of a specific source in the environment where pyqrlew is installed
-    # to get the relative path I could use pyqrlew.__file__ as follow
+    # to get the relative path I could use pyqrlew.__file__ as follow 
     fn = Path("python") / Path("pyqrlew") /  os.path.relpath(fn, start=os.path.dirname(pyqrlew.__file__))
-    return f"{github_root}/blob/{git_ref}/{fn}{linespec}"
+    return f"{github_root}/blob/{git_branch}/{fn}{linespec}"
