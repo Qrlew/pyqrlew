@@ -14,6 +14,9 @@ import sqlalchemy as sa
 import typing as t
 
 
+MAX_NUMERIC_RANGE = 2**50
+
+
 class Dataset:
     """A Dataset is a set of SQL Tables.
     
@@ -76,6 +79,7 @@ class Dataset:
                 The DB schema to use. Defaults to None.
             ranges (bool, optional):
                 Use the actual min and max of the data as ranges. **This is unsafe from a privacy perspective**. Defaults to False.
+                If False numeric values ranges will be considered between -2.0^50 to 2.0^50.
             possible_values_threshold (Optional[int], optional):
                 Use the actual observed values as range. **This is unsafe from a privacy perspective**. Defaults to None.
 
@@ -96,7 +100,7 @@ class Dataset:
         return self._dataset.size
     
     def with_range(self, schema_name: str, table_name: str, field_name: str, min: float, max: float) -> 'Dataset':
-        """Returns a new Dataset with a defined range for a given numeric column.
+        """Returns a new Dataset with a defined range for a given numeric column. Check out more `here! <https://qrlew.readthedocs.io/en/latest/tutorials/getting_started.html#optionally-declare-value-ranges-and-unique-constraints>`_
 
         Args:
             schema_name (str): schema
@@ -110,7 +114,7 @@ class Dataset:
         return Dataset(self._dataset.with_range(schema_name, table_name, field_name, min, max))
     
     def with_possible_values(self, schema_name: str, table_name: str, field_name: str, possible_values: t.Iterable[str]) -> 'Dataset':
-        """Returns a new Dataset with a defined possible values for a given text column.
+        """Returns a new Dataset with a defined possible values for a given text column. Check out more `here! <https://qrlew.readthedocs.io/en/latest/tutorials/getting_started.html#optionally-declare-value-ranges-and-unique-constraints>`_
 
         Args:
             schema_name (str): schema
@@ -123,7 +127,7 @@ class Dataset:
         return Dataset(self._dataset.with_possible_values(schema_name, table_name, field_name, possible_values))
     
     def with_constraint(self, schema_name: str, table_name: str, field_name: str, constraint: t.Optional[str]) -> 'Dataset':
-        """Returns a new Dataset with a constraint on given column.
+        """Returns a new Dataset with a constraint on given column. Check out more `here! <https://qrlew.readthedocs.io/en/latest/tutorials/getting_started.html#optionally-declare-value-ranges-and-unique-constraints>`_
         
         Args:
             schema_name (str): schema
@@ -177,9 +181,10 @@ class Relation:
     >>> relation = dataset.relation(query, Dialect.PostgreSql)
 
     Or alternatively 
+
     >>> from pyqrlew import Relation
     >>> relation = Relation.from_query(query=query, dataset=dataset, dialect=Dialect.PostgreSql) 
-    
+
     """
     
     def __init__(self, relation: _Relation) -> None:
@@ -225,14 +230,13 @@ class Relation:
         synthetic_data: t.Optional[SyntheticData]=None,
     ) -> RelationWithDpEvent:
         """Returns as RelationWithDpEvent where it's relation propagates the privacy unit
-        through the query.
+        through the query. Check out more `here! <https://qrlew.readthedocs.io/en/latest/tutorials/rewrite_with_dp.html#rewritting-with-dp>`_
         
         Args:
             dataset (Dataset):
                 Dataset with needed relations
             privacy_unit (Sequence[Tuple[str, Sequence[Tuple[str, str, str]], str]]):
-                privacy unit to be propagated.
-                example to better understand the structure of privacy_unit
+                Definition of privacy unit to be protected. Check out more `here <https://qrlew.readthedocs.io/en/latest/tutorials/rewrite_with_dp.html#the-privacy-unit>`_
             epsilon_delta (Mapping[str, float]): epsilon and delta budget
             max_multiplicity (Optional[float]): maximum number of rows per privacy unit in absolute terms
             max_multiplicity_share (Optional[float]): maximum number of rows per privacy unit in relative terms
@@ -263,14 +267,14 @@ class Relation:
         max_multiplicity_share: t.Optional[float]=None,
         synthetic_data: t.Optional[SyntheticData]=None,
     ) -> RelationWithDpEvent:
-        """It transforms a Relation into its differentially private equivalent.
+        """It transforms a Relation into its differentially private equivalent. Check out more `here! <https://qrlew.readthedocs.io/en/latest/tutorials/rewrite_with_dp.html#rewritting-with-dp>`_
 
+        Notice that aggregation functions 
         Args:
             dataset (Dataset):
                 Dataset with needed relations
             privacy_unit (Sequence[Tuple[str, Sequence[Tuple[str, str, str]], str]]):
-                privacy unit to be propagated.
-                example to better understand the structure of privacy_unit
+                Definition of privacy unit to be protected. Check out more `here <https://qrlew.readthedocs.io/en/latest/tutorials/rewrite_with_dp.html#the-privacy-unit>`_
             epsilon_delta (Mapping[str, float]): epsilon and delta budget
             max_multiplicity (Optional[float]): maximum number of rows per privacy unit in absolute terms
             max_multiplicity_share (Optional[float]): maximum number of rows per privacy unit in relative terms
@@ -537,8 +541,8 @@ def dataset_from_database(
                 },
             }
         elif isinstance(col.type, types.Float) or isinstance(col.type, types.Numeric):
-            min = '-1.7976931348623157e+308' if min is None else min
-            max = '1.7976931348623157e+308' if max is None else max
+            min = f'{-MAX_NUMERIC_RANGE}' if min is None else min
+            max = f'{MAX_NUMERIC_RANGE}' if max is None else max
             return {
                 'name': col.name,
                 'type': {
@@ -677,8 +681,8 @@ def dataset_from_database(
                     "float": {
                         "distribution": {
                             "double": {
-                                "max": '1.7976931348623157e+308',
-                                "min": '-1.7976931348623157e+308',
+                                "max": f'{MAX_NUMERIC_RANGE}',
+                                "min": f'{-MAX_NUMERIC_RANGE}',
                                 "points": []
                             },
                             "properties": {}

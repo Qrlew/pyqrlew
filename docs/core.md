@@ -7,7 +7,7 @@
 ```
 
 ```{eval-rst}
-.. autoclass:: pyqrlew.Relation
+.. autoclass:: pyqrlew.Relation()
     :members:
 ```
 
