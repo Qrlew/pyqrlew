@@ -26,5 +26,3 @@
     :members:
     :undoc-members:
 ```
-
-

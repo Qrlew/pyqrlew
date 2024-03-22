@@ -43,7 +43,7 @@ class Dataset:
     def __init__(self, dataset: _Dataset) -> None:
         self._dataset = dataset
 
-    def __str__(self) -> None:
+    def __str__(self) -> str:
         return self._dataset.__str__()
 
     @staticmethod
@@ -170,7 +170,7 @@ class Relation:
     Example
     ----------
 
-    Create a relation from a dataset and a query and rewrite it DP
+    Create a relation from a dataset
 
     >>> from pyqrlew import Dialect
     >>> query = "SELECT AVG(age), sex FROM extract.census GROUP BY sex"
@@ -184,6 +184,9 @@ class Relation:
     
     def __init__(self, relation: _Relation) -> None:
         self._relation = relation
+
+    def __str__(self) -> str:
+        return self._relation.__str__()
 
     @staticmethod
     def from_query(query: str, dataset: Dataset, dialect: t.Optional['Dialect']) -> 'Relation':
