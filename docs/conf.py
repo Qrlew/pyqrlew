@@ -118,6 +118,7 @@ html_theme_options = {
     ],
 }
 
+import pyqrlew
 
 # sphinx-ext-linkcode - Add external links to source code
 # https://www.sphinx-doc.org/en/master/usage/extensions/linkcode.html
@@ -170,13 +171,9 @@ def linkcode_resolve(domain: str, info: dict[str, Any]) -> str | None:
 
     linespec = f"#L{lineno}-L{lineno + len(source) - 1}" if lineno else ""
 
-    conf_dir_path = Path(__file__).absolute().parent
-    pyqrlew_root = conf_dir_path.parent.absolute()
     # https://github.com/Qrlew/pyqrlew/blob/main/pyqrlew/python/pyqrlew/io/postgresql.py#L16-L167
     # https://github.com/Qrlew/pyqrlew/blob/main/python/pyqrlew/io/postgresql.py
-    fn = os.path.relpath(fn, start=pyqrlew_root)
-    print("conf_dir_path", conf_dir_path)
-    print("pyqrlew_root", pyqrlew_root)
-    print("fn", fn)
-    print("Full:", f"{github_root}/blob/{git_ref}/{fn}{linespec}")
+    # fn is the absolute path of a specific source in the environment where pyqrlew is installed
+    # to get the relative path I could use pyqrlew.__file__ as follow
+    fn = Path("python") / Path("pyqrlew") /  os.path.relpath(fn, start=os.path.dirname(pyqrlew.__file__))
     return f"{github_root}/blob/{git_ref}/{fn}{linespec}"
