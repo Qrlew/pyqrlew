@@ -257,6 +257,15 @@ impl Relation {
             Dialect::BigQuery => ast::Query::from(RelationWithTranslator(&relation, BigQueryTranslator)).to_string(),
         }
     }
+
+    pub fn rename_fields(&self, fields: Vec<(&str, &str)>) -> Result<Self>{
+        // Convert the vector into a more efficient lookup table
+        let fields_mapping: HashMap<&str, &str> = fields.into_iter().collect();
+        let relation = self.deref().clone();
+        Ok(
+            Relation::new(Arc::new(relation.rename_fields(|n, _| fields_mapping.get(n).cloned().unwrap_or("unknown").to_string())))
+        )
+    }
 }
 
 #[cfg(test)]
