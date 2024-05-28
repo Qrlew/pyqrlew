@@ -1,15 +1,9 @@
 use std::{collections::HashMap, ops::Deref, str, sync::Arc};
 use pyo3::prelude::*;
 use qrlew::{
-    ast,
-    differential_privacy::DpParameters,
-    expr::Identifier,
-    privacy_unit_tracking::PrivacyUnit,
-    relation::{self, Variant},
-    synthetic_data::SyntheticData,
-    dialect_translation::{
+    ast, dialect_translation::{
         bigquery::BigQueryTranslator, mssql::MsSqlTranslator, postgresql::PostgreSqlTranslator, RelationWithTranslator
-    }
+    }, differential_privacy::DpParameters, expr::Identifier, privacy_unit_tracking::{self, PrivacyUnit}, relation::{self, Variant}, synthetic_data::SyntheticData
 };
 use crate::{
     dataset::Dataset,
@@ -34,6 +28,42 @@ impl Deref for Relation {
 impl Relation {
     pub fn new(relation: Arc<relation::Relation>) -> Self {
         Relation(relation)
+    }
+}
+
+#[derive(FromPyObject, Clone)]
+pub enum PrivacyUnitType<'a> {
+    Type1(Vec<(&'a str, Vec<(&'a str, &'a str, &'a str)>, &'a str)>),
+    Type2((Vec<(&'a str, Vec<(&'a str, &'a str, &'a str)>, &'a str, &'a str)>, bool)),
+}
+
+impl<'a> From<PrivacyUnitType<'a>> for PrivacyUnit {
+    fn from(input: PrivacyUnitType<'a>) -> Self {
+        match input {
+            PrivacyUnitType::Type1(data) => {
+                PrivacyUnit::from(data)
+            },
+            PrivacyUnitType::Type2(data) => {
+                PrivacyUnit::from(data)
+            },
+        }
+    }
+}
+
+// An Enum for the privacy unit tracking propagation
+#[pyclass]
+#[derive(Clone)]
+pub enum Strategy {
+    Soft,
+    Hard
+}
+
+impl From<Strategy> for privacy_unit_tracking::Strategy {
+    fn from(value: Strategy) -> Self {
+        match value {
+            Strategy::Soft => privacy_unit_tracking::Strategy::Soft,
+            Strategy::Hard => privacy_unit_tracking::Strategy::Hard,
+        }
     }
 }
 
@@ -99,11 +129,12 @@ impl Relation {
     pub fn rewrite_as_privacy_unit_preserving<'a>(
         &'a self,
         dataset: &'a Dataset,
-        privacy_unit: Vec<(&'a str, Vec<(&'a str, &'a str, &'a str)>, &'a str)>,
+        privacy_unit: PrivacyUnitType<'a>,
         epsilon_delta: HashMap<&'a str, f64>,
         max_multiplicity: Option<f64>,
         max_multiplicity_share: Option<f64>,
         synthetic_data: Option<Vec<(Vec<&'a str>, Vec<&'a str>)>>,
+        strategy: Option<Strategy>
     ) -> Result<RelationWithDpEvent> {
         let relation = self.deref().clone();
         let relations = dataset.deref().relations();
@@ -136,6 +167,7 @@ impl Relation {
             synthetic_data,
             privacy_unit,
             dp_parameters,
+            strategy.map(|s| s.into())
         )?;
         Ok(RelationWithDpEvent::new(Arc::new(
             relation_with_dp_event,
@@ -165,7 +197,7 @@ impl Relation {
     pub fn rewrite_with_differential_privacy<'a>(
         &'a self,
         dataset: &'a Dataset,
-        privacy_unit: Vec<(&'a str, Vec<(&'a str, &'a str, &'a str)>, &'a str)>,
+        privacy_unit: PrivacyUnitType<'a>,
         epsilon_delta: HashMap<&'a str, f64>,
         max_multiplicity: Option<f64>,
         max_multiplicity_share: Option<f64>,
@@ -234,7 +266,7 @@ mod tests {
 
     use crate::{
         dataset::Dataset,
-        relation::Relation
+        relation::{PrivacyUnitType, Relation}
     };
     use std::collections::HashMap;
 
@@ -248,13 +280,13 @@ mod tests {
         let dataset = Dataset::new(DATASET, SCHEMA, SIZE).unwrap();
         println!("{:?}", dataset.relations()[1].0) ;
 
-        let synthetic_data = Some(vec![(vec!["extract", "census"], vec!["extract", "census"])]);
-        let privacy_unit = vec![("census", Vec::<(&str, &str, &str)>::new(), "_PRIVACY_UNIT_ROW_")];
+        let synthetic_data = Some(vec![(vec!["extract", "census"], vec!["extract", "census_sd"])]);
+        let privacy_unit = PrivacyUnitType::Type1(vec![("census", Vec::<(&str, &str, &str)>::new(), "_PRIVACY_UNIT_ROW_")]);
         let budget: HashMap<&str, f64> = [("epsilon", 1.), ("delta", 0.005)].iter().cloned().collect();
 
         let queries = [
-            // "SELECT SUM(CASE WHEN age > 90 THEN 1 ELSE 0 END) AS s1 FROM census WHERE age > 20 AND age < 90;",
-            // "SELECT SUM(capital_loss / 100000.) AS my_sum FROM census WHERE capital_loss > 2231. AND capital_loss < 4356.;",
+            "SELECT SUM(CASE WHEN age > 90 THEN 1 ELSE 0 END) AS s1 FROM census WHERE age > 20 AND age < 90;",
+            "SELECT SUM(capital_loss / 100000.) AS my_sum FROM census WHERE capital_loss > 2231. AND capital_loss < 4356.;",
             // "SELECT SUM(capital_loss) FROM census GROUP BY capital_loss",
             "SELECT SUM(DISTINCT capital_loss) AS s1 FROM census WHERE capital_loss > 2231 AND capital_loss < 4356 GROUP BY sex HAVING COUNT(*) > 5;",
         ];
@@ -286,7 +318,6 @@ mod tests {
         let dataset = Dataset::new(DATASET, SCHEMA, SIZE).unwrap();
         println!("{:?}", dataset.relations()[1].0) ;
 
-        let tr = PostgreSqlTranslator;
         let query = r#"SELECT "age" AS s1 FROM census;"#;
         let relation = Relation::from_query(query, &dataset, None).unwrap();
 
