@@ -1,3 +1,8 @@
+import tempfile
+import os
+import platform
+import subprocess
+
 MAGENTA_COLOR = '\033[35m'
 BLUE_COLOR = '\033[34m'
 RESET_COLOR = '\033[0m'
@@ -30,3 +35,51 @@ def print_query(query: str) -> None:
         colored_query = colored_query.replace(word, MAGENTA_COLOR + word + RESET_COLOR)
     colored_query = colored_query.replace("WITH", BLUE_COLOR + "WITH" + RESET_COLOR)
     print(colored_query)
+
+
+def display_graph(dot_string):
+    # This is an optional dependency
+    from graphviz import Source
+
+    # Create a temporary file for the SVG
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.svg') as temp:
+        # Create a Source object from the DOT string
+        src = Source(dot_string)
+        
+        # Render the source to a temporary SVG file
+        svg_path = src.render(filename=temp.name, format='svg', cleanup=False)
+
+    # Create a temporary HTML file to embed the SVG
+    html_path = f"{temp.name}.html"
+    with open(html_path, 'w') as html_file:
+        # Use absolute path for SVG in the HTML to ensure it can be loaded
+        html_content = f"""
+        <html>
+            <head>
+                <style>
+                    body, html {{
+                        height: 100%;
+                        margin: 0;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                    }}
+                </style>
+            </head>
+            <body>
+                <img src="file://{svg_path}" alt="Graph" style="max-width: 100%; max-height: 100%;"/>
+            </body>
+        </html>
+        """
+        html_file.write(html_content)
+    
+    # Open the rendered HTML file in the default system browser
+    try:
+        if platform.system() == 'Darwin':       # macOS
+            subprocess.run(['open', html_path])
+        elif platform.system() == 'Windows':   # Windows
+            os.startfile(html_path)
+        else:                                   # Linux variants
+            subprocess.run(['xdg-open', html_path])
+    finally:
+        pass

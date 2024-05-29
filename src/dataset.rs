@@ -194,14 +194,6 @@ impl Dataset {
         Ok(Dataset(ds))
     }
 
-    pub fn compose<'a>(&'a self, dataset: &'a Dataset) -> Result<Self> {
-        let outer_relations = self.deref().relations();
-        let inner_relations = dataset.deref().relations();
-        let composed = outer_relations.compose(&inner_relations);
-        let ds: data_spec::Dataset = (&composed?).try_into()?;
-        Ok(Dataset(ds))
-    }
-
     pub fn __str__(&self) -> String {
         format!("{}", self.0)
     }

@@ -5,6 +5,7 @@ import typing as t
 
 PrivacyUnit = t.Union[
     t.Sequence[t.Tuple[str, t.Sequence[t.Tuple[str, str, str]], str]],
+    t.Tuple[t.Sequence[t.Tuple[str, t.Sequence[t.Tuple[str, str, str]], str]], bool],
     t.Tuple[t.Sequence[t.Tuple[str, t.Sequence[t.Tuple[str, str, str]], str, str]], bool]
 ]
 SyntheticData = t.Sequence[t.Tuple[t.Sequence[str], t.Sequence[str]]]

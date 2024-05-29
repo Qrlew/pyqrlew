@@ -3,7 +3,7 @@ use pyo3::prelude::*;
 use qrlew::{
     ast, dialect_translation::{
         bigquery::BigQueryTranslator, mssql::MsSqlTranslator, postgresql::PostgreSqlTranslator, RelationWithTranslator
-    }, differential_privacy::DpParameters, expr::Identifier, privacy_unit_tracking::{self, PrivacyUnit}, relation::{self, Variant}, synthetic_data::SyntheticData
+    }, differential_privacy::DpParameters, expr::Identifier, hierarchy::Hierarchy, privacy_unit_tracking::{self, PrivacyUnit}, relation::{self, Variant}, sql::parse_expr, synthetic_data::SyntheticData
 };
 use crate::{
     dataset::Dataset,
@@ -34,7 +34,8 @@ impl Relation {
 #[derive(FromPyObject, Clone)]
 pub enum PrivacyUnitType<'a> {
     Type1(Vec<(&'a str, Vec<(&'a str, &'a str, &'a str)>, &'a str)>),
-    Type2((Vec<(&'a str, Vec<(&'a str, &'a str, &'a str)>, &'a str, &'a str)>, bool)),
+    Type2((Vec<(&'a str, Vec<(&'a str, &'a str, &'a str)>, &'a str)>, bool)),
+    Type3((Vec<(&'a str, Vec<(&'a str, &'a str, &'a str)>, &'a str, &'a str)>, bool)),
 }
 
 impl<'a> From<PrivacyUnitType<'a>> for PrivacyUnit {
@@ -44,6 +45,9 @@ impl<'a> From<PrivacyUnitType<'a>> for PrivacyUnit {
                 PrivacyUnit::from(data)
             },
             PrivacyUnitType::Type2(data) => {
+                PrivacyUnit::from(data)
+            },
+            PrivacyUnitType::Type3(data) => {
                 PrivacyUnit::from(data)
             },
         }
@@ -259,12 +263,30 @@ impl Relation {
     }
 
     pub fn rename_fields(&self, fields: Vec<(&str, &str)>) -> Result<Self>{
-        // Convert the vector into a more efficient lookup table
         let fields_mapping: HashMap<&str, &str> = fields.into_iter().collect();
         let relation = self.deref().clone();
         Ok(
-            Relation::new(Arc::new(relation.rename_fields(|n, _| fields_mapping.get(n).cloned().unwrap_or("unknown").to_string())))
+            Relation::new(
+                Arc::new(
+                    relation.rename_fields(|n, _| fields_mapping.get(n).cloned().unwrap_or("unknown").to_string())
+                )
+            )
         )
+    }
+
+    pub fn compose(&self, relations: Vec<(Vec<String>, Relation)>) -> Result<Self> {
+        let outer_relations = self.deref();
+        let inner_relations: Hierarchy<Arc<qrlew::Relation>> = relations
+            .into_iter()
+            .map(|(path, rel)| (Identifier::from(path), rel.0))
+            .collect();
+        let composed = outer_relations.compose(&inner_relations);
+        Ok(Relation::new(Arc::new(composed)))
+    }
+
+    pub fn with_field(&self, name: &str, expr: &str) -> Result<Self> {
+        let expr = parse_expr(expr)?;
+        Ok(Relation::new(Arc::new(self.deref().clone().with_field(name, (&expr).try_into()?)))) 
     }
 }
 

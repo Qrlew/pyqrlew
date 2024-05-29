@@ -1,6 +1,6 @@
 """Module containing wrappers around rust objects and some utils"""
 from pyqrlew.typing import RelationWithDpEvent, PrivacyUnit, SyntheticData
-from .pyqrlew import _Dataset, _Relation, Dialect
+from .pyqrlew import _Dataset, _Relation, Dialect, Strategy
 import typing as t 
 from sqlalchemy.engine import Engine
 
@@ -168,6 +168,8 @@ class Dataset:
         """
         return Dataset(self._dataset.from_queries(queries, dialect))
 
+    def compose(self, dataset: 'Dataset') -> 'Dataset':
+        return Dataset(self._dataset.compose(dataset._dataset))
 
 class Relation:
     """A Relation is a Dataset transformed by a SQL query.
@@ -195,7 +197,7 @@ class Relation:
         return self._relation.__str__()
 
     @staticmethod
-    def from_query(query: str, dataset: Dataset, dialect: t.Optional['Dialect']) -> 'Relation':
+    def from_query(query: str, dataset: Dataset, dialect: t.Optional['Dialect']=None) -> 'Relation':
         """Builds a `Relation` from a query and a dataset
 
         Args:
@@ -229,6 +231,7 @@ class Relation:
         max_multiplicity: t.Optional[float]=None,
         max_multiplicity_share: t.Optional[float]=None,
         synthetic_data: t.Optional[SyntheticData]=None,
+        strategy: t.Optional[Strategy]=None,
     ) -> RelationWithDpEvent:
         """Returns as RelationWithDpEvent where it's relation propagates the privacy unit
         through the query. Check out more `here! <https://qrlew.readthedocs.io/en/latest/tutorials/rewrite_with_dp.html#rewritting-with-dp>`_
@@ -256,7 +259,8 @@ class Relation:
             epsilon_delta,
             max_multiplicity,
             max_multiplicity_share,
-            synthetic_data
+            synthetic_data,
+            strategy
         )
 
     def rewrite_with_differential_privacy(
@@ -295,6 +299,16 @@ class Relation:
             max_multiplicity_share,
             synthetic_data
         )
+
+    def compose(self, relations: t.Iterable[t.Tuple[t.Iterable[str], 'Relation']]) -> 'Relation':
+        converted_relations = [(path, rel._relation) for (path, rel) in relations]
+        return Relation(self._relation.compose(converted_relations))
+
+    def rename_fields(self, fields: t.Iterable[t.Tuple[str, str]])  -> 'Relation':
+        return Relation(self._relation.rename_fields(fields))
+
+    def with_field(self, name: str, expr: str) -> 'Relation':
+        return Relation(self._relation.with_field(name, expr))
 
     def schema(self) -> str:
         "Returns a string representation of the Relation's schema."
