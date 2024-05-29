@@ -168,8 +168,6 @@ class Dataset:
         """
         return Dataset(self._dataset.from_queries(queries, dialect))
 
-    def compose(self, dataset: 'Dataset') -> 'Dataset':
-        return Dataset(self._dataset.compose(dataset._dataset))
 
 class Relation:
     """A Relation is a Dataset transformed by a SQL query.

@@ -39,7 +39,7 @@ def print_query(query: str) -> None:
 
 def display_graph(dot_string):
     # This is an optional dependency
-    from graphviz import Source
+    from graphviz import Source  #type: ignore
 
     # Create a temporary file for the SVG
     with tempfile.NamedTemporaryFile(delete=False, suffix='.svg') as temp:
