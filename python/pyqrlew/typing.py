@@ -3,7 +3,11 @@ python. This is only for documentation purposes."""
 from .pyqrlew import _Relation
 import typing as t
 
-PrivacyUnit = t.Sequence[t.Tuple[str, t.Sequence[t.Tuple[str, str, str]], str]]
+PrivacyUnit = t.Union[
+    t.Sequence[t.Tuple[str, t.Sequence[t.Tuple[str, str, str]], str]],
+    t.Tuple[t.Sequence[t.Tuple[str, t.Sequence[t.Tuple[str, str, str]], str]], bool],
+    t.Tuple[t.Sequence[t.Tuple[str, t.Sequence[t.Tuple[str, str, str]], str, str]], bool]
+]
 SyntheticData = t.Sequence[t.Tuple[t.Sequence[str], t.Sequence[str]]]
 
 

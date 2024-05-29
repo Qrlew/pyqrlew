@@ -35,7 +35,8 @@ class _Relation:
         epsilon_delta: t.Dict[str, float],
         max_multiplicity: t.Optional[float]=None,
         max_multiplicity_share: t.Optional[float]=None,
-        synthetic_data: t.Optional[SyntheticData]=None
+        synthetic_data: t.Optional[SyntheticData]=None,
+        strategy: t.Optional['Strategy']=None
     ) -> 'RelationWithDpEvent': ...
     def rewrite_with_differential_privacy(
         self,
@@ -46,7 +47,9 @@ class _Relation:
         max_multiplicity_share: t.Optional[float]=None,
         synthetic_data: t.Optional[SyntheticData]=None
     ) -> 'RelationWithDpEvent': ...
-
+    def with_field(self, name: str, expr: str) -> '_Relation': ...
+    def rename_fields(self, fields: t.Iterable[t.Tuple[str, str]])  -> '_Relation': ...
+    def compose(self, relations: t.Iterable[t.Tuple[t.Iterable[str], '_Relation']]) -> '_Relation': ...
 
 class RelationWithDpEvent:
     def relation(self) -> _Relation: ...
@@ -64,3 +67,6 @@ class Dialect(enum.Enum):
     MsSql=2
     BigQuery=3
 
+class Strategy(enum.Enum):
+    Soft=1
+    Hard=2

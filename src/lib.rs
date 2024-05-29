@@ -6,7 +6,7 @@ pub mod dp_event;
 
 pub use crate::{
     dataset::Dataset,
-    relation::Relation,
+    relation::{Relation, Strategy},
     dialect::Dialect,
 };
 use pyo3::prelude::*;
@@ -17,5 +17,6 @@ fn pyqrlew(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<Dataset>()?;
     m.add_class::<Relation>()?;
     m.add_class::<Dialect>()?;
+    m.add_class::<Strategy>()?;
     Ok(())
 }
