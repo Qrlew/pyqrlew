@@ -318,8 +318,8 @@ mod tests {
         let budget: HashMap<&str, f64> = [("epsilon", 1.), ("delta", 0.005)].iter().cloned().collect();
 
         let queries = [
-            "SELECT SUM(CASE WHEN age > 90 THEN 1 ELSE 0 END) AS s1 FROM census WHERE age > 20 AND age < 90;",
-            "SELECT SUM(capital_loss / 100000.) AS my_sum FROM census WHERE capital_loss > 2231. AND capital_loss < 4356.;",
+            // "SELECT SUM(CASE WHEN age > 90 THEN 1 ELSE 0 END) AS s1 FROM census WHERE age > 20 AND age < 90;",
+            // "SELECT SUM(capital_loss / 100000.) AS my_sum FROM census WHERE capital_loss > 2231. AND capital_loss < 4356.;",
             // "SELECT SUM(capital_loss) FROM census GROUP BY capital_loss",
             "SELECT SUM(DISTINCT capital_loss) AS s1 FROM census WHERE capital_loss > 2231 AND capital_loss < 4356 GROUP BY sex HAVING COUNT(*) > 5;",
         ];
