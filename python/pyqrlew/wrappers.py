@@ -237,7 +237,7 @@ class Relation:
         Args:
             dataset (Dataset):
                 Dataset with needed relations
-            privacy_unit (Sequence[Tuple[str, Sequence[Tuple[str, str, str]], str]]):
+            privacy_unit (PrivacyUnit):
                 Definition of privacy unit to be protected. Check out more `here <https://qrlew.readthedocs.io/en/latest/tutorials/rewrite_with_dp.html#the-privacy-unit>`_
             epsilon_delta (Mapping[str, float]): epsilon and delta budget
             max_multiplicity (Optional[float]): maximum number of rows per privacy unit in absolute terms
@@ -247,7 +247,7 @@ class Relation:
             synthetic_data (Optional[Sequence[Tuple[Sequence[str],Sequence[str]]]]): Sequence of pairs 
                 of original table path and its corresponding synthetic version. Each table must be specified.
                 (e.g.: (["retail_schema", "features"], ["retail_schema", "features_synthetic"])).
-        
+            strategy (Optional[Strategy]): Strategy to follow during privacy tracking. If not provided the Hard Strategy will be followed
         Returns:
             RelationWithDpEvent: 
         """
@@ -275,7 +275,7 @@ class Relation:
         Args:
             dataset (Dataset):
                 Dataset with needed relations
-            privacy_unit (Sequence[Tuple[str, Sequence[Tuple[str, str, str]], str]]):
+            privacy_unit (PrivacyUnit):
                 Definition of privacy unit to be protected. Check out more `here <https://qrlew.readthedocs.io/en/latest/tutorials/rewrite_with_dp.html#the-privacy-unit>`_
             epsilon_delta (Mapping[str, float]): epsilon and delta budget
             max_multiplicity (Optional[float]): maximum number of rows per privacy unit in absolute terms
@@ -299,13 +299,40 @@ class Relation:
         )
 
     def compose(self, relations: t.Iterable[t.Tuple[t.Iterable[str], 'Relation']]) -> 'Relation':
+        """It composes itself with other relations. It substitute its Tables with the corresponding relation in relations
+            with the same path. Schemas in the relations to be composed should be compatible with
+            the schema of the corresponding table otherwise an error is raised.
+
+        Args:
+            relations (t.Iterable[t.Tuple[t.Iterable[str], 'Relation']]): An iterable of pairs of a path and a Relation
+                Tables in self will be substituted by the relation with the matching path.
+        
+        Returns:
+            Relation: 
+        """
         converted_relations = [(path, rel._relation) for (path, rel) in relations]
         return Relation(self._relation.compose(converted_relations))
 
     def rename_fields(self, fields: t.Iterable[t.Tuple[str, str]])  -> 'Relation':
+        """It renames fields in the Relation
+        
+        Args:
+            fields (t.Iterable[t.Tuple[str, str]]): An iterable of pairs with
+                field name to be renamed and the new name
+        Returns:
+            Relation:
+        """
         return Relation(self._relation.rename_fields(fields))
 
     def with_field(self, name: str, expr: str) -> 'Relation':
+        """It creates a new Relation from self with a prepended new field
+        
+        Args:
+            name (str): The field name
+            expr (str): An SQL expression following the Generic dialect
+        Returns:
+            Relation:
+        """
         return Relation(self._relation.with_field(name, expr))
 
     def schema(self) -> str:

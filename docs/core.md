@@ -26,3 +26,9 @@
     :members:
     :undoc-members:
 ```
+
+```{eval-rst}
+.. autoclass:: pyqrlew.Strategy
+    :members:
+    :undoc-members:
+```

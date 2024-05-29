@@ -54,7 +54,9 @@ impl<'a> From<PrivacyUnitType<'a>> for PrivacyUnit {
     }
 }
 
-// An Enum for the privacy unit tracking propagation
+/// An Enum for the privacy unit tracking propagation
+/// Soft will protect only when it does not affect the meaning of the original query and fail otherwise.
+/// Hard will protect at all cost. It will succeed most of the time.
 #[pyclass]
 #[derive(Clone)]
 pub enum Strategy {

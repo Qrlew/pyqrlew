@@ -10,6 +10,7 @@ def extract_dataset():
     dataset = database.extract()
     return dataset
 
+
 def test_from_query(extract_dataset):
     query = "SELECT * FROM extract.census"
     _ = Relation.from_query(query, extract_dataset)
@@ -17,7 +18,6 @@ def test_from_query(extract_dataset):
     _ = Relation.from_query(query, extract_dataset, dialect=Dialect.BigQuery)
     _ = Relation.from_query(query, extract_dataset, dialect=Dialect.MsSql)
     
-
 
 def test_rewrite_as_privacy_unit_preserving_soft(extract_dataset):
     query = "SELECT * FROM extract.census"
@@ -108,6 +108,17 @@ def test_rewrite_as_privacy_unit_preserving_hard(extract_dataset):
         epsilon_delta=epsilon_delta,
         strategy=Strategy.Hard
     )
+
+    with pytest.raises(RuntimeError) as e_info:
+        _ = rel.rewrite_as_privacy_unit_preserving(
+            dataset=extract_dataset,
+            synthetic_data=None,
+            privacy_unit=privacy_unit,
+            epsilon_delta=epsilon_delta,
+            strategy=Strategy.Soft
+        )
+        assert e_info == "UnreachableProperty: privacy_unit_preserving is unreachable"
+
 
 def rewrite_with_differential_privacy(extract_dataset):
     query = "SELECT age, COUNT(*) FROM extract.census GROUP BY age"
