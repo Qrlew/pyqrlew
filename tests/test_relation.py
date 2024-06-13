@@ -197,3 +197,4 @@ def test_with_filed(extract_dataset):
     new_rel = rel.with_field(name=new_field_name, expr=new_field_expr)
     assert new_rel.schema() == '{custom_field: float{1}, age: int[20 90] (UNIQUE), count_all: int[0 199]}'
     # display_graph(new_rel.dot())
+

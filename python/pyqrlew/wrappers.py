@@ -338,6 +338,10 @@ class Relation:
     def schema(self) -> str:
         "Returns a string representation of the Relation's schema."
         return self._relation.schema()
+    
+    def type_(self) -> str:
+        "Returns a protobuf compatible string representation of the Relation's data type."
+        return self._relation.type_()
 
     def dot(self) -> str:
         "GraphViz representation of the `Relation`"
@@ -404,6 +408,7 @@ def dataset_from_database(
         """Returns a Json representation compatible with [Protocol Buffers](https://protobuf.dev/reference/protobuf/google.protobuf/#google.protobuf.Struct)
         of the schema
         """
+
         tables = {"fields": [table(metadata.tables[name]) for name in metadata.tables]}
 
         if schema_name is not None:
@@ -441,43 +446,49 @@ def dataset_from_database(
                             },
                         },
                         {
-                            'name': 'sarus_weights',
-                            'type': {
-                                'name': 'Integer',
-                                'integer': {
-                                    'min': '-9223372036854775808',
-                                    'max': '9223372036854775807',
-                                    'base': 'INT64',
-                                    'possible_values': []
-                                },
-                                'properties': {}
-                            },
+                        "name": "sarus_is_public",
+                        "type": {
+                            "boolean": {},
+                            "name": "Boolean",
+                            "properties": {}
+                        }
                         },
                         {
-                            'name': 'sarus_is_public',
-                            'type': {
-                                'name': 'Boolean',
-                                'boolean': {},
-                                'properties': {},
+                        "name": "sarus_privacy_unit",
+                        "type": {
+                            "name": "Optional",
+                            "optional": {
+                            "type": {
+                                "id": {
+                                "base": "STRING",
+                                "unique": False
+                                },
+                                "name": "Id",
+                                "properties": {}
+                            }
                             },
+                            "properties": {}
+                        }
                         },
                         {
-                            'name': 'sarus_protected_entity',
-                            'type': {
-                                'name': 'Id',
-                                'id': {
-                                    'base': 'STRING',
-                                    'unique': False,
-                                },
-                                'properties': {},
+                        "name": "sarus_weights",
+                        "type": {
+                            "float": {
+                            "base": "FLOAT64",
+                            "max": 1.7976931348623157e+308,
+                            "min": 0.0,
+                            "possible_values": []
                             },
-                        },
+                            "name": "Float64",
+                            "properties": {}
+                        }
+                        }
                     ],
                 },
                 'properties': {}
             },
-            'protected': {
-                'label': 'data',
+            'privacy_unit': {
+                'label': 'sarus_data',
                 'paths': [],
                 'properties': {},
             },
@@ -490,6 +501,7 @@ def dataset_from_database(
 
     def table(tab: sa.Table) -> dict:
         min_max_possible_values = compute_min_max_possible_values(tab)
+        admin_cols = ['sarus_weights', 'sarus_is_public', 'sarus_privacy_unit']
         return {
             'name': tab.name,
             'type': {
@@ -502,6 +514,7 @@ def dataset_from_database(
                             max=t.cast(t.Optional[str], min_max_possible_values[col.name]["max"]),
                             possible_values=t.cast(t.List[str], min_max_possible_values[col.name]["possible_values"])
                         ) for col in tab.columns
+                        if col.name not in admin_cols
                     ],
                 },
                 'properties': {},
