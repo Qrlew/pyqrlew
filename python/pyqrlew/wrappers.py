@@ -338,6 +338,10 @@ class Relation:
     def schema(self) -> str:
         "Returns a string representation of the Relation's schema."
         return self._relation.schema()
+    
+    def type_(self) -> str:
+        "Returns a protobuf compatible string representation of the Relation's data type."
+        return self._relation.type_()
 
     def dot(self) -> str:
         "GraphViz representation of the `Relation`"
