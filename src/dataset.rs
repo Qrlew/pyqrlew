@@ -190,6 +190,7 @@ impl Dataset {
                 }
             })
             .collect();
+        
         let ds: data_spec::Dataset = (&result_relations?).try_into()?;
         Ok(Dataset(ds))
     }

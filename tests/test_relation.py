@@ -180,6 +180,7 @@ def test_compose(extract_dataset):
     ]
 
     new_ds = extract_dataset.from_queries(queries)
+    print(new_ds.schema)
     new_query = """SELECT age, marital_status, COUNT(*) AS count_all
         FROM genx
         GROUP BY age, marital_status

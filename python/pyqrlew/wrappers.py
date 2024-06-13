@@ -409,7 +409,10 @@ def dataset_from_database(
         of the schema
         """
 
-        tables = {"fields": [table(metadata.tables[name]) for name in metadata.tables]}
+        tables_and_have_admin = [table(metadata.tables[name]) for name in metadata.tables]
+        have_admin = [table_and_has_admin[1] for table_and_has_admin in tables_and_have_admin]
+
+        tables = {"fields": [table_and_has_admin[0] for table_and_has_admin in tables_and_have_admin]}
 
         if schema_name is not None:
             tables = {
@@ -425,84 +428,129 @@ def dataset_from_database(
                 }],
             }
 
-        return {
-            '@type': 'sarus_data_spec/sarus_data_spec.Schema',
-            'uuid': generate_uuid().hex,
-            'dataset': dataset['uuid'],
-            'name': name,
-            'type': {
-                # Slugname
-                'name': name.lower(),
-                'struct': {
-                    'fields': [
-                        {
-                            'name': 'sarus_data',
-                            'type': {
-                                'name': 'Union',
-                                'union': tables,
-                                'properties': {
-                                    'public_fields': '[]',
-                                },
-                            },
-                        },
-                        {
-                        "name": "sarus_is_public",
-                        "type": {
-                            "boolean": {},
-                            "name": "Boolean",
-                            "properties": {}
-                        }
-                        },
-                        {
-                        "name": "sarus_privacy_unit",
-                        "type": {
-                            "name": "Optional",
-                            "optional": {
-                            "type": {
-                                "id": {
-                                "base": "STRING",
-                                "unique": False
-                                },
-                                "name": "Id",
-                                "properties": {}
-                            }
-                            },
-                            "properties": {}
-                        }
-                        },
-                        {
-                        "name": "sarus_weights",
-                        "type": {
-                            "float": {
-                            "base": "FLOAT64",
-                            "max": 1.7976931348623157e+308,
-                            "min": 0.0,
-                            "possible_values": []
-                            },
-                            "name": "Float64",
-                            "properties": {}
-                        }
-                        }
-                    ],
-                },
-                'properties': {}
-            },
-            'privacy_unit': {
-                'label': 'sarus_data',
-                'paths': [],
-                'properties': {},
-            },
-            'properties': {
-                'max_max_multiplicity': '1',
-                'foreign_keys': '',
-                'primary_keys': '',
+        sarus_is_public = {
+            "name": "sarus_is_public",
+            "type": {
+                "boolean": {},
+                "name": "Boolean",
+                "properties": {}
             }
         }
 
-    def table(tab: sa.Table) -> dict:
+        sarus_privacy_unit = {
+            "name": "sarus_privacy_unit",
+            "type": {
+                "name": "Optional",
+                "optional": {
+                "type": {
+                    "id": {
+                    "base": "STRING",
+                    "unique": False
+                    },
+                    "name": "Id",
+                    "properties": {}
+                }
+                },
+                "properties": {}
+            }
+        }
+
+        sarus_weights = {
+            "name": "sarus_weights",
+            "type": {
+                "float": {
+                "base": "FLOAT64",
+                "max": 1.7976931348623157e+308,
+                "min": 0.0,
+                "possible_values": []
+                },
+                "name": "Float64",
+                "properties": {}
+            }
+        }
+        if any(have_admin):
+            return {
+                '@type': 'sarus_data_spec/sarus_data_spec.Schema',
+                'uuid': generate_uuid().hex,
+                'dataset': dataset['uuid'],
+                'name': name,
+                'type': {
+                    # Slugname
+                    'name': name.lower(),
+                    'struct': {
+                        'fields': [
+                            {
+                                'name': 'sarus_data',
+                                'type': {
+                                    'name': 'Union',
+                                    'union': tables,
+                                    'properties': {
+                                        'public_fields': '[]',
+                                    },
+                                },
+                            },
+                            sarus_is_public,
+                            sarus_privacy_unit,
+                            sarus_weights,
+                        ],
+                    },
+                    'properties': {}
+                },
+                'privacy_unit': {
+                    'label': 'sarus_data',
+                    'paths': [],
+                    'properties': {},
+                },
+                'properties': {
+                    'max_max_multiplicity': '1',
+                    'foreign_keys': '',
+                    'primary_keys': '',
+                }
+            }
+        else:
+            return {
+                '@type': 'sarus_data_spec/sarus_data_spec.Schema',
+                'uuid': generate_uuid().hex,
+                'dataset': dataset['uuid'],
+                'name': name,
+                'type': {
+                    # Slugname
+                    'name': name.lower(),
+                    'struct': {
+                        'fields': [
+                            {
+                                'name': 'sarus_data',
+                                'type': {
+                                    'name': 'Union',
+                                    'union': tables,
+                                    'properties': {
+                                        'public_fields': '[]',
+                                    },
+                                },
+                            }
+                        ],
+                    },
+                    'properties': {}
+                },
+                'privacy_unit': {
+                    'label': 'sarus_data',
+                    'paths': [],
+                    'properties': {},
+                },
+                'properties': {
+                    'max_max_multiplicity': '1',
+                    'foreign_keys': '',
+                    'primary_keys': '',
+                }
+            }
+
+
+    def table(tab: sa.Table) -> t.Tuple[dict, bool]:
         min_max_possible_values = compute_min_max_possible_values(tab)
         admin_cols = ['sarus_weights', 'sarus_is_public', 'sarus_privacy_unit']
-        return {
+        col_names = [col.name for col in tab.columns]
+        has_admin = [admin_col in col_names for admin_col in admin_cols]
+        return ({
             'name': tab.name,
             'type': {
                 'name': 'Struct',
@@ -519,7 +567,7 @@ def dataset_from_database(
                 },
                 'properties': {},
             }
-        }
+        }, all(has_admin))
 
     def compute_min_max_possible_values(tab: sa.Table) -> Dict[str, Dict[str, Union[t.Optional[str], List[str]]]]:
         """Send 3 SQL queries for loading the bounds"""
