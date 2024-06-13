@@ -167,6 +167,8 @@ def test_rename_fields(extract_dataset):
 
 
 def test_compose(extract_dataset):
+    for path, rel in extract_dataset.relations():
+        display_graph(rel.dot())
     queries = [
         (("dataset_name", "my_schema", "boomers",), "SELECT * FROM extract.census WHERE age >= 60"),
         (("dataset_name", "my_schema", "genx",), "SELECT * FROM extract.census WHERE age >= 40 AND age < 60"),
