@@ -494,6 +494,7 @@ def dataset_from_database(
 
     def table(tab: sa.Table) -> dict:
         min_max_possible_values = compute_min_max_possible_values(tab)
+        admin_cols = ['sarus_weights', 'sarus_is_public', 'sarus_privacy_unit']
         return {
             'name': tab.name,
             'type': {
@@ -506,6 +507,7 @@ def dataset_from_database(
                             max=t.cast(t.Optional[str], min_max_possible_values[col.name]["max"]),
                             possible_values=t.cast(t.List[str], min_max_possible_values[col.name]["possible_values"])
                         ) for col in tab.columns
+                        if col.name not in admin_cols
                     ],
                 },
                 'properties': {},
