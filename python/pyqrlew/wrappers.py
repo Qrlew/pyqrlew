@@ -1,6 +1,6 @@
 """Module containing wrappers around rust objects and some utils"""
-from pyqrlew.typing import PrivacyUnit, SyntheticData
-from .pyqrlew import _Dataset, _Relation, _RelationWithDpEvent, DpEvent, Dialect, Strategy
+from pyqrlew.typing import PrivacyUnit, SyntheticData, DpEvent
+from .pyqrlew import _Dataset, _Relation, _RelationWithDpEvent, Dialect, Strategy
 import typing as t 
 from sqlalchemy.engine import Engine
 

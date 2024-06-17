@@ -1,6 +1,5 @@
 """Module with the definition of some rust objects that are not exposed to
 python. This is only for documentation purposes."""
-from .pyqrlew import _Relation
 import typing as t
 
 PrivacyUnit = t.Union[
@@ -9,7 +8,7 @@ PrivacyUnit = t.Union[
     t.Tuple[t.Sequence[t.Tuple[str, t.Sequence[t.Tuple[str, str, str]], str, str]], bool]
 ]
 SyntheticData = t.Sequence[t.Tuple[t.Sequence[str], t.Sequence[str]]]
-
+NestedDPEvent = t.Mapping[str, t.Union[str, float, 'NestedDPEvent']]
 
 class DpEvent(t.Protocol):
     """Internal object containing a description of differentially private
@@ -19,7 +18,7 @@ class DpEvent(t.Protocol):
     budgets.
     """
 
-    def to_dict(self) -> t.Mapping[str, t.Union[str, float]]:
+    def to_dict(self) -> NestedDPEvent:
         """Returns a Dict representation of DP mechanisms."""
         ...
 
