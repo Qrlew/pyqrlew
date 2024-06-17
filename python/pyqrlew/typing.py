@@ -27,19 +27,3 @@ class DpEvent(t.Protocol):
         """Returns NamedTuple of DP mechanisms compatible with `dp-accounting`
         """
         ...
-
-
-class RelationWithDpEvent(t.Protocol):
-    """Internal object containing a differentially private (DP) or privacy unit
-    preserving (PUP) relation and the associated DpEvent."""
-
-    def relation(self) -> _Relation:
-        """Returns the DP or PUP relation.
-        """
-        ...
-
-
-    def dp_event(self) -> DpEvent:
-        """Returns the DpEvent associated with the relation."""
-        ...
-

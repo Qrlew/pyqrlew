@@ -56,12 +56,12 @@ def test_from_queries():
         (("dataset_name", "my_schema", "millenials",), "SELECT * FROM extract.census WHERE age >= 30 AND age < 40"),
         (("dataset_name", "my_schema", "genz",), "SELECT * FROM extract.census WHERE age < 30"),
     ]
+
     new_ds = dataset.from_queries(queries)
-    for path, rel in new_ds.relations():
+    for _, rel in new_ds.relations():
         display_graph(rel.dot())
-    #genx = new_ds.my_schema.genx.relation()
-    
-    #print(genx.schema())
+    genx = new_ds.my_schema.genx.relation()
+    print(genx.schema())
 
 # pytest -s tests/test_dataset.py::test_from_dp_compiled_queries
 def test_from_dp_compiled_queries():
@@ -83,7 +83,6 @@ def test_from_dp_compiled_queries():
         epsilon_delta=epsilon_delta,
     )
     
-    engine = database.engine()
     dprel = dprel_and_event.relation()
     display_graph(dprel.dot())
 
@@ -92,7 +91,6 @@ def test_from_dp_compiled_queries():
 
 
 def test_from_database():
-    # database = PostgreSQL()
     import sqlalchemy as sa
     url = "postgresql+psycopg2://postgres:pyqrlew-db@localhost:5433/test_db"
     engine = sa.create_engine(url)
@@ -105,55 +103,350 @@ def test_from_database():
         display_graph(rel.dot())
 
 
-def test_from_str():
-    # real dataset
-    schema = '{"@type": "sarus_data_spec/sarus_data_spec.Schema", "uuid": "f0e998eb7b904be9bcd656c4157357f6", "dataset": "f31d342bc8284fa2b8f36fbfb869aa3a", "name": "Transformed_schema", "type": {"name": "transformed_schema", "struct": {"fields": [{"name": "sarus_data", "type": {"name": "Union", "union": {"fields": [{"name": "st51_bicdlwoy", "type": {"name": "Union", "union": {"fields": [{"name": "xwiromvh", "type": {"name": "Struct", "struct": {"fields": [{"name": "id", "type": {"name": "Integer", "integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}}, {"name": "text", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8"}}}, {"name": "sarus_is_public", "type": {"name": "Boolean", "boolean": {}}}, {"name": "sarus_privacy_unit", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8"}}}, {"name": "sarus_weights", "type": {"name": "Float64", "float": {"min": -1125899906842624.0, "max": 1125899906842624.0}}}]}}}, {"name": "qqnhlkqe", "type": {"name": "Struct", "struct": {"fields": [{"name": "id", "type": {"name": "Integer", "integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}}, {"name": "integer", "type": {"name": "Integer", "integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}}, {"name": "float", "type": {"name": "Float64", "float": {"min": -1125899906842624.0, "max": 1125899906842624.0}}}, {"name": "datetime", "type": {"name": "Datetime", "datetime": {"format": "%Y-%m-%d %H:%M:%S", "min": "01-01-01 00:00:00", "max": "9999-12-31 00:00:00"}}}, {"name": "date", "type": {"name": "Datetime", "datetime": {"format": "%Y-%m-%d %H:%M:%S", "min": "01-01-01 00:00:00", "max": "9999-12-31 00:00:00"}}}, {"name": "boolean", "type": {"name": "Boolean", "boolean": {}}}, {"name": "text", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8"}}}, {"name": "public_fk", "type": {"name": "Integer", "integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}}, {"name": "sarus_is_public", "type": {"name": "Boolean", "boolean": {}}}, {"name": "sarus_privacy_unit", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8"}}}, {"name": "sarus_weights", "type": {"name": "Float64", "float": {"min": -1125899906842624.0, "max": 1125899906842624.0}}}]}}}, {"name": "bgpqlcws", "type": {"name": "Struct", "struct": {"fields": [{"name": "id", "type": {"name": "Integer", "integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}}, {"name": "integer", "type": {"name": "Integer", "integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}}, {"name": "float", "type": {"name": "Float64", "float": {"min": -1125899906842624.0, "max": 1125899906842624.0}}}, {"name": "datetime", "type": {"name": "Datetime", "datetime": {"format": "%Y-%m-%d %H:%M:%S", "min": "01-01-01 00:00:00", "max": "9999-12-31 00:00:00"}}}, {"name": "date", "type": {"name": "Datetime", "datetime": {"format": "%Y-%m-%d %H:%M:%S", "min": "01-01-01 00:00:00", "max": "9999-12-31 00:00:00"}}}, {"name": "boolean", "type": {"name": "Boolean", "boolean": {}}}, {"name": "text", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8"}}}, {"name": "public_fk", "type": {"name": "Integer", "integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}}, {"name": "sarus_is_public", "type": {"name": "Boolean", "boolean": {}}}, {"name": "sarus_privacy_unit", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8"}}}, {"name": "sarus_weights", "type": {"name": "Float64", "float": {"min": -1125899906842624.0, "max": 1125899906842624.0}}}]}}}, {"name": "tyzgsphn", "type": {"name": "Struct", "struct": {"fields": [{"name": "id", "type": {"name": "Integer", "integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}}, {"name": "text", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8"}}}, {"name": "sarus_is_public", "type": {"name": "Boolean", "boolean": {}}}, {"name": "sarus_privacy_unit", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8"}}}, {"name": "sarus_weights", "type": {"name": "Float64", "float": {"min": -1125899906842624.0, "max": 1125899906842624.0}}}]}}}]}, "properties": {"public_fields": "[]"}}}]}, "properties": {"public_fields": "[]"}}}, {"name": "sarus_weights", "type": {"name": "Integer", "integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}}, {"name": "sarus_is_public", "type": {"name": "Boolean", "boolean": {}}}, {"name": "sarus_protected_entity", "type": {"name": "Id", "id": {"base": "STRING"}}}]}}, "protected": {"label": "data"}, "properties": {"primary_keys": "", "max_max_multiplicity": "1", "foreign_keys": ""}}'
-    size = '{"@type": "sarus_data_spec/sarus_data_spec.Size", "uuid": "27eade642ec54c05a2a757c9846775a0", "dataset": "f31d342bc8284fa2b8f36fbfb869aa3a", "name": "Transformed_schema_sizes", "statistics": {"name": "Union", "union": {"fields": [{"name": "st51_bicdlwoy", "statistics": {"name": "Union", "union": {"fields": [{"name": "xwiromvh", "statistics": {"name": "Struct", "struct": {"fields": [{"name": "id", "statistics": {"name": "Integer", "integer": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "3", "multiplicity": 1.0}}}, {"name": "text", "statistics": {"name": "Text", "text": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "3", "multiplicity": 1.0}}}, {"name": "sarus_is_public", "statistics": {"name": "Boolean", "boolean": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "3", "multiplicity": 1.0}}}, {"name": "sarus_privacy_unit", "statistics": {"name": "Text", "text": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "3", "multiplicity": 1.0}}}, {"name": "sarus_weights", "statistics": {"name": "Float", "float": {"distribution": {"double": {"min": -1125899906842624.0, "max": 1125899906842624.0}}, "size": "3", "multiplicity": 1.0}}}], "size": "3", "multiplicity": 1.0}}}, {"name": "qqnhlkqe", "statistics": {"name": "Struct", "struct": {"fields": [{"name": "id", "statistics": {"name": "Integer", "integer": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "integer", "statistics": {"name": "Integer", "integer": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "float", "statistics": {"name": "Float", "float": {"distribution": {"double": {"min": -1125899906842624.0, "max": 1125899906842624.0}}, "size": "900", "multiplicity": 1.0}}}, {"name": "datetime", "statistics": {"name": "Datetime", "datetime": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "date", "statistics": {"name": "Datetime", "datetime": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "boolean", "statistics": {"name": "Boolean", "boolean": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "text", "statistics": {"name": "Text", "text": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "public_fk", "statistics": {"name": "Integer", "integer": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "sarus_is_public", "statistics": {"name": "Boolean", "boolean": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "sarus_privacy_unit", "statistics": {"name": "Text", "text": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "sarus_weights", "statistics": {"name": "Float", "float": {"distribution": {"double": {"min": -1125899906842624.0, "max": 1125899906842624.0}}, "size": "900", "multiplicity": 1.0}}}], "size": "900", "multiplicity": 1.0}}}, {"name": "bgpqlcws", "statistics": {"name": "Struct", "struct": {"fields": [{"name": "id", "statistics": {"name": "Integer", "integer": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "integer", "statistics": {"name": "Integer", "integer": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "float", "statistics": {"name": "Float", "float": {"distribution": {"double": {"min": -1125899906842624.0, "max": 1125899906842624.0}}, "size": "900", "multiplicity": 1.0}}}, {"name": "datetime", "statistics": {"name": "Datetime", "datetime": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "date", "statistics": {"name": "Datetime", "datetime": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "boolean", "statistics": {"name": "Boolean", "boolean": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "text", "statistics": {"name": "Text", "text": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "public_fk", "statistics": {"name": "Integer", "integer": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "sarus_is_public", "statistics": {"name": "Boolean", "boolean": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "sarus_privacy_unit", "statistics": {"name": "Text", "text": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "sarus_weights", "statistics": {"name": "Float", "float": {"distribution": {"double": {"min": -1125899906842624.0, "max": 1125899906842624.0}}, "size": "900", "multiplicity": 1.0}}}], "size": "900", "multiplicity": 1.0}}}, {"name": "tyzgsphn", "statistics": {"name": "Struct", "struct": {"fields": [{"name": "id", "statistics": {"name": "Integer", "integer": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "3", "multiplicity": 1.0}}}, {"name": "text", "statistics": {"name": "Text", "text": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "3", "multiplicity": 1.0}}}, {"name": "sarus_is_public", "statistics": {"name": "Boolean", "boolean": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "3", "multiplicity": 1.0}}}, {"name": "sarus_privacy_unit", "statistics": {"name": "Text", "text": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "3", "multiplicity": 1.0}}}, {"name": "sarus_weights", "statistics": {"name": "Float", "float": {"distribution": {"double": {"min": -1125899906842624.0, "max": 1125899906842624.0}}, "size": "3", "multiplicity": 1.0}}}], "size": "3", "multiplicity": 1.0}}}]}}}]}}}'
-    dataset = '{"@type": "sarus_data_spec/sarus_data_spec.Dataset", "uuid": "f31d342bc8284fa2b8f36fbfb869aa3a", "name": "Transformed", "spec": {"transformed": {"transform": "98f18c2b0beb406088193dab26e24552", "arguments": [], "named_arguments": {}}}, "properties": {}, "doc": "This ia a demo dataset for testing purpose"}'
+# def test_from_str():
+#     dataset = '{"@type": "sarus_data_spec/sarus_data_spec.Dataset", "uuid": "f31d342bc8284fa2b8f36fbfb869aa3a", "name": "Transformed", "spec": {"transformed": {"transform": "98f18c2b0beb406088193dab26e24552", "arguments": [], "named_arguments": {}}}, "properties": {}, "doc": "This ia a demo dataset for testing purpose"}'
+#     schema = '''
+#     {
+#     "@type":"sarus_data_spec/sarus_data_spec.Schema",
+#     "uuid":"f0e998eb7b904be9bcd656c4157357f6",
+#     "dataset":"f31d342bc8284fa2b8f36fbfb869aa3a",
+#     "name":"Transformed_schema",
+#     "type":{
+#         "name":"transformed_schema",
+#         "struct":{
+#             "fields":[
+#                 {
+#                 "name":"sarus_data",
+#                 "type":{
+#                     "name":"Union",
+#                     "union":{
+#                         "fields":[
+#                             {
+#                             "name":"st51_bicdlwoy",
+#                             "type":{
+#                                 "name":"Union",
+#                                 "union":{
+#                                     "fields":[
+#                                         {
+#                                         "name":"xwiromvh",
+#                                         "type":{
+#                                             "name":"Struct",
+#                                             "struct":{
+#                                                 "fields":[
+#                                                     {
+#                                                     "name":"id",
+#                                                     "type":{
+#                                                         "name":"Integer",
+#                                                         "integer":{
+#                                                             "min":"-9223372036854775808",
+#                                                             "max":"9223372036854775807"
+#                                                         }
+#                                                     }
+#                                                     },
+#                                                     {
+#                                                     "name":"text",
+#                                                     "type":{
+#                                                         "name":"Text UTF-8",
+#                                                         "text":{
+#                                                             "encoding":"UTF-8"
+#                                                         }
+#                                                     }
+#                                                     }
+#                                                 ]
+#                                             }
+#                                         }
+#                                         },
+#                                         {
+#                                         "name":"qqnhlkqe",
+#                                         "type":{
+#                                             "name":"Struct",
+#                                             "struct":{
+#                                                 "fields":[
+#                                                     {
+#                                                     "name":"id",
+#                                                     "type":{
+#                                                         "name":"Integer",
+#                                                         "integer":{
+#                                                             "min":"-9223372036854775808",
+#                                                             "max":"9223372036854775807"
+#                                                         }
+#                                                     }
+#                                                     },
+#                                                     {
+#                                                     "name":"integer",
+#                                                     "type":{
+#                                                         "name":"Integer",
+#                                                         "integer":{
+#                                                             "min":"-9223372036854775808",
+#                                                             "max":"9223372036854775807"
+#                                                         }
+#                                                     }
+#                                                     },
+#                                                     {
+#                                                     "name":"float",
+#                                                     "type":{
+#                                                         "name":"Float64",
+#                                                         "float":{
+#                                                             "min":-1125899906842624.0,
+#                                                             "max":1125899906842624.0
+#                                                         }
+#                                                     }
+#                                                     },
+#                                                     {
+#                                                     "name":"datetime",
+#                                                     "type":{
+#                                                         "name":"Datetime",
+#                                                         "datetime":{
+#                                                             "format":"%Y-%m-%d %H:%M:%S",
+#                                                             "min":"01-01-01 00:00:00",
+#                                                             "max":"9999-12-31 00:00:00"
+#                                                         }
+#                                                     }
+#                                                     },
+#                                                     {
+#                                                     "name":"date",
+#                                                     "type":{
+#                                                         "name":"Datetime",
+#                                                         "datetime":{
+#                                                             "format":"%Y-%m-%d %H:%M:%S",
+#                                                             "min":"01-01-01 00:00:00",
+#                                                             "max":"9999-12-31 00:00:00"
+#                                                         }
+#                                                     }
+#                                                     },
+#                                                     {
+#                                                     "name":"boolean",
+#                                                     "type":{
+#                                                         "name":"Boolean",
+#                                                         "boolean":{
+                                                            
+#                                                         }
+#                                                     }
+#                                                     },
+#                                                     {
+#                                                     "name":"text",
+#                                                     "type":{
+#                                                         "name":"Text UTF-8",
+#                                                         "text":{
+#                                                             "encoding":"UTF-8"
+#                                                         }
+#                                                     }
+#                                                     },
+#                                                     {
+#                                                     "name":"public_fk",
+#                                                     "type":{
+#                                                         "name":"Integer",
+#                                                         "integer":{
+#                                                             "min":"-9223372036854775808",
+#                                                             "max":"9223372036854775807"
+#                                                         }
+#                                                     }
+#                                                     }
+#                                                 ]
+#                                             }
+#                                         }
+#                                         },
+#                                         {
+#                                         "name":"bgpqlcws",
+#                                         "type":{
+#                                             "name":"Struct",
+#                                             "struct":{
+#                                                 "fields":[
+#                                                     {
+#                                                     "name":"id",
+#                                                     "type":{
+#                                                         "name":"Integer",
+#                                                         "integer":{
+#                                                             "min":"-9223372036854775808",
+#                                                             "max":"9223372036854775807"
+#                                                         }
+#                                                     }
+#                                                     },
+#                                                     {
+#                                                     "name":"integer",
+#                                                     "type":{
+#                                                         "name":"Integer",
+#                                                         "integer":{
+#                                                             "min":"-9223372036854775808",
+#                                                             "max":"9223372036854775807"
+#                                                         }
+#                                                     }
+#                                                     },
+#                                                     {
+#                                                     "name":"float",
+#                                                     "type":{
+#                                                         "name":"Float64",
+#                                                         "float":{
+#                                                             "min":-1125899906842624.0,
+#                                                             "max":1125899906842624.0
+#                                                         }
+#                                                     }
+#                                                     },
+#                                                     {
+#                                                     "name":"datetime",
+#                                                     "type":{
+#                                                         "name":"Datetime",
+#                                                         "datetime":{
+#                                                             "format":"%Y-%m-%d %H:%M:%S",
+#                                                             "min":"01-01-01 00:00:00",
+#                                                             "max":"9999-12-31 00:00:00"
+#                                                         }
+#                                                     }
+#                                                     },
+#                                                     {
+#                                                     "name":"date",
+#                                                     "type":{
+#                                                         "name":"Datetime",
+#                                                         "datetime":{
+#                                                             "format":"%Y-%m-%d %H:%M:%S",
+#                                                             "min":"01-01-01 00:00:00",
+#                                                             "max":"9999-12-31 00:00:00"
+#                                                         }
+#                                                     }
+#                                                     },
+#                                                     {
+#                                                     "name":"boolean",
+#                                                     "type":{
+#                                                         "name":"Boolean",
+#                                                         "boolean":{
+                                                            
+#                                                         }
+#                                                     }
+#                                                     },
+#                                                     {
+#                                                     "name":"text",
+#                                                     "type":{
+#                                                         "name":"Text UTF-8",
+#                                                         "text":{
+#                                                             "encoding":"UTF-8"
+#                                                         }
+#                                                     }
+#                                                     },
+#                                                     {
+#                                                     "name":"public_fk",
+#                                                     "type":{
+#                                                         "name":"Integer",
+#                                                         "integer":{
+#                                                             "min":"-9223372036854775808",
+#                                                             "max":"9223372036854775807"
+#                                                         }
+#                                                     }
+#                                                     }
+#                                                 ]
+#                                             }
+#                                         }
+#                                         },
+#                                         {
+#                                         "name":"tyzgsphn",
+#                                         "type":{
+#                                             "name":"Struct",
+#                                             "struct":{
+#                                                 "fields":[
+#                                                     {
+#                                                     "name":"id",
+#                                                     "type":{
+#                                                         "name":"Integer",
+#                                                         "integer":{
+#                                                             "min":"-9223372036854775808",
+#                                                             "max":"9223372036854775807"
+#                                                         }
+#                                                     }
+#                                                     },
+#                                                     {
+#                                                     "name":"text",
+#                                                     "type":{
+#                                                         "name":"Text UTF-8",
+#                                                         "text":{
+#                                                             "encoding":"UTF-8"
+#                                                         }
+#                                                     }
+#                                                     }
+#                                                 ]
+#                                             }
+#                                         }
+#                                         }
+#                                     ]
+#                                 },
+#                                 "properties":{
+#                                     "public_fields":"[]"
+#                                 }
+#                             }
+#                             }
+#                         ]
+#                     },
+#                     "properties":{
+#                         "public_fields":"[]"
+#                     }
+#                 }
+#                 },
+#                 {
+#                 "name":"sarus_weights",
+#                 "type":{
+#                     "name":"Integer",
+#                     "integer":{
+#                         "min":"-9223372036854775808",
+#                         "max":"9223372036854775807"
+#                     }
+#                 }
+#                 },
+#                 {
+#                 "name":"sarus_is_public",
+#                 "type":{
+#                     "name":"Boolean",
+#                     "boolean":{
+                        
+#                     }
+#                 }
+#                 },
+#                 {
+#                     "name": "sarus_privacy_unit",
+#                     "type": {
+#                     "name": "Optional",
+#                     "optional": {
+#                         "type": {
+#                         "id": {
+#                             "base": "STRING",
+#                             "unique": false
+#                         },
+#                         "name": "Id",
+#                         "properties": {}
+#                         }
+#                     },
+#                     "properties": {}
+#                     }
+#             },
+#             ]
+#         }
+#     },
+#     "protected":{
+#         "label":"data"
+#     },
+#     "properties":{
+#         "primary_keys":"",
+#         "max_max_multiplicity":"1",
+#         "foreign_keys":""
+#     }
+#     }
+#     '''
+#     real_ds = Dataset.from_str(dataset, schema, '')
 
-    real_ds = Dataset.from_str(dataset, schema, size)
-    # paths_rels = ds.relations()
-    # for path, rel in paths_rels:
-    #     print(path)
+    # # sarus dataset:
+    # dataset = '{"@type": "sarus_data_spec/sarus_data_spec.Dataset", "uuid": "10ba9d15c46403eb7b1eb5b872868b69", "name": "Transformed", "spec": {"transformed": {"transform": "98f18c2b0beb406088193dab26e24552", "arguments": [], "named_arguments": {}}}, "properties": {}, "doc": "This ia a demo dataset for testing purpose"}'
+    # schema = '{"@type": "sarus_data_spec/sarus_data_spec.Schema", "uuid": "72c83138118ecbea709ae57f9cdf8a2c", "dataset": "10ba9d15c46403eb7b1eb5b872868b69", "name": "Transformed_schema", "type": {"name": "Struct", "struct": {"fields": [{"name": "sarus_data", "type": {"name": "Union", "union": {"fields": [{"name": "primary_table", "type": {"name": "Struct", "struct": {"fields": [{"name": "id", "type": {"name": "Id", "id": {"base": "INT32", "unique": true}}}, {"name": "integer", "type": {"name": "Integer", "integer": {"base": "INT32", "max": "99"}, "properties": {"possible_values": "[30, 89, 12, 65, 31, 57, 36, 27, 18, 93, 77, 22, 23, 94, 11, 28, 74, 88, 9, 15, 80, 71, 17, 46, 7, 75, 33, 84, 96, 44, 5, 4, 50, 54, 34, 6, 85, 92, 62, 79, 42, 97, 45, 40, 73, 37, 0, 3, 29, 16, 82, 14, 51, 53, 25, 48, 32, 81, 41, 90, 64, 38, 66, 67, 95, 99, 86, 21, 43, 8, 72, 78, 13, 87, 39, 91, 52, 76, 68, 70, 2, 58, 69, 1, 63, 83, 55, 20, 49, 60, 61, 19, 35, 10, 59, 98, 56, 26, 47, 24]", "possible_values_length": "100"}}}, {"name": "float", "type": {"name": "Float64", "float": {"base": "FLOAT32", "min": 0.00011310506670270115, "max": 0.9992868304252625}, "properties": {"possible_values_length": "301"}}}, {"name": "datetime", "type": {"name": "Datetime", "datetime": {"format": "%Y-%m-%d %H:%M:%S", "min": "1980-01-01 01:04:49", "max": "1980-01-31 23:23:22"}, "properties": {"possible_values_length": "301"}}}, {"name": "date", "type": {"name": "Date", "date": {"format": "%Y-%m-%d", "min": "1980-01-03", "max": "2000-01-01"}, "properties": {"possible_values_length": "301"}}}, {"name": "boolean", "type": {"name": "Boolean", "boolean": {}}}, {"name": "text", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8"}, "properties": {"min_length": "8", "possible_values_length": "301", "text_alphabet_name": "Simple", "text_char_set": "[48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90]", "max_length": "8"}}}, {"name": "public_fk", "type": {"name": "Id", "id": {"base": "INT32", "reference": {"label": "sarus_data", "paths": [{"label": "primary_public_table", "paths": [{"label": "id"}]}]}}}}]}, "properties": {"merge_paths": "0", "sarus_is_public": "False"}}}, {"name": "secondary_table", "type": {"name": "Struct", "struct": {"fields": [{"name": "id", "type": {"name": "Id", "id": {"base": "INT32", "reference": {"label": "sarus_data", "paths": [{"label": "primary_table", "paths": [{"label": "id"}]}]}}}}, {"name": "integer", "type": {"name": "Integer", "integer": {"base": "INT32", "max": "99"}, "properties": {"possible_values": "[30, 89, 12, 65, 31, 57, 36, 27, 18, 93, 77, 22, 23, 94, 11, 28, 74, 88, 9, 15, 80, 71, 17, 46, 7, 75, 33, 84, 96, 44, 5, 4, 50, 54, 34, 6, 85, 92, 62, 79, 42, 97, 45, 40, 73, 37, 0, 3, 29, 16, 82, 14, 51, 53, 25, 48, 32, 81, 41, 90, 64, 38, 66, 67, 95, 99, 86, 21, 43, 8, 72, 78, 13, 87, 39, 91, 52, 76, 68, 70, 2, 58, 69, 1, 63, 83, 55, 20, 49, 60, 61, 19, 35, 10, 59, 98, 56, 26, 47, 24]", "possible_values_length": "100"}}}, {"name": "float", "type": {"name": "Float64", "float": {"base": "FLOAT32", "min": 0.00011310506670270115, "max": 0.9992868304252625}, "properties": {"possible_values_length": "301"}}}, {"name": "datetime", "type": {"name": "Datetime", "datetime": {"format": "%Y-%m-%d %H:%M:%S", "min": "1980-01-01 01:04:49", "max": "1980-01-31 23:23:22"}, "properties": {"possible_values_length": "301"}}}, {"name": "date", "type": {"name": "Date", "date": {"format": "%Y-%m-%d", "min": "1980-01-03", "max": "2000-01-01"}, "properties": {"possible_values_length": "301"}}}, {"name": "boolean", "type": {"name": "Boolean", "boolean": {}}}, {"name": "text", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8"}, "properties": {"max_length": "8", "text_alphabet_name": "Simple", "min_length": "8", "text_char_set": "[48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90]", "possible_values_length": "301"}}}, {"name": "public_fk", "type": {"name": "Id", "id": {"base": "INT32", "reference": {"label": "sarus_data", "paths": [{"label": "secondary_public_table", "paths": [{"label": "id"}]}]}}}}]}, "properties": {"sarus_is_public": "False", "fks_for_merging": "[\\"CiRzYXJ1c19kYXRhX3NwZWMvc2FydXNfZGF0YV9zcGVjLlBhdGgSEQoPc2Vjb25kYXJ5X3RhYmxl\\", \\"CiRzYXJ1c19kYXRhX3NwZWMvc2FydXNfZGF0YV9zcGVjLlBhdGgSDwoNcHJpbWFyeV90YWJsZQ==\\"]", "merge_paths": "2"}}}, {"name": "primary_public_table", "type": {"name": "Struct", "struct": {"fields": [{"name": "id", "type": {"name": "Id", "id": {"base": "INT32", "unique": true}}}, {"name": "text", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8"}, "properties": {"text_char_set": "[50, 51, 52, 55, 65, 70, 73, 74, 76, 78, 79, 80, 81, 87, 89, 90]", "max_length": "8", "possible_values": "[\\"JPA2Z33I\\", \\"JAQLY7IO\\", \\"NFNZN2W4\\"]", "text_alphabet_name": "Simple", "min_length": "8", "possible_values_length": "3"}}}]}, "properties": {"merge_paths": "1", "sarus_is_public": "True"}}}, {"name": "secondary_public_table", "type": {"name": "Struct", "struct": {"fields": [{"name": "id", "type": {"name": "Id", "id": {"base": "INT32", "unique": true}}}, {"name": "text", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8"}, "properties": {"text_alphabet_name": "Simple", "text_char_set": "[50, 51, 52, 55, 65, 70, 73, 74, 76, 78, 79, 80, 81, 87, 89, 90]", "possible_values": "[\\"JPA2Z33I\\", \\"JAQLY7IO\\", \\"NFNZN2W4\\"]", "possible_values_length": "3", "max_length": "8", "min_length": "8"}}}]}, "properties": {"merge_paths": "1", "sarus_is_public": "True"}}}]}, "properties": {"sarus_is_public": "False"}}}, {"name": "sarus_is_public", "type": {"name": "Boolean", "boolean": {}}}, {"name": "sarus_privacy_unit", "type": {"name": "Optional", "optional": {"type": {"name": "Id", "id": {"base": "STRING"}}}}}, {"name": "sarus_weights", "type": {"name": "Float64", "float": {"max": 1.7976931348623157e308}}}]}}, "properties": {"max_max_multiplicity": "10"}}'
 
+    # sarus_ds = Dataset.from_str(dataset, schema, size)
+
+    # query = 'SELECT * FROM primary_table'
+    # rel = Relation.from_query(query, sarus_ds)
     # display_graph(rel.dot())
 
-    # sarus dataset:
-    schema = '{"@type": "sarus_data_spec/sarus_data_spec.Schema", "uuid": "72c83138118ecbea709ae57f9cdf8a2c", "dataset": "10ba9d15c46403eb7b1eb5b872868b69", "name": "Transformed_schema", "type": {"name": "Struct", "struct": {"fields": [{"name": "sarus_data", "type": {"name": "Union", "union": {"fields": [{"name": "primary_table", "type": {"name": "Struct", "struct": {"fields": [{"name": "id", "type": {"name": "Id", "id": {"base": "INT32", "unique": true}}}, {"name": "integer", "type": {"name": "Integer", "integer": {"base": "INT32", "max": "99"}, "properties": {"possible_values": "[30, 89, 12, 65, 31, 57, 36, 27, 18, 93, 77, 22, 23, 94, 11, 28, 74, 88, 9, 15, 80, 71, 17, 46, 7, 75, 33, 84, 96, 44, 5, 4, 50, 54, 34, 6, 85, 92, 62, 79, 42, 97, 45, 40, 73, 37, 0, 3, 29, 16, 82, 14, 51, 53, 25, 48, 32, 81, 41, 90, 64, 38, 66, 67, 95, 99, 86, 21, 43, 8, 72, 78, 13, 87, 39, 91, 52, 76, 68, 70, 2, 58, 69, 1, 63, 83, 55, 20, 49, 60, 61, 19, 35, 10, 59, 98, 56, 26, 47, 24]", "possible_values_length": "100"}}}, {"name": "float", "type": {"name": "Float64", "float": {"base": "FLOAT32", "min": 0.00011310506670270115, "max": 0.9992868304252625}, "properties": {"possible_values_length": "301"}}}, {"name": "datetime", "type": {"name": "Datetime", "datetime": {"format": "%Y-%m-%d %H:%M:%S", "min": "1980-01-01 01:04:49", "max": "1980-01-31 23:23:22"}, "properties": {"possible_values_length": "301"}}}, {"name": "date", "type": {"name": "Date", "date": {"format": "%Y-%m-%d", "min": "1980-01-03", "max": "2000-01-01"}, "properties": {"possible_values_length": "301"}}}, {"name": "boolean", "type": {"name": "Boolean", "boolean": {}}}, {"name": "text", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8"}, "properties": {"min_length": "8", "possible_values_length": "301", "text_alphabet_name": "Simple", "text_char_set": "[48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90]", "max_length": "8"}}}, {"name": "public_fk", "type": {"name": "Id", "id": {"base": "INT32", "reference": {"label": "sarus_data", "paths": [{"label": "primary_public_table", "paths": [{"label": "id"}]}]}}}}]}, "properties": {"merge_paths": "0", "sarus_is_public": "False"}}}, {"name": "secondary_table", "type": {"name": "Struct", "struct": {"fields": [{"name": "id", "type": {"name": "Id", "id": {"base": "INT32", "reference": {"label": "sarus_data", "paths": [{"label": "primary_table", "paths": [{"label": "id"}]}]}}}}, {"name": "integer", "type": {"name": "Integer", "integer": {"base": "INT32", "max": "99"}, "properties": {"possible_values": "[30, 89, 12, 65, 31, 57, 36, 27, 18, 93, 77, 22, 23, 94, 11, 28, 74, 88, 9, 15, 80, 71, 17, 46, 7, 75, 33, 84, 96, 44, 5, 4, 50, 54, 34, 6, 85, 92, 62, 79, 42, 97, 45, 40, 73, 37, 0, 3, 29, 16, 82, 14, 51, 53, 25, 48, 32, 81, 41, 90, 64, 38, 66, 67, 95, 99, 86, 21, 43, 8, 72, 78, 13, 87, 39, 91, 52, 76, 68, 70, 2, 58, 69, 1, 63, 83, 55, 20, 49, 60, 61, 19, 35, 10, 59, 98, 56, 26, 47, 24]", "possible_values_length": "100"}}}, {"name": "float", "type": {"name": "Float64", "float": {"base": "FLOAT32", "min": 0.00011310506670270115, "max": 0.9992868304252625}, "properties": {"possible_values_length": "301"}}}, {"name": "datetime", "type": {"name": "Datetime", "datetime": {"format": "%Y-%m-%d %H:%M:%S", "min": "1980-01-01 01:04:49", "max": "1980-01-31 23:23:22"}, "properties": {"possible_values_length": "301"}}}, {"name": "date", "type": {"name": "Date", "date": {"format": "%Y-%m-%d", "min": "1980-01-03", "max": "2000-01-01"}, "properties": {"possible_values_length": "301"}}}, {"name": "boolean", "type": {"name": "Boolean", "boolean": {}}}, {"name": "text", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8"}, "properties": {"max_length": "8", "text_alphabet_name": "Simple", "min_length": "8", "text_char_set": "[48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90]", "possible_values_length": "301"}}}, {"name": "public_fk", "type": {"name": "Id", "id": {"base": "INT32", "reference": {"label": "sarus_data", "paths": [{"label": "secondary_public_table", "paths": [{"label": "id"}]}]}}}}]}, "properties": {"sarus_is_public": "False", "fks_for_merging": "[\\"CiRzYXJ1c19kYXRhX3NwZWMvc2FydXNfZGF0YV9zcGVjLlBhdGgSEQoPc2Vjb25kYXJ5X3RhYmxl\\", \\"CiRzYXJ1c19kYXRhX3NwZWMvc2FydXNfZGF0YV9zcGVjLlBhdGgSDwoNcHJpbWFyeV90YWJsZQ==\\"]", "merge_paths": "2"}}}, {"name": "primary_public_table", "type": {"name": "Struct", "struct": {"fields": [{"name": "id", "type": {"name": "Id", "id": {"base": "INT32", "unique": true}}}, {"name": "text", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8"}, "properties": {"text_char_set": "[50, 51, 52, 55, 65, 70, 73, 74, 76, 78, 79, 80, 81, 87, 89, 90]", "max_length": "8", "possible_values": "[\\"JPA2Z33I\\", \\"JAQLY7IO\\", \\"NFNZN2W4\\"]", "text_alphabet_name": "Simple", "min_length": "8", "possible_values_length": "3"}}}]}, "properties": {"merge_paths": "1", "sarus_is_public": "True"}}}, {"name": "secondary_public_table", "type": {"name": "Struct", "struct": {"fields": [{"name": "id", "type": {"name": "Id", "id": {"base": "INT32", "unique": true}}}, {"name": "text", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8"}, "properties": {"text_alphabet_name": "Simple", "text_char_set": "[50, 51, 52, 55, 65, 70, 73, 74, 76, 78, 79, 80, 81, 87, 89, 90]", "possible_values": "[\\"JPA2Z33I\\", \\"JAQLY7IO\\", \\"NFNZN2W4\\"]", "possible_values_length": "3", "max_length": "8", "min_length": "8"}}}]}, "properties": {"merge_paths": "1", "sarus_is_public": "True"}}}]}, "properties": {"sarus_is_public": "False"}}}, {"name": "sarus_is_public", "type": {"name": "Boolean", "boolean": {}}}, {"name": "sarus_privacy_unit", "type": {"name": "Optional", "optional": {"type": {"name": "Id", "id": {"base": "STRING"}}}}}, {"name": "sarus_weights", "type": {"name": "Float64", "float": {"max": 1.7976931348623157e308}}}]}}, "properties": {"max_max_multiplicity": "10"}}'
-    size = '{"@type": "sarus_data_spec/sarus_data_spec.Size", "uuid": "fbb0e426a217c9f748af4b20daafa8c7", "dataset": "10ba9d15c46403eb7b1eb5b872868b69", "name": "Transformed_sizes", "statistics": {"name": "Union", "union": {"fields": [{"name": "primary_table", "statistics": {"name": "Struct", "struct": {"fields": [{"name": "id", "statistics": {"name": "Id", "id": {"size": "901", "multiplicity": 1.0}}}, {"name": "integer", "statistics": {"name": "Integer", "integer": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "901", "multiplicity": 1.0}}}, {"name": "float", "statistics": {"name": "Float", "float": {"distribution": {"double": {"min": -1.7976931348623157e308, "max": 1.7976931348623157e308}}, "size": "901", "multiplicity": 1.0}}}, {"name": "datetime", "statistics": {"name": "Datetime", "datetime": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "901", "multiplicity": 1.0}}}, {"name": "date", "statistics": {"name": "Date", "date": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "901", "multiplicity": 1.0}}}, {"name": "boolean", "statistics": {"name": "Boolean", "boolean": {"distribution": {"boolean": {}}, "size": "901", "multiplicity": 1.0}}}, {"name": "text", "statistics": {"name": "Text", "text": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "901", "multiplicity": 1.0}}}, {"name": "public_fk", "statistics": {"name": "Id", "id": {"size": "901", "multiplicity": 1.0}}}], "size": "901", "multiplicity": 1.0}, "properties": {"merge_paths": "0", "sarus_is_public": "False"}}}, {"name": "secondary_table", "statistics": {"name": "Struct", "struct": {"fields": [{"name": "id", "statistics": {"name": "Id", "id": {"size": "898", "multiplicity": 1.003023217158495}}}, {"name": "integer", "statistics": {"name": "Integer", "integer": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "898", "multiplicity": 1.003023217158495}}}, {"name": "float", "statistics": {"name": "Float", "float": {"distribution": {"double": {"min": -1.7976931348623157e308, "max": 1.7976931348623157e308}}, "size": "898", "multiplicity": 1.003023217158495}}}, {"name": "datetime", "statistics": {"name": "Datetime", "datetime": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "898", "multiplicity": 1.003023217158495}}}, {"name": "date", "statistics": {"name": "Date", "date": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "898", "multiplicity": 1.003023217158495}}}, {"name": "boolean", "statistics": {"name": "Boolean", "boolean": {"distribution": {"boolean": {}}, "size": "898", "multiplicity": 1.003023217158495}}}, {"name": "text", "statistics": {"name": "Text", "text": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "898", "multiplicity": 1.003023217158495}}}, {"name": "public_fk", "statistics": {"name": "Id", "id": {"size": "898", "multiplicity": 1.003023217158495}}}], "size": "898", "multiplicity": 1.003023217158495}, "properties": {"fks_for_merging": "[\\"CiRzYXJ1c19kYXRhX3NwZWMvc2FydXNfZGF0YV9zcGVjLlBhdGgSEQoPc2Vjb25kYXJ5X3RhYmxl\\", \\"CiRzYXJ1c19kYXRhX3NwZWMvc2FydXNfZGF0YV9zcGVjLlBhdGgSDwoNcHJpbWFyeV90YWJsZQ==\\"]", "sarus_is_public": "False", "merge_paths": "2"}}}, {"name": "primary_public_table", "statistics": {"name": "Struct", "struct": {"fields": [{"name": "id", "statistics": {"name": "Id", "id": {"size": "3", "multiplicity": 1.0}}}, {"name": "text", "statistics": {"name": "Text", "text": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "3", "multiplicity": 1.0}}}], "size": "3", "multiplicity": 1.0}, "properties": {"merge_paths": "1", "sarus_is_public": "True"}}}, {"name": "secondary_public_table", "statistics": {"name": "Struct", "struct": {"fields": [{"name": "id", "statistics": {"name": "Id", "id": {"size": "3", "multiplicity": 1.0}}}, {"name": "text", "statistics": {"name": "Text", "text": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "3", "multiplicity": 1.0}}}], "size": "3", "multiplicity": 1.0}, "properties": {"sarus_is_public": "True", "merge_paths": "1"}}}], "size": "1805", "multiplicity": 1.0}, "properties": {"sarus_is_public": "False"}}}'
-    dataset = '{"@type": "sarus_data_spec/sarus_data_spec.Dataset", "uuid": "10ba9d15c46403eb7b1eb5b872868b69", "name": "Transformed", "spec": {"transformed": {"transform": "98f18c2b0beb406088193dab26e24552", "arguments": [], "named_arguments": {}}}, "properties": {}, "doc": "This ia a demo dataset for testing purpose"}'
+    # tab_mapping = {
+    #     ('Transformed_schema', 'primary_public_table'): ('Transformed_schema', 'st51_bicdlwoy', 'bgpqlcws'),
+    #     ('Transformed_schema', 'primary_table'): ('Transformed_schema', 'st51_bicdlwoy', 'qqnhlkqe')
+    # }
+    # real_relations_dict = {tuple(path): rel for (path, rel) in real_ds.relations()}
+    # # sarus_relations_dict = dict(sarus_ds.relations())
+    # renamed_relations = [(sarus_path, real_relations_dict[real_path]) for sarus_path, real_path in tab_mapping.items()]
 
-    sarus_ds = Dataset.from_str(dataset, schema, size)
-
-    query = 'SELECT * FROM primary_table'
-    rel = Relation.from_query(query, sarus_ds)
-    display_graph(rel.dot())
-
-    tab_mapping = {
-        ('Transformed_schema', 'primary_public_table'): ('Transformed_schema', 'st51_bicdlwoy', 'bgpqlcws'),
-        ('Transformed_schema', 'primary_table'): ('Transformed_schema', 'st51_bicdlwoy', 'qqnhlkqe')
-    }
-    real_relations_dict = {tuple(path): rel for (path, rel) in real_ds.relations()}
-    # sarus_relations_dict = dict(sarus_ds.relations())
-    renamed_relations = [(sarus_path, real_relations_dict[real_path]) for sarus_path, real_path in tab_mapping.items()]
-
-    renamed = rel.compose(renamed_relations)
-    display_graph(renamed.dot())
-
-
-def test_from_str_bis():
-    dataset='{"@type": "sarus_data_spec/sarus_data_spec.Dataset", "uuid": "32a28b78e29543729f9aa6530b7fe9ef", "name": "Transformed", "spec": {"transformed": {"transform": "8feff2ec007340348704d908772ef5ff", "arguments": [], "named_arguments": {}}}, "properties": {}, "doc": "This ia a demo dataset for testing purpose"}'
-    schema = '{"@type": "sarus_data_spec/sarus_data_spec.Schema", "uuid": "9e7813d17b5644bca143b65f3d118c24", "dataset": "32a28b78e29543729f9aa6530b7fe9ef", "name": "Transformed_schema", "type": {"name": "transformed_schema", "struct": {"fields": [{"name": "sarus_data", "type": {"name": "Union", "union": {"fields": [{"name": "st51_cwyuajpk", "type": {"name": "Union", "union": {"fields": [{"name": "vaymkrql", "type": {"name": "Struct", "struct": {"fields": [{"name": "id", "type": {"name": "Integer", "integer": {"base": "INT64", "min": "-9223372036854775808", "max": "9223372036854775807", "possible_values": []}, "properties": {}}}, {"name": "text", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8", "min": null, "max": null, "possible_values": []}, "properties": {}}}, {"name": "sarus_is_public", "type": {"name": "Boolean", "boolean": {}, "properties": {}}}, {"name": "sarus_privacy_unit", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8", "min": null, "max": null, "possible_values": []}, "properties": {}}}, {"name": "sarus_weights", "type": {"name": "Float64", "float": {"base": "FLOAT64", "min": "-1125899906842624", "max": "1125899906842624", "possible_values": []}, "properties": {}}}]}, "properties": {}}}, {"name": "oasezpii", "type": {"name": "Struct", "struct": {"fields": [{"name": "id", "type": {"name": "Integer", "integer": {"base": "INT64", "min": "-9223372036854775808", "max": "9223372036854775807", "possible_values": []}, "properties": {}}}, {"name": "integer", "type": {"name": "Integer", "integer": {"base": "INT64", "min": "-9223372036854775808", "max": "9223372036854775807", "possible_values": []}, "properties": {}}}, {"name": "float", "type": {"name": "Float64", "float": {"base": "FLOAT64", "min": "-1125899906842624", "max": "1125899906842624", "possible_values": []}, "properties": {}}}, {"name": "datetime", "type": {"name": "Datetime", "datetime": {"format": "%Y-%m-%d %H:%M:%S", "min": "01-01-01 00:00:00", "max": "9999-12-31 00:00:00"}, "properties": {}}}, {"name": "date", "type": {"name": "Datetime", "datetime": {"format": "%Y-%m-%d %H:%M:%S", "min": "01-01-01 00:00:00", "max": "9999-12-31 00:00:00"}, "properties": {}}}, {"name": "boolean", "type": {"name": "Boolean", "boolean": {}, "properties": {}}}, {"name": "text", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8", "min": null, "max": null, "possible_values": []}, "properties": {}}}, {"name": "public_fk", "type": {"name": "Integer", "integer": {"base": "INT64", "min": "-9223372036854775808", "max": "9223372036854775807", "possible_values": []}, "properties": {}}}, {"name": "sarus_is_public", "type": {"name": "Boolean", "boolean": {}, "properties": {}}}, {"name": "sarus_privacy_unit", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8", "min": null, "max": null, "possible_values": []}, "properties": {}}}, {"name": "sarus_weights", "type": {"name": "Float64", "float": {"base": "FLOAT64", "min": "-1125899906842624", "max": "1125899906842624", "possible_values": []}, "properties": {}}}]}, "properties": {}}}, {"name": "rsawqlwy", "type": {"name": "Struct", "struct": {"fields": [{"name": "id", "type": {"name": "Integer", "integer": {"base": "INT64", "min": "-9223372036854775808", "max": "9223372036854775807", "possible_values": []}, "properties": {}}}, {"name": "integer", "type": {"name": "Integer", "integer": {"base": "INT64", "min": "-9223372036854775808", "max": "9223372036854775807", "possible_values": []}, "properties": {}}}, {"name": "float", "type": {"name": "Float64", "float": {"base": "FLOAT64", "min": "-1125899906842624", "max": "1125899906842624", "possible_values": []}, "properties": {}}}, {"name": "datetime", "type": {"name": "Datetime", "datetime": {"format": "%Y-%m-%d %H:%M:%S", "min": "01-01-01 00:00:00", "max": "9999-12-31 00:00:00"}, "properties": {}}}, {"name": "date", "type": {"name": "Datetime", "datetime": {"format": "%Y-%m-%d %H:%M:%S", "min": "01-01-01 00:00:00", "max": "9999-12-31 00:00:00"}, "properties": {}}}, {"name": "boolean", "type": {"name": "Boolean", "boolean": {}, "properties": {}}}, {"name": "text", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8", "min": null, "max": null, "possible_values": []}, "properties": {}}}, {"name": "public_fk", "type": {"name": "Integer", "integer": {"base": "INT64", "min": "-9223372036854775808", "max": "9223372036854775807", "possible_values": []}, "properties": {}}}, {"name": "sarus_is_public", "type": {"name": "Boolean", "boolean": {}, "properties": {}}}, {"name": "sarus_privacy_unit", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8", "min": null, "max": null, "possible_values": []}, "properties": {}}}, {"name": "sarus_weights", "type": {"name": "Float64", "float": {"base": "FLOAT64", "min": "-1125899906842624", "max": "1125899906842624", "possible_values": []}, "properties": {}}}]}, "properties": {}}}, {"name": "agjtmkwt", "type": {"name": "Struct", "struct": {"fields": [{"name": "id", "type": {"name": "Integer", "integer": {"base": "INT64", "min": "-9223372036854775808", "max": "9223372036854775807", "possible_values": []}, "properties": {}}}, {"name": "text", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8", "min": null, "max": null, "possible_values": []}, "properties": {}}}, {"name": "sarus_is_public", "type": {"name": "Boolean", "boolean": {}, "properties": {}}}, {"name": "sarus_privacy_unit", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8", "min": null, "max": null, "possible_values": []}, "properties": {}}}, {"name": "sarus_weights", "type": {"name": "Float64", "float": {"base": "FLOAT64", "min": "-1125899906842624", "max": "1125899906842624", "possible_values": []}, "properties": {}}}]}, "properties": {}}}]}, "properties": {"public_fields": "[]"}}}]}, "properties": {"public_fields": "[]"}}}, {"name": "sarus_weights", "type": {"name": "Integer", "integer": {"min": "-9223372036854775808", "max": "9223372036854775807", "base": "INT64", "possible_values": []}, "properties": {}}}, {"name": "sarus_is_public", "type": {"name": "Boolean", "boolean": {}, "properties": {}}}, {"name": "sarus_protected_entity", "type": {"name": "Id", "id": {"base": "STRING", "unique": false}, "properties": {}}}]}, "properties": {}}, "protected": {"label": "data", "paths": [], "properties": {}}, "properties": {"max_max_multiplicity": "1", "foreign_keys": "", "primary_keys": ""}}'
-    size = '{"@type": "sarus_data_spec/sarus_data_spec.Size", "uuid": "9796c71645f4403581404252c73c055d", "dataset": "32a28b78e29543729f9aa6530b7fe9ef", "name": "Transformed_schema_sizes", "statistics": {"name": "Union", "union": {"fields": [{"name": "st51_cwyuajpk", "statistics": {"name": "Union", "union": {"fields": [{"name": "vaymkrql", "statistics": {"name": "Struct", "struct": {"fields": [{"name": "id", "statistics": {"integer": {"distribution": {"integer": {"max": "9223372036854775807", "min": "-9223372036854775808", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 3}, "name": "Integer", "properties": {}}}, {"name": "text", "statistics": {"text": {"distribution": {"integer": {"max": "9223372036854775807", "min": "-9223372036854775808", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 3}, "name": "Text", "properties": {}}}, {"name": "sarus_is_public", "statistics": {"boolean": {"distribution": {"integer": {"max": "9223372036854775807", "min": "-9223372036854775808", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 3}, "name": "Boolean", "properties": {}}}, {"name": "sarus_privacy_unit", "statistics": {"text": {"distribution": {"integer": {"max": "9223372036854775807", "min": "-9223372036854775808", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 3}, "name": "Text", "properties": {}}}, {"name": "sarus_weights", "statistics": {"float": {"distribution": {"double": {"max": "1125899906842624", "min": "-1125899906842624", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 3}, "name": "Float", "properties": {}}}], "size": "3", "multiplicity": 1.0}, "properties": {}}}, {"name": "oasezpii", "statistics": {"name": "Struct", "struct": {"fields": [{"name": "id", "statistics": {"integer": {"distribution": {"integer": {"max": "9223372036854775807", "min": "-9223372036854775808", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 900}, "name": "Integer", "properties": {}}}, {"name": "integer", "statistics": {"integer": {"distribution": {"integer": {"max": "9223372036854775807", "min": "-9223372036854775808", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 900}, "name": "Integer", "properties": {}}}, {"name": "float", "statistics": {"float": {"distribution": {"double": {"max": "1125899906842624", "min": "-1125899906842624", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 900}, "name": "Float", "properties": {}}}, {"name": "datetime", "statistics": {"datetime": {"distribution": {"integer": {"max": "9223372036854775807", "min": "-9223372036854775808", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 900}, "name": "Datetime", "properties": {}}}, {"name": "date", "statistics": {"datetime": {"distribution": {"integer": {"max": "9223372036854775807", "min": "-9223372036854775808", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 900}, "name": "Datetime", "properties": {}}}, {"name": "boolean", "statistics": {"boolean": {"distribution": {"integer": {"max": "9223372036854775807", "min": "-9223372036854775808", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 900}, "name": "Boolean", "properties": {}}}, {"name": "text", "statistics": {"text": {"distribution": {"integer": {"max": "9223372036854775807", "min": "-9223372036854775808", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 900}, "name": "Text", "properties": {}}}, {"name": "public_fk", "statistics": {"integer": {"distribution": {"integer": {"max": "9223372036854775807", "min": "-9223372036854775808", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 900}, "name": "Integer", "properties": {}}}, {"name": "sarus_is_public", "statistics": {"boolean": {"distribution": {"integer": {"max": "9223372036854775807", "min": "-9223372036854775808", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 900}, "name": "Boolean", "properties": {}}}, {"name": "sarus_privacy_unit", "statistics": {"text": {"distribution": {"integer": {"max": "9223372036854775807", "min": "-9223372036854775808", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 900}, "name": "Text", "properties": {}}}, {"name": "sarus_weights", "statistics": {"float": {"distribution": {"double": {"max": "1125899906842624", "min": "-1125899906842624", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 900}, "name": "Float", "properties": {}}}], "size": "900", "multiplicity": 1.0}, "properties": {}}}, {"name": "rsawqlwy", "statistics": {"name": "Struct", "struct": {"fields": [{"name": "id", "statistics": {"integer": {"distribution": {"integer": {"max": "9223372036854775807", "min": "-9223372036854775808", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 900}, "name": "Integer", "properties": {}}}, {"name": "integer", "statistics": {"integer": {"distribution": {"integer": {"max": "9223372036854775807", "min": "-9223372036854775808", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 900}, "name": "Integer", "properties": {}}}, {"name": "float", "statistics": {"float": {"distribution": {"double": {"max": "1125899906842624", "min": "-1125899906842624", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 900}, "name": "Float", "properties": {}}}, {"name": "datetime", "statistics": {"datetime": {"distribution": {"integer": {"max": "9223372036854775807", "min": "-9223372036854775808", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 900}, "name": "Datetime", "properties": {}}}, {"name": "date", "statistics": {"datetime": {"distribution": {"integer": {"max": "9223372036854775807", "min": "-9223372036854775808", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 900}, "name": "Datetime", "properties": {}}}, {"name": "boolean", "statistics": {"boolean": {"distribution": {"integer": {"max": "9223372036854775807", "min": "-9223372036854775808", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 900}, "name": "Boolean", "properties": {}}}, {"name": "text", "statistics": {"text": {"distribution": {"integer": {"max": "9223372036854775807", "min": "-9223372036854775808", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 900}, "name": "Text", "properties": {}}}, {"name": "public_fk", "statistics": {"integer": {"distribution": {"integer": {"max": "9223372036854775807", "min": "-9223372036854775808", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 900}, "name": "Integer", "properties": {}}}, {"name": "sarus_is_public", "statistics": {"boolean": {"distribution": {"integer": {"max": "9223372036854775807", "min": "-9223372036854775808", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 900}, "name": "Boolean", "properties": {}}}, {"name": "sarus_privacy_unit", "statistics": {"text": {"distribution": {"integer": {"max": "9223372036854775807", "min": "-9223372036854775808", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 900}, "name": "Text", "properties": {}}}, {"name": "sarus_weights", "statistics": {"float": {"distribution": {"double": {"max": "1125899906842624", "min": "-1125899906842624", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 900}, "name": "Float", "properties": {}}}], "size": "900", "multiplicity": 1.0}, "properties": {}}}, {"name": "agjtmkwt", "statistics": {"name": "Struct", "struct": {"fields": [{"name": "id", "statistics": {"integer": {"distribution": {"integer": {"max": "9223372036854775807", "min": "-9223372036854775808", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 3}, "name": "Integer", "properties": {}}}, {"name": "text", "statistics": {"text": {"distribution": {"integer": {"max": "9223372036854775807", "min": "-9223372036854775808", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 3}, "name": "Text", "properties": {}}}, {"name": "sarus_is_public", "statistics": {"boolean": {"distribution": {"integer": {"max": "9223372036854775807", "min": "-9223372036854775808", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 3}, "name": "Boolean", "properties": {}}}, {"name": "sarus_privacy_unit", "statistics": {"text": {"distribution": {"integer": {"max": "9223372036854775807", "min": "-9223372036854775808", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 3}, "name": "Text", "properties": {}}}, {"name": "sarus_weights", "statistics": {"float": {"distribution": {"double": {"max": "1125899906842624", "min": "-1125899906842624", "points": []}, "properties": {}}, "multiplicity": 1.0, "size": 3}, "name": "Float", "properties": {}}}], "size": "3", "multiplicity": 1.0}, "properties": {}}}]}, "properties": {}}, "properties": {}}]}, "properties": {}}, "properties": {}}'
-    ds = Dataset.from_str(dataset, schema, size)
-    print(ds.relations())
-
-
-def test_primary(tables, engine):
-    ds = Dataset.from_database("my_db", engine, schema_name=None)
-    print(ds.relations())
-    query = """
-    WITH "join_edbl" ( "field_ljc8", "field_9e80", "field_epzz", "field_ysxm", "field_mt07", "field_kdj_", "field_xkq4", "field_yva6", "field_rv0k", "field_xn3k", "field_3z4q", "field_o2t5", "field_xfrs", "field_pqun", "field_90w5", "field_9tue" ) AS ( SELECT * FROM "primary_table" AS "_LEFT_"  JOIN "primary_public_table" AS "_RIGHT_" ON ( "_LEFT_"."id" ) = ( "_RIGHT_"."id" ) ), "map_2l3y" ( "id", "field_9e80", "field_epzz", "field_ysxm", "field_mt07", "field_kdj_", "field_xkq4", "field_yva6", "field_rv0k", "field_xn3k", "field_3z4q", "field_xfrs", "field_pqun", "field_90w5", "field_9tue" ) AS ( SELECT COALESCE ( "field_ljc8", "field_o2t5" ) AS "id", "field_9e80" AS "field_9e80", "field_epzz" AS "field_epzz", "field_ysxm" AS "field_ysxm", "field_mt07" AS "field_mt07", "field_kdj_" AS "field_kdj_", "field_xkq4" AS "field_xkq4", "field_yva6" AS "field_yva6", "field_rv0k" AS "field_rv0k", "field_xn3k" AS "field_xn3k", "field_3z4q" AS "field_3z4q", "field_xfrs" AS "field_xfrs", "field_pqun" AS "field_pqun", "field_90w5" AS "field_90w5", "field_9tue" AS "field_9tue" FROM "join_edbl" ), "map_nyks" ( "id", "integer", "float", "datetime", "date", "boolean", "field_xkq4", "public_fk", "field_rv0k", "field_xn3k", "field_3z4q", "field_xfrs", "field_pqun", "field_90w5", "field_9tue" ) AS ( SELECT "id" AS "id", "field_9e80" AS "integer", "field_epzz" AS "float", "field_ysxm" AS "datetime", "field_mt07" AS "date", "field_kdj_" AS "boolean", "field_xkq4" AS "field_xkq4", "field_yva6" AS "public_fk", "field_rv0k" AS "field_rv0k", "field_xn3k" AS "field_xn3k", "field_3z4q" AS "field_3z4q", "field_xfrs" AS "field_xfrs", "field_pqun" AS "field_pqun", "field_90w5" AS "field_90w5", "field_9tue" AS "field_9tue" FROM "map_2l3y" ), "map_khga" ( "field_n9r3" ) AS ( SELECT 1 AS "field_n9r3" FROM "map_nyks" ), "reduce_a10h" ( "count_all" ) AS ( SELECT COUNT( "field_n9r3" ) AS "count_all" FROM "map_khga" ) SELECT * FROM "reduce_a10h"
-    """
-    rel = Relation.from_query(query, ds)
-    display_graph(rel.dot())
+    # renamed = rel.compose(renamed_relations)
+    # display_graph(renamed.dot())

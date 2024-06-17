@@ -242,15 +242,14 @@ def test_dp_event(extract_dataset):
     )
 
     dp_event = relwithdp.dp_event()
-    dp_event_dict = dp_event.to_dict()
-    print("ok")
+    _ = dp_event.to_dict()
 
 
 
 def test_some_queries(tables, engine):
     ds = Dataset.from_database("my_db", engine, schema_name=None)
     print(ds.relations())
-    NOPUP_JOINS_PUBLIC = [
+    QUERIES = [
         # ('SELECT "integer" FROM primary_table, primary_public_table'),
         # (
         #     'SELECT "integer" FROM primary_table '
@@ -279,11 +278,8 @@ def test_some_queries(tables, engine):
         "SELECT * FROM primary_table"
     ]
 
-    for query in NOPUP_JOINS_PUBLIC:
+    for query in QUERIES:
         rel = Relation.from_query(query, ds)
-        #rel = rel.with_field("sarus_is_public", "False")
-        #rel = rel.with_field('privacy_unit', 'CAST(Null AS TEXT)')
-        #rel = rel.with_field('weight', '1')
         query = rel.to_query()
         print(query)
         display_graph(rel.dot())

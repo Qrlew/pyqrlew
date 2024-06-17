@@ -114,7 +114,7 @@ impl DpEvent {
     }
 }
 
-#[pyclass]
+#[pyclass(name="_RelationWithDpEvent")]
 #[derive(Clone, Debug)]
 pub struct RelationWithDpEvent(Arc<rewriting_rule::RelationWithDpEvent>);
 

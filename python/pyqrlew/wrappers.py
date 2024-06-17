@@ -1,6 +1,6 @@
 """Module containing wrappers around rust objects and some utils"""
-from pyqrlew.typing import RelationWithDpEvent, PrivacyUnit, SyntheticData
-from .pyqrlew import _Dataset, _Relation, Dialect, Strategy
+from pyqrlew.typing import PrivacyUnit, SyntheticData
+from .pyqrlew import _Dataset, _Relation, _RelationWithDpEvent, Dialect, Strategy
 import typing as t 
 from sqlalchemy.engine import Engine
 
@@ -230,7 +230,7 @@ class Relation:
         max_multiplicity_share: t.Optional[float]=None,
         synthetic_data: t.Optional[SyntheticData]=None,
         strategy: t.Optional[Strategy]=None,
-    ) -> RelationWithDpEvent:
+    ) -> 'RelationWithDpEvent':
         """Returns as RelationWithDpEvent where it's relation propagates the privacy unit
         through the query. Check out more `here! <https://qrlew.readthedocs.io/en/latest/tutorials/rewrite_with_dp.html#rewritting-with-dp>`_
         
@@ -251,7 +251,7 @@ class Relation:
         Returns:
             RelationWithDpEvent: 
         """
-        return self._relation.rewrite_as_privacy_unit_preserving(
+        return RelationWithDpEvent(self._relation.rewrite_as_privacy_unit_preserving(
             dataset._dataset,
             privacy_unit,
             epsilon_delta,
@@ -259,7 +259,7 @@ class Relation:
             max_multiplicity_share,
             synthetic_data,
             strategy
-        )
+        ))
 
     def rewrite_with_differential_privacy(
         self,
@@ -269,7 +269,7 @@ class Relation:
         max_multiplicity: t.Optional[float]=None,
         max_multiplicity_share: t.Optional[float]=None,
         synthetic_data: t.Optional[SyntheticData]=None,
-    ) -> RelationWithDpEvent:
+    ) -> 'RelationWithDpEvent':
         """It transforms a Relation into its differentially private equivalent. Check out more `here! <https://qrlew.readthedocs.io/en/latest/tutorials/rewrite_with_dp.html#rewritting-with-dp>`_
 
         Args:
@@ -289,14 +289,14 @@ class Relation:
         Returns:
             RelationWithDpEvent: 
         """
-        return self._relation.rewrite_with_differential_privacy(
+        return RelationWithDpEvent(self._relation.rewrite_with_differential_privacy(
             dataset._dataset,
             privacy_unit,
             epsilon_delta,
             max_multiplicity,
             max_multiplicity_share,
             synthetic_data
-        )
+        ))
 
     def compose(self, relations: t.Iterable[t.Tuple[t.Iterable[str], 'Relation']]) -> 'Relation':
         """It composes itself with other relations. It substitute its Tables with the corresponding relation in relations
@@ -346,6 +346,21 @@ class Relation:
     def dot(self) -> str:
         "GraphViz representation of the `Relation`"
         return self._relation.dot()
+
+class RelationWithDpEvent:
+    """Object containing a differentially private (DP) or privacy unit
+    preserving (PUP) relation and the associated DpEvent."""
+
+    def __init__(self, relation_with_dpevent: _RelationWithDpEvent) -> None:
+        self.relation_with_dpevent = relation_with_dpevent
+
+    def relation(self):
+        """Returns the DP or PUP relation"""
+        return Relation(self.relation_with_dpevent.relation())
+    
+    def dp_event(self):
+        """Returns the DpEvent associated with the relation."""
+        return self.relation_with_dpevent.dp_event()
 
 
 def dataset_from_database(

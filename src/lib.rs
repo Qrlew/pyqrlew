@@ -9,6 +9,7 @@ pub use crate::{
     relation::{Relation, Strategy},
     dialect::Dialect,
 };
+use dp_event::RelationWithDpEvent;
 use pyo3::prelude::*;
 
 /// A Python module implemented in Rust.
@@ -18,5 +19,6 @@ fn pyqrlew(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<Relation>()?;
     m.add_class::<Dialect>()?;
     m.add_class::<Strategy>()?;
+    m.add_class::<RelationWithDpEvent>()?;
     Ok(())
 }
