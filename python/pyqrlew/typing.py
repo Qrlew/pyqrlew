@@ -8,7 +8,7 @@ PrivacyUnit = t.Union[
     t.Tuple[t.Sequence[t.Tuple[str, t.Sequence[t.Tuple[str, str, str]], str, str]], bool]
 ]
 SyntheticData = t.Sequence[t.Tuple[t.Sequence[str], t.Sequence[str]]]
-NestedDPEvent = t.Mapping[str, t.Union[str, float, 'NestedDPEvent']]
+DPEvent = t.Mapping[str, t.Union[str, float, t.Sequence['DPEvent']]]
 
 class DpEvent(t.Protocol):
     """Internal object containing a description of differentially private
@@ -18,7 +18,7 @@ class DpEvent(t.Protocol):
     budgets.
     """
 
-    def to_dict(self) -> NestedDPEvent:
+    def to_dict(self) -> DPEvent:
         """Returns a Dict representation of DP mechanisms."""
         ...
 
