@@ -1,20 +1,30 @@
-use std::{collections::HashMap, ops::Deref, str, sync::Arc};
-use pyo3::prelude::*;
-use qrlew::{
-    ast, data_type::DataTyped, dialect_translation::{
-        bigquery::BigQueryTranslator, mssql::MsSqlTranslator, postgresql::PostgreSqlTranslator, RelationWithTranslator
-    }, differential_privacy::DpParameters, expr::Identifier, hierarchy::Hierarchy, privacy_unit_tracking::{self, PrivacyUnit}, relation::{self, Variant}, sql::parse_expr, synthetic_data::SyntheticData
-};
-use qrlew_sarus::protobuf::{type_, print_to_string};
 use crate::{
     dataset::Dataset,
-    error::{MissingKeyError, Result},
-    dp_event::RelationWithDpEvent,
     dialect::Dialect,
+    dp_event::RelationWithDpEvent,
+    error::{MissingKeyError, Result},
 };
+use pyo3::prelude::*;
+use qrlew::{
+    ast,
+    data_type::DataTyped,
+    dialect_translation::{
+        bigquery::BigQueryTranslator, mssql::MsSqlTranslator, postgresql::PostgreSqlTranslator,
+        RelationWithTranslator,
+    },
+    differential_privacy::DpParameters,
+    expr::Identifier,
+    hierarchy::Hierarchy,
+    privacy_unit_tracking::{self, PrivacyUnit},
+    relation::{self, Variant},
+    sql::parse_expr,
+    synthetic_data::SyntheticData,
+};
+use qrlew_sarus::protobuf::{print_to_string, type_};
+use std::{collections::HashMap, ops::Deref, str, sync::Arc};
 
 /// A Relation is a Dataset transformed by a SQL query
-#[pyclass(name="_Relation")]
+#[pyclass(name = "_Relation")]
 #[derive(Clone)]
 pub struct Relation(Arc<relation::Relation>);
 
@@ -35,22 +45,26 @@ impl Relation {
 #[derive(FromPyObject, Clone)]
 pub enum PrivacyUnitType<'a> {
     Type1(Vec<(&'a str, Vec<(&'a str, &'a str, &'a str)>, &'a str)>),
-    Type2((Vec<(&'a str, Vec<(&'a str, &'a str, &'a str)>, &'a str)>, bool)),
-    Type3((Vec<(&'a str, Vec<(&'a str, &'a str, &'a str)>, &'a str, &'a str)>, bool)),
+    Type2(
+        (
+            Vec<(&'a str, Vec<(&'a str, &'a str, &'a str)>, &'a str)>,
+            bool,
+        ),
+    ),
+    Type3(
+        (
+            Vec<(&'a str, Vec<(&'a str, &'a str, &'a str)>, &'a str, &'a str)>,
+            bool,
+        ),
+    ),
 }
 
 impl<'a> From<PrivacyUnitType<'a>> for PrivacyUnit {
     fn from(input: PrivacyUnitType<'a>) -> Self {
         match input {
-            PrivacyUnitType::Type1(data) => {
-                PrivacyUnit::from(data)
-            },
-            PrivacyUnitType::Type2(data) => {
-                PrivacyUnit::from(data)
-            },
-            PrivacyUnitType::Type3(data) => {
-                PrivacyUnit::from(data)
-            },
+            PrivacyUnitType::Type1(data) => PrivacyUnit::from(data),
+            PrivacyUnitType::Type2(data) => PrivacyUnit::from(data),
+            PrivacyUnitType::Type3(data) => PrivacyUnit::from(data),
         }
     }
 }
@@ -62,7 +76,7 @@ impl<'a> From<PrivacyUnitType<'a>> for PrivacyUnit {
 #[derive(Clone)]
 pub enum Strategy {
     Soft,
-    Hard
+    Hard,
 }
 
 impl From<Strategy> for privacy_unit_tracking::Strategy {
@@ -85,7 +99,7 @@ impl Relation {
     ///     dialect (Optional[Dialect]): query's dialect. If not provided, it is assumed to be PostgreSql
     ///
     /// Returns:
-    ///     Relation: 
+    ///     Relation:
     pub fn from_query(query: &str, dataset: &Dataset, dialect: Option<Dialect>) -> Result<Self> {
         dataset.relation(query, dialect)
     }
@@ -93,7 +107,8 @@ impl Relation {
     /// String representation of the `Relation` in the default dialect
     pub fn __str__(&self) -> String {
         let relation = self.0.as_ref();
-        let query = ast::Query::from(RelationWithTranslator(&relation, PostgreSqlTranslator)).to_string();
+        let query =
+            ast::Query::from(RelationWithTranslator(&relation, PostgreSqlTranslator)).to_string();
         format!("{}", query)
     }
 
@@ -123,7 +138,7 @@ impl Relation {
     }
     /// Returns as RelationWithDpEvent where it's relation propagates the privacy unit
     /// through the query.
-    /// 
+    ///
     /// Args:
     ///     dataset (Dataset):
     ///         Dataset with needed relations
@@ -135,12 +150,12 @@ impl Relation {
     ///     max_multiplicity_share (Optional[float]): maximum number of rows per privacy unit in relative terms
     ///         w.r.t. the dataset size. The actual max_multiplicity used to bound the PU contribution will be
     ///         minimum(max_multiplicity, max_multiplicity_share*dataset.size).
-    ///     synthetic_data (Optional[Sequence[Tuple[Sequence[str],Sequence[str]]]]): Sequence of pairs 
+    ///     synthetic_data (Optional[Sequence[Tuple[Sequence[str],Sequence[str]]]]): Sequence of pairs
     ///         of original table path and its corresponding synthetic version. Each table must be specified.
     ///         (e.g.: (["retail_schema", "features"], ["retail_schema", "features_synthetic"])).
     ///
     /// Returns:
-    ///     RelationWithDpEvent: 
+    ///     RelationWithDpEvent:
     ///
     pub fn rewrite_as_privacy_unit_preserving<'a>(
         &'a self,
@@ -150,17 +165,21 @@ impl Relation {
         max_multiplicity: Option<f64>,
         max_multiplicity_share: Option<f64>,
         synthetic_data: Option<Vec<(Vec<&'a str>, Vec<&'a str>)>>,
-        strategy: Option<Strategy>
+        strategy: Option<Strategy>,
     ) -> Result<RelationWithDpEvent> {
         let relation = self.deref().clone();
         let relations = dataset.deref().relations();
-        let synthetic_data = synthetic_data.map(|sd| SyntheticData::new(sd
-            .into_iter()
-            .map(|(path, iden)| {
-                let iden_as_vec_of_strings: Vec<String> = iden.iter().map(|s| s.to_string()).collect();
-                (path, Identifier::from(iden_as_vec_of_strings))
-            }).collect())
-        );
+        let synthetic_data = synthetic_data.map(|sd| {
+            SyntheticData::new(
+                sd.into_iter()
+                    .map(|(path, iden)| {
+                        let iden_as_vec_of_strings: Vec<String> =
+                            iden.iter().map(|s| s.to_string()).collect();
+                        (path, Identifier::from(iden_as_vec_of_strings))
+                    })
+                    .collect(),
+            )
+        });
         let privacy_unit = PrivacyUnit::from(privacy_unit);
         let epsilon = epsilon_delta
             .get("epsilon")
@@ -174,7 +193,8 @@ impl Relation {
                 dp_parameters = dp_parameters.with_privacy_unit_max_multiplicity(max_multiplicity);
             }
             if let Some(max_multiplicity_share) = max_multiplicity_share {
-                dp_parameters = dp_parameters.with_privacy_unit_max_multiplicity_share(max_multiplicity_share);
+                dp_parameters =
+                    dp_parameters.with_privacy_unit_max_multiplicity_share(max_multiplicity_share);
             }
             dp_parameters
         };
@@ -183,15 +203,13 @@ impl Relation {
             synthetic_data,
             privacy_unit,
             dp_parameters,
-            strategy.map(|s| s.into())
+            strategy.map(|s| s.into()),
         )?;
-        Ok(RelationWithDpEvent::new(Arc::new(
-            relation_with_dp_event,
-        )))
+        Ok(RelationWithDpEvent::new(Arc::new(relation_with_dp_event)))
     }
 
     /// It transforms a Relation into its differentially private equivalent.
-    /// 
+    ///
     /// Args:
     ///     dataset (Dataset):
     ///         Dataset with needed relations
@@ -203,12 +221,12 @@ impl Relation {
     ///     max_multiplicity_share (Optional[float]): maximum number of rows per privacy unit in relative terms
     ///         w.r.t. the dataset size. The actual max_multiplicity used to bound the PU contribution will be
     ///         minimum(max_multiplicity, max_multiplicity_share*dataset.size).
-    ///     synthetic_data (Optional[Sequence[Tuple[Sequence[str],Sequence[str]]]]): Sequence of pairs 
+    ///     synthetic_data (Optional[Sequence[Tuple[Sequence[str],Sequence[str]]]]): Sequence of pairs
     ///         of original table path and its corresponding synthetic version. Each table must be specified.
     ///         (e.g.: (["retail_schema", "features"], ["retail_schema", "features_synthetic"])).
     ///
     /// Returns:
-    ///     RelationWithDpEvent: 
+    ///     RelationWithDpEvent:
     ///
     pub fn rewrite_with_differential_privacy<'a>(
         &'a self,
@@ -221,13 +239,17 @@ impl Relation {
     ) -> Result<RelationWithDpEvent> {
         let relation = self.deref().clone();
         let relations = dataset.deref().relations();
-        let synthetic_data = synthetic_data.map(|sd| SyntheticData::new(sd
-                .into_iter()
-                .map(|(path, iden)| {
-                    let iden_as_vec_of_strings: Vec<String> = iden.iter().map(|s| s.to_string()).collect();
-                    (path, Identifier::from(iden_as_vec_of_strings))
-                }).collect())
-            );
+        let synthetic_data = synthetic_data.map(|sd| {
+            SyntheticData::new(
+                sd.into_iter()
+                    .map(|(path, iden)| {
+                        let iden_as_vec_of_strings: Vec<String> =
+                            iden.iter().map(|s| s.to_string()).collect();
+                        (path, Identifier::from(iden_as_vec_of_strings))
+                    })
+                    .collect(),
+            )
+        });
         let privacy_unit = PrivacyUnit::from(privacy_unit);
         let epsilon = epsilon_delta
             .get("epsilon")
@@ -241,7 +263,8 @@ impl Relation {
                 dp_parameters = dp_parameters.with_privacy_unit_max_multiplicity(max_multiplicity);
             }
             if let Some(max_multiplicity_share) = max_multiplicity_share {
-                dp_parameters = dp_parameters.with_privacy_unit_max_multiplicity_share(max_multiplicity_share);
+                dp_parameters =
+                    dp_parameters.with_privacy_unit_max_multiplicity_share(max_multiplicity_share);
             }
             dp_parameters
         };
@@ -251,16 +274,14 @@ impl Relation {
             privacy_unit,
             dp_parameters,
         )?;
-        Ok(RelationWithDpEvent::new(Arc::new(
-            relation_with_dp_event,
-        )))
+        Ok(RelationWithDpEvent::new(Arc::new(relation_with_dp_event)))
     }
 
     /// Returns an SQL representation of the Relation.
-    /// 
+    ///
     /// Args:
     ///     dialect (Optional[Dialect]): dialect of generated sql query. If no dialect is provided,
-    ///         the query will be in PostgreSql. 
+    ///         the query will be in PostgreSql.
     ///
     /// Returns:
     ///     str:
@@ -268,22 +289,25 @@ impl Relation {
         let relation = &*(self.0);
         let dialect = dialect.unwrap_or(Dialect::PostgreSql);
         match dialect {
-            Dialect::PostgreSql => ast::Query::from(RelationWithTranslator(&relation, PostgreSqlTranslator)).to_string(),
-            Dialect::MsSql => ast::Query::from(RelationWithTranslator(&relation, MsSqlTranslator)).to_string(),
-            Dialect::BigQuery => ast::Query::from(RelationWithTranslator(&relation, BigQueryTranslator)).to_string(),
+            Dialect::PostgreSql => {
+                ast::Query::from(RelationWithTranslator(&relation, PostgreSqlTranslator))
+                    .to_string()
+            }
+            Dialect::MsSql => {
+                ast::Query::from(RelationWithTranslator(&relation, MsSqlTranslator)).to_string()
+            }
+            Dialect::BigQuery => {
+                ast::Query::from(RelationWithTranslator(&relation, BigQueryTranslator)).to_string()
+            }
         }
     }
 
-    pub fn rename_fields(&self, fields: Vec<(&str, &str)>) -> Result<Self>{
+    pub fn rename_fields(&self, fields: Vec<(&str, &str)>) -> Result<Self> {
         let fields_mapping: HashMap<&str, &str> = fields.into_iter().collect();
         let relation = self.deref().clone();
-        Ok(
-            Relation::new(
-                Arc::new(
-                    relation.rename_fields(|n, _| fields_mapping.get(n).cloned().unwrap_or(n).to_string())
-                )
-            )
-        )
+        Ok(Relation::new(Arc::new(relation.rename_fields(|n, _| {
+            fields_mapping.get(n).cloned().unwrap_or(n).to_string()
+        }))))
     }
 
     pub fn compose(&self, relations: Vec<(Vec<String>, Relation)>) -> Result<Self> {
@@ -298,18 +322,23 @@ impl Relation {
 
     pub fn with_field(&self, name: &str, expr: &str) -> Result<Self> {
         let expr = parse_expr(expr)?;
-        Ok(Relation::new(Arc::new(self.deref().clone().with_field(name, (&expr).try_into()?)))) 
+        Ok(Relation::new(Arc::new(
+            self.deref().clone().with_field(name, (&expr).try_into()?),
+        )))
     }
 }
 
 #[cfg(test)]
 mod tests {
 
-    use qrlew::{ast, dialect_translation::{postgresql::PostgreSqlTranslator, RelationWithTranslator}};
+    use qrlew::{
+        ast,
+        dialect_translation::{postgresql::PostgreSqlTranslator, RelationWithTranslator},
+    };
 
     use crate::{
         dataset::Dataset,
-        relation::{PrivacyUnitType, Relation}
+        relation::{PrivacyUnitType, Relation},
     };
     use std::collections::HashMap;
 
@@ -324,23 +353,32 @@ mod tests {
     fn test_create_ds() {
         let ds: &str = r#"{"@type": "sarus_data_spec/sarus_data_spec.Dataset", "uuid": "e9cb9391ca184e89897f49bd75387a46", "name": "Transformed", "spec": {"transformed": {"transform": "98f18c2b0beb406088193dab26e24552", "arguments": [], "named_arguments": {}}}, "properties": {}, "doc": "This ia a demo dataset for testing purpose"}"#;
         let sch: &str = r#"{"@type": "sarus_data_spec/sarus_data_spec.Schema", "uuid": "f0e998eb7b904be9bcd656c4157357f6", "dataset": "f31d342bc8284fa2b8f36fbfb869aa3a", "name": "Transformed_schema", "type": {"name": "transformed_schema", "struct": {"fields": [{"name": "sarus_data", "type": {"name": "Union", "union": {"fields": [{"name": "st51_bicdlwoy", "type": {"name": "Union", "union": {"fields": [{"name": "xwiromvh", "type": {"name": "Struct", "struct": {"fields": [{"name": "id", "type": {"name": "Integer", "integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}}, {"name": "text", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8"}}}, {"name": "sarus_is_public", "type": {"name": "Boolean", "boolean": {}}}, {"name": "sarus_privacy_unit", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8"}}}, {"name": "sarus_weights", "type": {"name": "Float64", "float": {"min": -1125899906842624.0, "max": 1125899906842624.0}}}]}}}, {"name": "qqnhlkqe", "type": {"name": "Struct", "struct": {"fields": [{"name": "id", "type": {"name": "Integer", "integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}}, {"name": "integer", "type": {"name": "Integer", "integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}}, {"name": "float", "type": {"name": "Float64", "float": {"min": -1125899906842624.0, "max": 1125899906842624.0}}}, {"name": "datetime", "type": {"name": "Datetime", "datetime": {"format": "%Y-%m-%d %H:%M:%S", "min": "01-01-01 00:00:00", "max": "9999-12-31 00:00:00"}}}, {"name": "date", "type": {"name": "Datetime", "datetime": {"format": "%Y-%m-%d %H:%M:%S", "min": "01-01-01 00:00:00", "max": "9999-12-31 00:00:00"}}}, {"name": "boolean", "type": {"name": "Boolean", "boolean": {}}}, {"name": "text", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8"}}}, {"name": "public_fk", "type": {"name": "Integer", "integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}}, {"name": "sarus_is_public", "type": {"name": "Boolean", "boolean": {}}}, {"name": "sarus_privacy_unit", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8"}}}, {"name": "sarus_weights", "type": {"name": "Float64", "float": {"min": -1125899906842624.0, "max": 1125899906842624.0}}}]}}}, {"name": "bgpqlcws", "type": {"name": "Struct", "struct": {"fields": [{"name": "id", "type": {"name": "Integer", "integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}}, {"name": "integer", "type": {"name": "Integer", "integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}}, {"name": "float", "type": {"name": "Float64", "float": {"min": -1125899906842624.0, "max": 1125899906842624.0}}}, {"name": "datetime", "type": {"name": "Datetime", "datetime": {"format": "%Y-%m-%d %H:%M:%S", "min": "01-01-01 00:00:00", "max": "9999-12-31 00:00:00"}}}, {"name": "date", "type": {"name": "Datetime", "datetime": {"format": "%Y-%m-%d %H:%M:%S", "min": "01-01-01 00:00:00", "max": "9999-12-31 00:00:00"}}}, {"name": "boolean", "type": {"name": "Boolean", "boolean": {}}}, {"name": "text", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8"}}}, {"name": "public_fk", "type": {"name": "Integer", "integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}}, {"name": "sarus_is_public", "type": {"name": "Boolean", "boolean": {}}}, {"name": "sarus_privacy_unit", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8"}}}, {"name": "sarus_weights", "type": {"name": "Float64", "float": {"min": -1125899906842624.0, "max": 1125899906842624.0}}}]}}}, {"name": "tyzgsphn", "type": {"name": "Struct", "struct": {"fields": [{"name": "id", "type": {"name": "Integer", "integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}}, {"name": "text", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8"}}}, {"name": "sarus_is_public", "type": {"name": "Boolean", "boolean": {}}}, {"name": "sarus_privacy_unit", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8"}}}, {"name": "sarus_weights", "type": {"name": "Float64", "float": {"min": -1125899906842624.0, "max": 1125899906842624.0}}}]}}}]}, "properties": {"public_fields": "[]"}}}]}, "properties": {"public_fields": "[]"}}}, {"name": "sarus_weights", "type": {"name": "Integer", "integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}}, {"name": "sarus_is_public", "type": {"name": "Boolean", "boolean": {}}}, {"name": "sarus_protected_entity", "type": {"name": "Id", "id": {"base": "STRING"}}}]}}, "protected": {"label": "data"}, "properties": {"primary_keys": "", "max_max_multiplicity": "1", "foreign_keys": ""}}"#;
-        let size: &str= r#"{"@type": "sarus_data_spec/sarus_data_spec.Size", "uuid": "27eade642ec54c05a2a757c9846775a0", "dataset": "f31d342bc8284fa2b8f36fbfb869aa3a", "name": "Transformed_schema_sizes", "statistics": {"name": "Union", "union": {"fields": [{"name": "st51_bicdlwoy", "statistics": {"name": "Union", "union": {"fields": [{"name": "xwiromvh", "statistics": {"name": "Struct", "struct": {"fields": [{"name": "id", "statistics": {"name": "Integer", "integer": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "3", "multiplicity": 1.0}}}, {"name": "text", "statistics": {"name": "Text", "text": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "3", "multiplicity": 1.0}}}, {"name": "sarus_is_public", "statistics": {"name": "Boolean", "boolean": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "3", "multiplicity": 1.0}}}, {"name": "sarus_privacy_unit", "statistics": {"name": "Text", "text": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "3", "multiplicity": 1.0}}}, {"name": "sarus_weights", "statistics": {"name": "Float", "float": {"distribution": {"double": {"min": -1125899906842624.0, "max": 1125899906842624.0}}, "size": "3", "multiplicity": 1.0}}}], "size": "3", "multiplicity": 1.0}}}, {"name": "qqnhlkqe", "statistics": {"name": "Struct", "struct": {"fields": [{"name": "id", "statistics": {"name": "Integer", "integer": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "integer", "statistics": {"name": "Integer", "integer": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "float", "statistics": {"name": "Float", "float": {"distribution": {"double": {"min": -1125899906842624.0, "max": 1125899906842624.0}}, "size": "900", "multiplicity": 1.0}}}, {"name": "datetime", "statistics": {"name": "Datetime", "datetime": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "date", "statistics": {"name": "Datetime", "datetime": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "boolean", "statistics": {"name": "Boolean", "boolean": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "text", "statistics": {"name": "Text", "text": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "public_fk", "statistics": {"name": "Integer", "integer": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "sarus_is_public", "statistics": {"name": "Boolean", "boolean": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "sarus_privacy_unit", "statistics": {"name": "Text", "text": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "sarus_weights", "statistics": {"name": "Float", "float": {"distribution": {"double": {"min": -1125899906842624.0, "max": 1125899906842624.0}}, "size": "900", "multiplicity": 1.0}}}], "size": "900", "multiplicity": 1.0}}}, {"name": "bgpqlcws", "statistics": {"name": "Struct", "struct": {"fields": [{"name": "id", "statistics": {"name": "Integer", "integer": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "integer", "statistics": {"name": "Integer", "integer": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "float", "statistics": {"name": "Float", "float": {"distribution": {"double": {"min": -1125899906842624.0, "max": 1125899906842624.0}}, "size": "900", "multiplicity": 1.0}}}, {"name": "datetime", "statistics": {"name": "Datetime", "datetime": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "date", "statistics": {"name": "Datetime", "datetime": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "boolean", "statistics": {"name": "Boolean", "boolean": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "text", "statistics": {"name": "Text", "text": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "public_fk", "statistics": {"name": "Integer", "integer": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "sarus_is_public", "statistics": {"name": "Boolean", "boolean": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "sarus_privacy_unit", "statistics": {"name": "Text", "text": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "sarus_weights", "statistics": {"name": "Float", "float": {"distribution": {"double": {"min": -1125899906842624.0, "max": 1125899906842624.0}}, "size": "900", "multiplicity": 1.0}}}], "size": "900", "multiplicity": 1.0}}}, {"name": "tyzgsphn", "statistics": {"name": "Struct", "struct": {"fields": [{"name": "id", "statistics": {"name": "Integer", "integer": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "3", "multiplicity": 1.0}}}, {"name": "text", "statistics": {"name": "Text", "text": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "3", "multiplicity": 1.0}}}, {"name": "sarus_is_public", "statistics": {"name": "Boolean", "boolean": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "3", "multiplicity": 1.0}}}, {"name": "sarus_privacy_unit", "statistics": {"name": "Text", "text": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "3", "multiplicity": 1.0}}}, {"name": "sarus_weights", "statistics": {"name": "Float", "float": {"distribution": {"double": {"min": -1125899906842624.0, "max": 1125899906842624.0}}, "size": "3", "multiplicity": 1.0}}}], "size": "3", "multiplicity": 1.0}}}]}}}]}}}"#;
+        let size: &str = r#"{"@type": "sarus_data_spec/sarus_data_spec.Size", "uuid": "27eade642ec54c05a2a757c9846775a0", "dataset": "f31d342bc8284fa2b8f36fbfb869aa3a", "name": "Transformed_schema_sizes", "statistics": {"name": "Union", "union": {"fields": [{"name": "st51_bicdlwoy", "statistics": {"name": "Union", "union": {"fields": [{"name": "xwiromvh", "statistics": {"name": "Struct", "struct": {"fields": [{"name": "id", "statistics": {"name": "Integer", "integer": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "3", "multiplicity": 1.0}}}, {"name": "text", "statistics": {"name": "Text", "text": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "3", "multiplicity": 1.0}}}, {"name": "sarus_is_public", "statistics": {"name": "Boolean", "boolean": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "3", "multiplicity": 1.0}}}, {"name": "sarus_privacy_unit", "statistics": {"name": "Text", "text": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "3", "multiplicity": 1.0}}}, {"name": "sarus_weights", "statistics": {"name": "Float", "float": {"distribution": {"double": {"min": -1125899906842624.0, "max": 1125899906842624.0}}, "size": "3", "multiplicity": 1.0}}}], "size": "3", "multiplicity": 1.0}}}, {"name": "qqnhlkqe", "statistics": {"name": "Struct", "struct": {"fields": [{"name": "id", "statistics": {"name": "Integer", "integer": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "integer", "statistics": {"name": "Integer", "integer": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "float", "statistics": {"name": "Float", "float": {"distribution": {"double": {"min": -1125899906842624.0, "max": 1125899906842624.0}}, "size": "900", "multiplicity": 1.0}}}, {"name": "datetime", "statistics": {"name": "Datetime", "datetime": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "date", "statistics": {"name": "Datetime", "datetime": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "boolean", "statistics": {"name": "Boolean", "boolean": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "text", "statistics": {"name": "Text", "text": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "public_fk", "statistics": {"name": "Integer", "integer": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "sarus_is_public", "statistics": {"name": "Boolean", "boolean": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "sarus_privacy_unit", "statistics": {"name": "Text", "text": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "sarus_weights", "statistics": {"name": "Float", "float": {"distribution": {"double": {"min": -1125899906842624.0, "max": 1125899906842624.0}}, "size": "900", "multiplicity": 1.0}}}], "size": "900", "multiplicity": 1.0}}}, {"name": "bgpqlcws", "statistics": {"name": "Struct", "struct": {"fields": [{"name": "id", "statistics": {"name": "Integer", "integer": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "integer", "statistics": {"name": "Integer", "integer": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "float", "statistics": {"name": "Float", "float": {"distribution": {"double": {"min": -1125899906842624.0, "max": 1125899906842624.0}}, "size": "900", "multiplicity": 1.0}}}, {"name": "datetime", "statistics": {"name": "Datetime", "datetime": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "date", "statistics": {"name": "Datetime", "datetime": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "boolean", "statistics": {"name": "Boolean", "boolean": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "text", "statistics": {"name": "Text", "text": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "public_fk", "statistics": {"name": "Integer", "integer": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "sarus_is_public", "statistics": {"name": "Boolean", "boolean": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "sarus_privacy_unit", "statistics": {"name": "Text", "text": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "900", "multiplicity": 1.0}}}, {"name": "sarus_weights", "statistics": {"name": "Float", "float": {"distribution": {"double": {"min": -1125899906842624.0, "max": 1125899906842624.0}}, "size": "900", "multiplicity": 1.0}}}], "size": "900", "multiplicity": 1.0}}}, {"name": "tyzgsphn", "statistics": {"name": "Struct", "struct": {"fields": [{"name": "id", "statistics": {"name": "Integer", "integer": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "3", "multiplicity": 1.0}}}, {"name": "text", "statistics": {"name": "Text", "text": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "3", "multiplicity": 1.0}}}, {"name": "sarus_is_public", "statistics": {"name": "Boolean", "boolean": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "3", "multiplicity": 1.0}}}, {"name": "sarus_privacy_unit", "statistics": {"name": "Text", "text": {"distribution": {"integer": {"min": "-9223372036854775808", "max": "9223372036854775807"}}, "size": "3", "multiplicity": 1.0}}}, {"name": "sarus_weights", "statistics": {"name": "Float", "float": {"distribution": {"double": {"min": -1125899906842624.0, "max": 1125899906842624.0}}, "size": "3", "multiplicity": 1.0}}}], "size": "3", "multiplicity": 1.0}}}]}}}]}}}"#;
 
         let dataset = Dataset::new(ds, sch, size).unwrap();
         for (path, rel) in dataset.relations() {
             println!("{:?}", path);
         }
-
     }
 
     #[test]
     fn test_rewrite_with_differential_privacy() {
         let dataset = Dataset::new(DATASET, SCHEMA, SIZE).unwrap();
-        println!("{:?}", dataset.relations()[1].0) ;
+        println!("{:?}", dataset.relations()[1].0);
 
-        let synthetic_data = Some(vec![(vec!["extract", "census"], vec!["extract", "census_sd"])]);
-        let privacy_unit = PrivacyUnitType::Type1(vec![("census", Vec::<(&str, &str, &str)>::new(), "_PRIVACY_UNIT_ROW_")]);
-        let budget: HashMap<&str, f64> = [("epsilon", 1.), ("delta", 0.005)].iter().cloned().collect();
+        let synthetic_data = Some(vec![(
+            vec!["extract", "census"],
+            vec!["extract", "census_sd"],
+        )]);
+        let privacy_unit = PrivacyUnitType::Type1(vec![(
+            "census",
+            Vec::<(&str, &str, &str)>::new(),
+            "_PRIVACY_UNIT_ROW_",
+        )]);
+        let budget: HashMap<&str, f64> = [("epsilon", 1.), ("delta", 0.005)]
+            .iter()
+            .cloned()
+            .collect();
 
         let queries = [
             // "SELECT SUM(CASE WHEN age > 90 THEN 1 ELSE 0 END) AS s1 FROM census WHERE age > 20 AND age < 90;",
@@ -352,9 +390,16 @@ mod tests {
         for query in queries {
             let relation = Relation::from_query(query, &dataset, None).unwrap();
             println!("{}", relation.0);
-            let dp_relation = relation.rewrite_with_differential_privacy(
-                &dataset, privacy_unit.clone(), budget.clone(), None, None, synthetic_data.clone()
-            ).unwrap();
+            let dp_relation = relation
+                .rewrite_with_differential_privacy(
+                    &dataset,
+                    privacy_unit.clone(),
+                    budget.clone(),
+                    None,
+                    None,
+                    synthetic_data.clone(),
+                )
+                .unwrap();
             let dp_query = dp_relation.relation().to_query(None);
             println!("\n\n{dp_query}");
         }
@@ -363,9 +408,16 @@ mod tests {
         for query in queries {
             let relation = Relation::from_query(query, &dataset, None).unwrap();
             println!("{}", relation.0);
-            let dp_relation = relation.rewrite_with_differential_privacy(
-                &dataset, privacy_unit.clone(), budget.clone(), None, None, None
-            ).unwrap();
+            let dp_relation = relation
+                .rewrite_with_differential_privacy(
+                    &dataset,
+                    privacy_unit.clone(),
+                    budget.clone(),
+                    None,
+                    None,
+                    None,
+                )
+                .unwrap();
             let dp_query = dp_relation.relation().to_query(None);
             println!("\n\n{dp_query}");
         }
@@ -374,13 +426,14 @@ mod tests {
     #[test]
     fn test_quoting() {
         let dataset = Dataset::new(DATASET, SCHEMA, SIZE).unwrap();
-        println!("{:?}", dataset.relations()[1].0) ;
+        println!("{:?}", dataset.relations()[1].0);
 
         let query = r#"SELECT "age" AS s1 FROM census;"#;
         let relation = Relation::from_query(query, &dataset, None).unwrap();
 
-        let trans = ast::Query::from(RelationWithTranslator(&relation, PostgreSqlTranslator)).to_string();
-        println!("{}",trans);
+        let trans =
+            ast::Query::from(RelationWithTranslator(&relation, PostgreSqlTranslator)).to_string();
+        println!("{}", trans);
     }
 
     #[test]
@@ -391,15 +444,42 @@ mod tests {
         let dataset = Dataset::new(ds, schema, size).unwrap();
 
         let queries = vec![
-            (vec!["dataset_name".to_string(), "my_schema".to_string(), "boomers".to_string(),], "SELECT * FROM extract.census WHERE age >= 60".to_string()),
-            (vec!["dataset_name".to_string(), "my_schema".to_string(), "genx".to_string(),], "SELECT * FROM extract.census WHERE age >= 40 AND age < 60".to_string()),
-            (vec!["dataset_name".to_string(), "my_schema".to_string(), "millenials".to_string(),], "SELECT * FROM extract.census WHERE age >= 30 AND age < 40".to_string()),
-            (vec!["dataset_name".to_string(), "my_schema".to_string(), "genz".to_string(),], "SELECT * FROM extract.census WHERE age < 30".to_string()),
+            (
+                vec![
+                    "dataset_name".to_string(),
+                    "my_schema".to_string(),
+                    "boomers".to_string(),
+                ],
+                "SELECT * FROM extract.census WHERE age >= 60".to_string(),
+            ),
+            (
+                vec![
+                    "dataset_name".to_string(),
+                    "my_schema".to_string(),
+                    "genx".to_string(),
+                ],
+                "SELECT * FROM extract.census WHERE age >= 40 AND age < 60".to_string(),
+            ),
+            (
+                vec![
+                    "dataset_name".to_string(),
+                    "my_schema".to_string(),
+                    "millenials".to_string(),
+                ],
+                "SELECT * FROM extract.census WHERE age >= 30 AND age < 40".to_string(),
+            ),
+            (
+                vec![
+                    "dataset_name".to_string(),
+                    "my_schema".to_string(),
+                    "genz".to_string(),
+                ],
+                "SELECT * FROM extract.census WHERE age < 30".to_string(),
+            ),
         ];
         let new_ds = dataset.from_queries(queries, None).unwrap();
-        
+
         println!("{:?}", new_ds.schema());
         let rels = new_ds.relations();
-
     }
 }

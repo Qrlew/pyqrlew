@@ -1,13 +1,13 @@
 pub mod dataset;
-pub mod error;
-pub mod relation;
 pub mod dialect;
 pub mod dp_event;
+pub mod error;
+pub mod relation;
 
 pub use crate::{
     dataset::Dataset,
-    relation::{Relation, Strategy},
     dialect::Dialect,
+    relation::{Relation, Strategy},
 };
 use dp_event::RelationWithDpEvent;
 use pyo3::prelude::*;
