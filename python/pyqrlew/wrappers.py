@@ -1,6 +1,6 @@
 """Module containing wrappers around rust objects and some utils"""
 from pyqrlew.typing import PrivacyUnit, SyntheticData
-from .pyqrlew import _Dataset, _Relation, _RelationWithDpEvent, Dialect, Strategy
+from .pyqrlew import _Dataset, _Relation, _RelationWithDpEvent, DpEvent, Dialect, Strategy
 import typing as t 
 from sqlalchemy.engine import Engine
 
@@ -354,11 +354,11 @@ class RelationWithDpEvent:
     def __init__(self, relation_with_dpevent: _RelationWithDpEvent) -> None:
         self.relation_with_dpevent = relation_with_dpevent
 
-    def relation(self):
+    def relation(self) -> Relation:
         """Returns the DP or PUP relation"""
         return Relation(self.relation_with_dpevent.relation())
     
-    def dp_event(self):
+    def dp_event(self) -> DpEvent:
         """Returns the DpEvent associated with the relation."""
         return self.relation_with_dpevent.dp_event()
 
