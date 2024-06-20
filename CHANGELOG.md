@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.9.20] - 2024-05-29
 ### Added
 - Add wrapper for RelationWithDPEvent
+- type() method for Relation
 
 ### Fixed
 - Dataset with admin cols from engine only if tables have admin cols

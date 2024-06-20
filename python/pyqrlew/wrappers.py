@@ -339,7 +339,7 @@ class Relation:
         "Returns a string representation of the Relation's schema."
         return self._relation.schema()
     
-    def type_(self) -> str:
+    def type(self) -> str:
         "Returns a protobuf compatible string representation of the Relation's data type."
         return self._relation.type_()
 
