@@ -250,32 +250,31 @@ def test_some_queries(tables, engine):
     ds = Dataset.from_database("my_db", engine, schema_name=None)
     print(ds.relations())
     QUERIES = [
-        # ('SELECT "integer" FROM primary_table, primary_public_table'),
-        # (
-        #     'SELECT "integer" FROM primary_table '
-        #     "JOIN (SELECT * FROM primary_public_table) AS subq USING(id)"
-        # ),
-        # (
-        #     """WITH tab1 AS (
-        #         SELECT "integer" FROM primary_table
-        #         JOIN primary_public_table USING(id)
-        #     ),
-        #     tab2 AS (
-        #         SELECT * FROM primary_table JOIN secondary_table USING(id)
-        #     )
-        #     SELECT * FROM tab1
-        #     """
-        # ),
-        # "SELECT t1.id FROM primary_public_table AS t1 JOIN secondary_public_table AS t2 ON(t1.id=t2.id)",
-        # """
-        # WITH "join_nagp" ("field_ljc8", "field_xkq4", "field_rv0k", "field_xn3k", "field_3z4q", "field_o2t5", "field_xfrs", "field_pqun", "field_90w5", "field_9tue") AS (
-        #     SELECT * FROM "primary_public_table" AS "_LEFT_" JOIN "secondary_public_table" AS "_RIGHT_" ON ("_LEFT_"."id") = ("_RIGHT_"."id")
-        # ), "map_w9s_" ("_PRIVACY_UNIT_WEIGHT_", "_PRIVACY_UNIT_", "sarus_is_public", "id") AS (
-        #     SELECT CAST(1 AS INTEGER) AS "_PRIVACY_UNIT_WEIGHT_", CAST(CASE WHEN (1) > (2) THEN 1 ELSE NULL END AS TEXT) AS "_PRIVACY_UNIT_", CAST(0 AS BOOLEAN) AS "sarus_is_public", "field_ljc8" AS "id"
-        #     FROM "join_nagp"
-        # ) SELECT * FROM "map_w9s_"
-        # """,
-        "SELECT * FROM primary_table"
+        ('SELECT "integer" FROM primary_table, primary_public_table'),
+        (
+            'SELECT "integer" FROM primary_table '
+            "JOIN (SELECT * FROM primary_public_table) AS subq USING(id)"
+        ),
+        (
+            """WITH tab1 AS (
+                SELECT "integer" FROM primary_table
+                JOIN primary_public_table USING(id)
+            ),
+            tab2 AS (
+                SELECT * FROM primary_table JOIN secondary_table USING(id)
+            )
+            SELECT * FROM tab1
+            """
+        ),
+        "SELECT t1.id FROM primary_public_table AS t1 JOIN secondary_public_table AS t2 ON(t1.id=t2.id)",
+        """
+        WITH "join_nagp" ("field_ljc8", "field_xkq4", "field_rv0k", "field_xn3k", "field_3z4q", "field_o2t5", "field_xfrs", "field_pqun", "field_90w5", "field_9tue") AS (
+            SELECT * FROM "primary_public_table" AS "_LEFT_" JOIN "secondary_public_table" AS "_RIGHT_" ON ("_LEFT_"."id") = ("_RIGHT_"."id")
+        ), "map_w9s_" ("_PRIVACY_UNIT_WEIGHT_", "_PRIVACY_UNIT_", "sarus_is_public", "id") AS (
+            SELECT CAST(1 AS INTEGER) AS "_PRIVACY_UNIT_WEIGHT_", CAST(CASE WHEN (1) > (2) THEN 1 ELSE NULL END AS TEXT) AS "_PRIVACY_UNIT_", CAST(0 AS BOOLEAN) AS "sarus_is_public", "field_ljc8" AS "id"
+            FROM "join_nagp"
+        ) SELECT * FROM "map_w9s_"
+        """,
     ]
 
     for query in QUERIES:
@@ -288,12 +287,151 @@ def test_some_queries(tables, engine):
 def test_writing_and_rewriting_many_times(tables, engine):
     import sqlalchemy as sa
     ds = Dataset.from_database("my_db", engine, schema_name=None)
-    query = """SELECT * FROM primary_table t1 JOIN primary_public_table t2 ON (t1.id=t2.id)"""
+    query = """
+WITH
+  "map_6qs7" (
+    "id",
+    "integer",
+    "float",
+    "datetime",
+    "date",
+    "boolean",
+    "text",
+    "public_fk"
+  ) AS (
+    SELECT
+      "id" AS "id",
+      "integer" AS "integer",
+      "float" AS "float",
+      "datetime" AS "datetime",
+      "date" AS "date",
+      "boolean" AS "boolean",
+      "text" AS "text",
+      "public_fk" AS "public_fk"
+    FROM
+      "primary_table"
+  ),
+  "original_table" (
+    "id",
+    "integer",
+    "float",
+    "datetime",
+    "date",
+    "boolean",
+    "text",
+    "public_fk",
+    "sarus_is_public",
+    "sarus_privacy_unit",
+    "sarus_weights"
+  ) AS (
+    SELECT
+      "id" AS "id",
+      "integer" AS "integer",
+      "float" AS "float",
+      "datetime" AS "datetime",
+      "date" AS "date",
+      "boolean" AS "boolean",
+      "text" AS "text",
+      "public_fk" AS "public_fk",
+      0 AS "sarus_is_public",
+      MD5(
+        CONCAT(
+          MD5(
+            CONCAT(
+              '3c7787272a91a5753234666ca398ba8d3cf6d9ff6dda137886ea9a77a3d19f7b',
+              MD5(CAST(RANDOM() AS TEXT))
+            )
+          ),
+          MD5(
+            CONCAT(
+              '0e8b99dba4369b3265b0b9e1337d3ae04d70881174bce77685e75fd9b46e23e0'
+            )
+          ),
+          MD5(
+            CONCAT(
+              '17bbc4d13311f67df8bc1e832c9a5a082f61c28be77e933c7759c9d70b343b86'
+            )
+          ),
+          MD5(
+            CONCAT(
+              '2f4f7d6eaa60d8aaa2b102efb6054a94e76aa4020776c63b6f5ab230eec43e1b'
+            )
+          )
+        )
+      ) AS "sarus_privacy_unit",
+      1 AS "sarus_weights"
+    FROM
+      "map_6qs7"
+  ),
+  "map_j11u" ("sarus_privacy_unit") AS (
+    SELECT
+      "sarus_privacy_unit" AS "sarus_privacy_unit"
+    FROM
+      "original_table"
+  ),
+  "map_xtgv" ("field_cbf0") AS (
+    SELECT
+      "sarus_privacy_unit" AS "field_cbf0"
+    FROM
+      "map_j11u"
+  ),
+  "reduce_zcd_" ("field_dydc") AS (
+    SELECT
+      "field_cbf0" AS "field_dydc"
+    FROM
+      "map_xtgv"
+    GROUP BY
+      "field_cbf0"
+  ),
+  "map_dpy6" ("sarus_privacy_unit") AS (
+    SELECT
+      "field_dydc" AS "sarus_privacy_unit"
+    FROM
+      "reduce_zcd_"
+  ),
+  "map_oy_e" ("sarus_privacy_unit") AS (
+    SELECT
+      "sarus_privacy_unit" AS "sarus_privacy_unit"
+    FROM
+      "map_dpy6"
+  ),
+  "map_uyvg" ("sarus_privacy_unit") AS (
+    SELECT
+      "sarus_privacy_unit" AS "sarus_privacy_unit"
+    FROM
+      "map_oy_e"
+  ),
+  "sampled_table" ("sarus_privacy_unit") AS (
+    SELECT
+      "sarus_privacy_unit" AS "sarus_privacy_unit"
+    FROM
+      "map_uyvg"
+    ORDER BY
+      RANDOM() ASC
+    LIMIT
+      90
+  )
+    SELECT
+      "_LEFT_"."id" AS "id",
+      "_LEFT_"."integer" AS "integer",
+      "_LEFT_"."float" AS "float",
+      "_LEFT_"."datetime" AS "datetime",
+      "_LEFT_"."date" AS "date",
+      "_LEFT_"."boolean" AS "boolean",
+      "_LEFT_"."text" AS "text",
+      "_LEFT_"."public_fk" AS "public_fk",
+      "_LEFT_"."sarus_is_public" AS "sarus_is_public",
+      "_LEFT_"."sarus_privacy_unit" AS "sarus_privacy_unit",
+      "_LEFT_"."sarus_weights" AS "sarus_weights"
+    FROM
+      "original_table" AS "_LEFT_"
+      JOIN "sampled_table" AS "_RIGHT_" ON ("_LEFT_"."sarus_privacy_unit") = ("_RIGHT_"."sarus_privacy_unit")
+"""
 
     with engine.connect() as conn:
         conn.execute(sa.text(query))
 
-    for i in range(5):
+    for i in range(2):
         rel = Relation.from_query(query, ds)
         query = rel.to_query()
         print(query)

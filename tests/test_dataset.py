@@ -103,342 +103,517 @@ def test_from_database():
         display_graph(rel.dot())
 
 
-# def test_from_str():
-#     dataset = '{"@type": "sarus_data_spec/sarus_data_spec.Dataset", "uuid": "f31d342bc8284fa2b8f36fbfb869aa3a", "name": "Transformed", "spec": {"transformed": {"transform": "98f18c2b0beb406088193dab26e24552", "arguments": [], "named_arguments": {}}}, "properties": {}, "doc": "This ia a demo dataset for testing purpose"}'
-#     schema = '''
-#     {
-#     "@type":"sarus_data_spec/sarus_data_spec.Schema",
-#     "uuid":"f0e998eb7b904be9bcd656c4157357f6",
-#     "dataset":"f31d342bc8284fa2b8f36fbfb869aa3a",
-#     "name":"Transformed_schema",
-#     "type":{
-#         "name":"transformed_schema",
-#         "struct":{
-#             "fields":[
-#                 {
-#                 "name":"sarus_data",
-#                 "type":{
-#                     "name":"Union",
-#                     "union":{
-#                         "fields":[
-#                             {
-#                             "name":"st51_bicdlwoy",
-#                             "type":{
-#                                 "name":"Union",
-#                                 "union":{
-#                                     "fields":[
-#                                         {
-#                                         "name":"xwiromvh",
-#                                         "type":{
-#                                             "name":"Struct",
-#                                             "struct":{
-#                                                 "fields":[
-#                                                     {
-#                                                     "name":"id",
-#                                                     "type":{
-#                                                         "name":"Integer",
-#                                                         "integer":{
-#                                                             "min":"-9223372036854775808",
-#                                                             "max":"9223372036854775807"
-#                                                         }
-#                                                     }
-#                                                     },
-#                                                     {
-#                                                     "name":"text",
-#                                                     "type":{
-#                                                         "name":"Text UTF-8",
-#                                                         "text":{
-#                                                             "encoding":"UTF-8"
-#                                                         }
-#                                                     }
-#                                                     }
-#                                                 ]
-#                                             }
-#                                         }
-#                                         },
-#                                         {
-#                                         "name":"qqnhlkqe",
-#                                         "type":{
-#                                             "name":"Struct",
-#                                             "struct":{
-#                                                 "fields":[
-#                                                     {
-#                                                     "name":"id",
-#                                                     "type":{
-#                                                         "name":"Integer",
-#                                                         "integer":{
-#                                                             "min":"-9223372036854775808",
-#                                                             "max":"9223372036854775807"
-#                                                         }
-#                                                     }
-#                                                     },
-#                                                     {
-#                                                     "name":"integer",
-#                                                     "type":{
-#                                                         "name":"Integer",
-#                                                         "integer":{
-#                                                             "min":"-9223372036854775808",
-#                                                             "max":"9223372036854775807"
-#                                                         }
-#                                                     }
-#                                                     },
-#                                                     {
-#                                                     "name":"float",
-#                                                     "type":{
-#                                                         "name":"Float64",
-#                                                         "float":{
-#                                                             "min":-1125899906842624.0,
-#                                                             "max":1125899906842624.0
-#                                                         }
-#                                                     }
-#                                                     },
-#                                                     {
-#                                                     "name":"datetime",
-#                                                     "type":{
-#                                                         "name":"Datetime",
-#                                                         "datetime":{
-#                                                             "format":"%Y-%m-%d %H:%M:%S",
-#                                                             "min":"01-01-01 00:00:00",
-#                                                             "max":"9999-12-31 00:00:00"
-#                                                         }
-#                                                     }
-#                                                     },
-#                                                     {
-#                                                     "name":"date",
-#                                                     "type":{
-#                                                         "name":"Datetime",
-#                                                         "datetime":{
-#                                                             "format":"%Y-%m-%d %H:%M:%S",
-#                                                             "min":"01-01-01 00:00:00",
-#                                                             "max":"9999-12-31 00:00:00"
-#                                                         }
-#                                                     }
-#                                                     },
-#                                                     {
-#                                                     "name":"boolean",
-#                                                     "type":{
-#                                                         "name":"Boolean",
-#                                                         "boolean":{
-                                                            
-#                                                         }
-#                                                     }
-#                                                     },
-#                                                     {
-#                                                     "name":"text",
-#                                                     "type":{
-#                                                         "name":"Text UTF-8",
-#                                                         "text":{
-#                                                             "encoding":"UTF-8"
-#                                                         }
-#                                                     }
-#                                                     },
-#                                                     {
-#                                                     "name":"public_fk",
-#                                                     "type":{
-#                                                         "name":"Integer",
-#                                                         "integer":{
-#                                                             "min":"-9223372036854775808",
-#                                                             "max":"9223372036854775807"
-#                                                         }
-#                                                     }
-#                                                     }
-#                                                 ]
-#                                             }
-#                                         }
-#                                         },
-#                                         {
-#                                         "name":"bgpqlcws",
-#                                         "type":{
-#                                             "name":"Struct",
-#                                             "struct":{
-#                                                 "fields":[
-#                                                     {
-#                                                     "name":"id",
-#                                                     "type":{
-#                                                         "name":"Integer",
-#                                                         "integer":{
-#                                                             "min":"-9223372036854775808",
-#                                                             "max":"9223372036854775807"
-#                                                         }
-#                                                     }
-#                                                     },
-#                                                     {
-#                                                     "name":"integer",
-#                                                     "type":{
-#                                                         "name":"Integer",
-#                                                         "integer":{
-#                                                             "min":"-9223372036854775808",
-#                                                             "max":"9223372036854775807"
-#                                                         }
-#                                                     }
-#                                                     },
-#                                                     {
-#                                                     "name":"float",
-#                                                     "type":{
-#                                                         "name":"Float64",
-#                                                         "float":{
-#                                                             "min":-1125899906842624.0,
-#                                                             "max":1125899906842624.0
-#                                                         }
-#                                                     }
-#                                                     },
-#                                                     {
-#                                                     "name":"datetime",
-#                                                     "type":{
-#                                                         "name":"Datetime",
-#                                                         "datetime":{
-#                                                             "format":"%Y-%m-%d %H:%M:%S",
-#                                                             "min":"01-01-01 00:00:00",
-#                                                             "max":"9999-12-31 00:00:00"
-#                                                         }
-#                                                     }
-#                                                     },
-#                                                     {
-#                                                     "name":"date",
-#                                                     "type":{
-#                                                         "name":"Datetime",
-#                                                         "datetime":{
-#                                                             "format":"%Y-%m-%d %H:%M:%S",
-#                                                             "min":"01-01-01 00:00:00",
-#                                                             "max":"9999-12-31 00:00:00"
-#                                                         }
-#                                                     }
-#                                                     },
-#                                                     {
-#                                                     "name":"boolean",
-#                                                     "type":{
-#                                                         "name":"Boolean",
-#                                                         "boolean":{
-                                                            
-#                                                         }
-#                                                     }
-#                                                     },
-#                                                     {
-#                                                     "name":"text",
-#                                                     "type":{
-#                                                         "name":"Text UTF-8",
-#                                                         "text":{
-#                                                             "encoding":"UTF-8"
-#                                                         }
-#                                                     }
-#                                                     },
-#                                                     {
-#                                                     "name":"public_fk",
-#                                                     "type":{
-#                                                         "name":"Integer",
-#                                                         "integer":{
-#                                                             "min":"-9223372036854775808",
-#                                                             "max":"9223372036854775807"
-#                                                         }
-#                                                     }
-#                                                     }
-#                                                 ]
-#                                             }
-#                                         }
-#                                         },
-#                                         {
-#                                         "name":"tyzgsphn",
-#                                         "type":{
-#                                             "name":"Struct",
-#                                             "struct":{
-#                                                 "fields":[
-#                                                     {
-#                                                     "name":"id",
-#                                                     "type":{
-#                                                         "name":"Integer",
-#                                                         "integer":{
-#                                                             "min":"-9223372036854775808",
-#                                                             "max":"9223372036854775807"
-#                                                         }
-#                                                     }
-#                                                     },
-#                                                     {
-#                                                     "name":"text",
-#                                                     "type":{
-#                                                         "name":"Text UTF-8",
-#                                                         "text":{
-#                                                             "encoding":"UTF-8"
-#                                                         }
-#                                                     }
-#                                                     }
-#                                                 ]
-#                                             }
-#                                         }
-#                                         }
-#                                     ]
-#                                 },
-#                                 "properties":{
-#                                     "public_fields":"[]"
-#                                 }
-#                             }
-#                             }
-#                         ]
-#                     },
-#                     "properties":{
-#                         "public_fields":"[]"
-#                     }
-#                 }
-#                 },
-#                 {
-#                 "name":"sarus_weights",
-#                 "type":{
-#                     "name":"Integer",
-#                     "integer":{
-#                         "min":"-9223372036854775808",
-#                         "max":"9223372036854775807"
-#                     }
-#                 }
-#                 },
-#                 {
-#                 "name":"sarus_is_public",
-#                 "type":{
-#                     "name":"Boolean",
-#                     "boolean":{
-                        
-#                     }
-#                 }
-#                 },
-#                 {
-#                     "name": "sarus_privacy_unit",
-#                     "type": {
-#                     "name": "Optional",
-#                     "optional": {
-#                         "type": {
-#                         "id": {
-#                             "base": "STRING",
-#                             "unique": false
-#                         },
-#                         "name": "Id",
-#                         "properties": {}
-#                         }
-#                     },
-#                     "properties": {}
-#                     }
-#             },
-#             ]
-#         }
-#     },
-#     "protected":{
-#         "label":"data"
-#     },
-#     "properties":{
-#         "primary_keys":"",
-#         "max_max_multiplicity":"1",
-#         "foreign_keys":""
-#     }
-#     }
-#     '''
-#     real_ds = Dataset.from_str(dataset, schema, '')
+def test_from_str():
+    dataset = """
+    {
+    "@type": "sarus_data_spec/sarus_data_spec.Dataset",
+    "doc": "",
+    "name": "Transformed",
+    "properties": {},
+    "spec": {
+        "transformed": {
+        "arguments": [
+            "c07f899129e90190f48db0aebbff8abe"
+        ],
+        "named_arguments": {
+            "privacy_unit_tracking_paths": "ece2e9d477e6c88513551c78499cbbad",
+            "public_paths": "c3e688ad907078c5d834bc3a2cf4bca8"
+        },
+        "transform": "5c620caa2fcc37332fcd73d66372ffb5"
+        }
+    },
+    "uuid": "50c5f0570960e686b724275e0adb39af"
+    }
+    """
+    schema = """
+    {
+    "@type": "sarus_data_spec/sarus_data_spec.Schema",
+    "dataset": "50c5f0570960e686b724275e0adb39af",
+    "name": "demo_db_schema",
+    "privacy_unit": {
+        "label": "sarus_data",
+        "paths": [
+        {
+            "label": "primary_table",
+            "paths": [],
+            "properties": {}
+        },
+        {
+            "label": "secondary_table",
+            "paths": [],
+            "properties": {}
+        },
+        {
+            "label": "primary_public_table",
+            "paths": [],
+            "properties": {}
+        },
+        {
+            "label": "secondary_public_table",
+            "paths": [],
+            "properties": {}
+        }
+        ],
+        "properties": {}
+    },
+    "properties": {},
+    "type": {
+        "name": "Struct",
+        "properties": {},
+        "struct": {
+        "fields": [
+            {
+            "name": "sarus_data",
+            "type": {
+                "name": "Union",
+                "properties": {
+                "sarus_is_public": "False"
+                },
+                "union": {
+                "fields": [
+                    {
+                    "name": "primary_table",
+                    "type": {
+                        "name": "Struct",
+                        "properties": {
+                        "merge_paths": "0",
+                        "sarus_is_public": "False"
+                        },
+                        "struct": {
+                        "fields": [
+                            {
+                            "name": "id",
+                            "type": {
+                                "id": {
+                                "base": "INT32",
+                                "unique": true
+                                },
+                                "name": "Id",
+                                "properties": {}
+                            }
+                            },
+                            {
+                            "name": "integer",
+                            "type": {
+                                "integer": {
+                                "base": "INT32",
+                                "max": "99",
+                                "min": "0",
+                                "possible_values": []
+                                },
+                                "name": "Integer",
+                                "properties": {
+                                "possible_values": "[18, 79, 32, 54, 14, 81, 84, 36, 33, 24, 43, 48, 90, 99, 21, 70, 85, 51, 27, 63, 55, 49, 12, 39, 37, 44, 3, 26, 76, 65, 15, 42, 82, 4, 28, 9, 16, 62, 31, 68, 57, 87, 77, 6, 41, 22, 72, 25, 69, 7, 8, 96, 89, 38, 91, 66, 29, 5, 64, 71, 61, 20, 95, 88, 30, 50, 19, 78, 56, 0, 97, 58, 10, 98, 2, 47, 80, 35, 75, 73, 13, 83, 46, 17, 23, 74, 86, 67, 60, 1, 45, 53, 40, 11, 34, 52, 94, 59, 92, 93]",
+                                "possible_values_length": "100"
+                                }
+                            }
+                            },
+                            {
+                            "name": "float",
+                            "type": {
+                                "float": {
+                                "base": "FLOAT32",
+                                "max": 0.9992433190345764,
+                                "min": 0.00011310506670270115,
+                                "possible_values": []
+                                },
+                                "name": "Float64",
+                                "properties": {
+                                "possible_values_length": "301"
+                                }
+                            }
+                            },
+                            {
+                            "name": "datetime",
+                            "type": {
+                                "datetime": {
+                                "base": "INT64_NS",
+                                "format": "%Y-%m-%d %H:%M:%S",
+                                "max": "1980-01-31 18:51:02",
+                                "min": "1980-01-01 01:04:49",
+                                "possible_values": []
+                                },
+                                "name": "Datetime",
+                                "properties": {
+                                "possible_values_length": "301"
+                                }
+                            }
+                            },
+                            {
+                            "name": "date",
+                            "type": {
+                                "date": {
+                                "base": "INT32",
+                                "format": "%Y-%m-%d",
+                                "max": "2000-01-01",
+                                "min": "1980-01-23",
+                                "possible_values": []
+                                },
+                                "name": "Date",
+                                "properties": {
+                                "possible_values_length": "301"
+                                }
+                            }
+                            },
+                            {
+                            "name": "boolean",
+                            "type": {
+                                "boolean": {},
+                                "name": "Boolean",
+                                "properties": {}
+                            }
+                            },
+                            {
+                            "name": "text",
+                            "type": {
+                                "name": "Text UTF-8",
+                                "properties": {
+                                "max_length": "8",
+                                "min_length": "8",
+                                "possible_values_length": "301",
+                                "text_alphabet_name": "Simple",
+                                "text_char_set": "[48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90]"
+                                },
+                                "text": {
+                                "encoding": "UTF-8",
+                                "possible_values": []
+                                }
+                            }
+                            },
+                            {
+                            "name": "public_fk",
+                            "type": {
+                                "id": {
+                                "base": "INT32",
+                                "reference": {
+                                    "label": "sarus_data",
+                                    "paths": [
+                                    {
+                                        "label": "primary_public_table",
+                                        "paths": [
+                                        {
+                                            "label": "id",
+                                            "paths": [],
+                                            "properties": {}
+                                        }
+                                        ],
+                                        "properties": {}
+                                    }
+                                    ],
+                                    "properties": {}
+                                },
+                                "unique": false
+                                },
+                                "name": "Id",
+                                "properties": {}
+                            }
+                            }
+                        ]
+                        }
+                    }
+                    },
+                    {
+                    "name": "secondary_table",
+                    "type": {
+                        "name": "Struct",
+                        "properties": {
+                        "merge_paths": "0",
+                        "sarus_is_public": "False"
+                        },
+                        "struct": {
+                        "fields": [
+                            {
+                            "name": "id",
+                            "type": {
+                                "id": {
+                                "base": "INT32",
+                                "reference": {
+                                    "label": "sarus_data",
+                                    "paths": [
+                                    {
+                                        "label": "primary_table",
+                                        "paths": [
+                                        {
+                                            "label": "id",
+                                            "paths": [],
+                                            "properties": {}
+                                        }
+                                        ],
+                                        "properties": {}
+                                    }
+                                    ],
+                                    "properties": {}
+                                },
+                                "unique": false
+                                },
+                                "name": "Id",
+                                "properties": {}
+                            }
+                            },
+                            {
+                            "name": "integer",
+                            "type": {
+                                "integer": {
+                                "base": "INT32",
+                                "max": "99",
+                                "min": "0",
+                                "possible_values": []
+                                },
+                                "name": "Integer",
+                                "properties": {
+                                "possible_values": "[58, 72, 88, 37, 76, 26, 20, 0, 54, 93, 46, 28, 31, 3, 84, 30, 66, 17, 4, 27, 44, 94, 73, 9, 77, 69, 67, 15, 61, 56, 21, 42, 25, 16, 11, 49, 35, 90, 71, 81, 24, 53, 10, 74, 86, 62, 85, 13, 55, 48, 92, 83, 89, 59, 97, 5, 98, 50, 51, 6, 19, 96, 82, 41, 39, 7, 1, 2, 78, 79, 63, 47, 18, 43, 38, 57, 29, 8, 80, 70, 65, 68, 23, 33, 40, 60, 95, 99, 32, 87, 14, 36, 12, 34, 75, 22, 52, 64, 45, 91]",
+                                "possible_values_length": "100"
+                                }
+                            }
+                            },
+                            {
+                            "name": "float",
+                            "type": {
+                                "float": {
+                                "base": "FLOAT32",
+                                "max": 0.9992868304252625,
+                                "min": 0.00011310506670270115,
+                                "possible_values": []
+                                },
+                                "name": "Float64",
+                                "properties": {
+                                "possible_values_length": "301"
+                                }
+                            }
+                            },
+                            {
+                            "name": "datetime",
+                            "type": {
+                                "datetime": {
+                                "base": "INT64_NS",
+                                "format": "%Y-%m-%d %H:%M:%S",
+                                "max": "1980-01-31 23:23:22",
+                                "min": "1980-01-01 01:04:49",
+                                "possible_values": []
+                                },
+                                "name": "Datetime",
+                                "properties": {
+                                "possible_values_length": "301"
+                                }
+                            }
+                            },
+                            {
+                            "name": "date",
+                            "type": {
+                                "date": {
+                                "base": "INT32",
+                                "format": "%Y-%m-%d",
+                                "max": "2000-01-01",
+                                "min": "1980-01-03",
+                                "possible_values": []
+                                },
+                                "name": "Date",
+                                "properties": {
+                                "possible_values_length": "301"
+                                }
+                            }
+                            },
+                            {
+                            "name": "boolean",
+                            "type": {
+                                "boolean": {},
+                                "name": "Boolean",
+                                "properties": {}
+                            }
+                            },
+                            {
+                            "name": "text",
+                            "type": {
+                                "name": "Text UTF-8",
+                                "properties": {
+                                "max_length": "8",
+                                "min_length": "8",
+                                "possible_values_length": "301",
+                                "text_alphabet_name": "Simple",
+                                "text_char_set": "[48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90]"
+                                },
+                                "text": {
+                                "encoding": "UTF-8",
+                                "possible_values": []
+                                }
+                            }
+                            },
+                            {
+                            "name": "public_fk",
+                            "type": {
+                                "id": {
+                                "base": "INT32",
+                                "reference": {
+                                    "label": "sarus_data",
+                                    "paths": [
+                                    {
+                                        "label": "secondary_public_table",
+                                        "paths": [
+                                        {
+                                            "label": "id",
+                                            "paths": [],
+                                            "properties": {}
+                                        }
+                                        ],
+                                        "properties": {}
+                                    }
+                                    ],
+                                    "properties": {}
+                                },
+                                "unique": false
+                                },
+                                "name": "Id",
+                                "properties": {}
+                            }
+                            }
+                        ]
+                        }
+                    }
+                    },
+                    {
+                    "name": "primary_public_table",
+                    "type": {
+                        "name": "Struct",
+                        "properties": {
+                        "merge_paths": "1",
+                        "sarus_is_public": "True"
+                        },
+                        "struct": {
+                        "fields": [
+                            {
+                            "name": "id",
+                            "type": {
+                                "id": {
+                                "base": "INT32",
+                                "unique": true
+                                },
+                                "name": "Id",
+                                "properties": {}
+                            }
+                            },
+                            {
+                            "name": "text",
+                            "type": {
+                                "name": "Text UTF-8",
+                                "properties": {
+                                "max_length": "8",
+                                "min_length": "8",
+                                "possible_values": "[\\"JPA2Z33I\\"]",
+                                "possible_values_length": "1",
+                                "text_alphabet_name": "Simple",
+                                "text_char_set": "[50, 51, 65, 73, 74, 80, 90]"
+                                },
+                                "text": {
+                                "encoding": "UTF-8",
+                                "possible_values": [
+                                    "JPA2Z33I"
+                                ]
+                                }
+                            }
+                            }
+                        ]
+                        }
+                    }
+                    },
+                    {
+                    "name": "secondary_public_table",
+                    "type": {
+                        "name": "Struct",
+                        "properties": {
+                        "merge_paths": "1",
+                        "sarus_is_public": "True"
+                        },
+                        "struct": {
+                        "fields": [
+                            {
+                            "name": "id",
+                            "type": {
+                                "id": {
+                                "base": "INT32",
+                                "unique": true
+                                },
+                                "name": "Id",
+                                "properties": {}
+                            }
+                            },
+                            {
+                            "name": "text",
+                            "type": {
+                                "name": "Text UTF-8",
+                                "properties": {
+                                "max_length": "8",
+                                "min_length": "8",
+                                "possible_values": "[\\"JPA2Z33I\\"]",
+                                "possible_values_length": "1",
+                                "text_alphabet_name": "Simple",
+                                "text_char_set": "[50, 51, 65, 73, 74, 80, 90]"
+                                },
+                                "text": {
+                                "encoding": "UTF-8",
+                                "possible_values": [
+                                    "JPA2Z33I"
+                                ]
+                                }
+                            }
+                            }
+                        ]
+                        }
+                    }
+                    }
+                ]
+                }
+            }
+            },
+            {
+            "name": "sarus_is_public",
+            "type": {
+                "boolean": {},
+                "name": "Boolean",
+                "properties": {}
+            }
+            },
+            {
+            "name": "sarus_privacy_unit",
+            "type": {
+                "name": "Optional",
+                "optional": {
+                "type": {
+                    "id": {
+                    "base": "STRING",
+                    "unique": false
+                    },
+                    "name": "Id",
+                    "properties": {}
+                }
+                },
+                "properties": {}
+            }
+            },
+            {
+            "name": "sarus_weights",
+            "type": {
+                "float": {
+                "base": "FLOAT64",
+                "max": 1.7976931348623157e+308,
+                "min": 0.0,
+                "possible_values": []
+                },
+                "name": "Float64",
+                "properties": {}
+            }
+            }
+        ]
+        }
+    },
+    "uuid": "0995b7557812707dbdd97d826ef34fa5"
+    }
+    """
 
-    # # sarus dataset:
-    # dataset = '{"@type": "sarus_data_spec/sarus_data_spec.Dataset", "uuid": "10ba9d15c46403eb7b1eb5b872868b69", "name": "Transformed", "spec": {"transformed": {"transform": "98f18c2b0beb406088193dab26e24552", "arguments": [], "named_arguments": {}}}, "properties": {}, "doc": "This ia a demo dataset for testing purpose"}'
-    # schema = '{"@type": "sarus_data_spec/sarus_data_spec.Schema", "uuid": "72c83138118ecbea709ae57f9cdf8a2c", "dataset": "10ba9d15c46403eb7b1eb5b872868b69", "name": "Transformed_schema", "type": {"name": "Struct", "struct": {"fields": [{"name": "sarus_data", "type": {"name": "Union", "union": {"fields": [{"name": "primary_table", "type": {"name": "Struct", "struct": {"fields": [{"name": "id", "type": {"name": "Id", "id": {"base": "INT32", "unique": true}}}, {"name": "integer", "type": {"name": "Integer", "integer": {"base": "INT32", "max": "99"}, "properties": {"possible_values": "[30, 89, 12, 65, 31, 57, 36, 27, 18, 93, 77, 22, 23, 94, 11, 28, 74, 88, 9, 15, 80, 71, 17, 46, 7, 75, 33, 84, 96, 44, 5, 4, 50, 54, 34, 6, 85, 92, 62, 79, 42, 97, 45, 40, 73, 37, 0, 3, 29, 16, 82, 14, 51, 53, 25, 48, 32, 81, 41, 90, 64, 38, 66, 67, 95, 99, 86, 21, 43, 8, 72, 78, 13, 87, 39, 91, 52, 76, 68, 70, 2, 58, 69, 1, 63, 83, 55, 20, 49, 60, 61, 19, 35, 10, 59, 98, 56, 26, 47, 24]", "possible_values_length": "100"}}}, {"name": "float", "type": {"name": "Float64", "float": {"base": "FLOAT32", "min": 0.00011310506670270115, "max": 0.9992868304252625}, "properties": {"possible_values_length": "301"}}}, {"name": "datetime", "type": {"name": "Datetime", "datetime": {"format": "%Y-%m-%d %H:%M:%S", "min": "1980-01-01 01:04:49", "max": "1980-01-31 23:23:22"}, "properties": {"possible_values_length": "301"}}}, {"name": "date", "type": {"name": "Date", "date": {"format": "%Y-%m-%d", "min": "1980-01-03", "max": "2000-01-01"}, "properties": {"possible_values_length": "301"}}}, {"name": "boolean", "type": {"name": "Boolean", "boolean": {}}}, {"name": "text", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8"}, "properties": {"min_length": "8", "possible_values_length": "301", "text_alphabet_name": "Simple", "text_char_set": "[48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90]", "max_length": "8"}}}, {"name": "public_fk", "type": {"name": "Id", "id": {"base": "INT32", "reference": {"label": "sarus_data", "paths": [{"label": "primary_public_table", "paths": [{"label": "id"}]}]}}}}]}, "properties": {"merge_paths": "0", "sarus_is_public": "False"}}}, {"name": "secondary_table", "type": {"name": "Struct", "struct": {"fields": [{"name": "id", "type": {"name": "Id", "id": {"base": "INT32", "reference": {"label": "sarus_data", "paths": [{"label": "primary_table", "paths": [{"label": "id"}]}]}}}}, {"name": "integer", "type": {"name": "Integer", "integer": {"base": "INT32", "max": "99"}, "properties": {"possible_values": "[30, 89, 12, 65, 31, 57, 36, 27, 18, 93, 77, 22, 23, 94, 11, 28, 74, 88, 9, 15, 80, 71, 17, 46, 7, 75, 33, 84, 96, 44, 5, 4, 50, 54, 34, 6, 85, 92, 62, 79, 42, 97, 45, 40, 73, 37, 0, 3, 29, 16, 82, 14, 51, 53, 25, 48, 32, 81, 41, 90, 64, 38, 66, 67, 95, 99, 86, 21, 43, 8, 72, 78, 13, 87, 39, 91, 52, 76, 68, 70, 2, 58, 69, 1, 63, 83, 55, 20, 49, 60, 61, 19, 35, 10, 59, 98, 56, 26, 47, 24]", "possible_values_length": "100"}}}, {"name": "float", "type": {"name": "Float64", "float": {"base": "FLOAT32", "min": 0.00011310506670270115, "max": 0.9992868304252625}, "properties": {"possible_values_length": "301"}}}, {"name": "datetime", "type": {"name": "Datetime", "datetime": {"format": "%Y-%m-%d %H:%M:%S", "min": "1980-01-01 01:04:49", "max": "1980-01-31 23:23:22"}, "properties": {"possible_values_length": "301"}}}, {"name": "date", "type": {"name": "Date", "date": {"format": "%Y-%m-%d", "min": "1980-01-03", "max": "2000-01-01"}, "properties": {"possible_values_length": "301"}}}, {"name": "boolean", "type": {"name": "Boolean", "boolean": {}}}, {"name": "text", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8"}, "properties": {"max_length": "8", "text_alphabet_name": "Simple", "min_length": "8", "text_char_set": "[48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90]", "possible_values_length": "301"}}}, {"name": "public_fk", "type": {"name": "Id", "id": {"base": "INT32", "reference": {"label": "sarus_data", "paths": [{"label": "secondary_public_table", "paths": [{"label": "id"}]}]}}}}]}, "properties": {"sarus_is_public": "False", "fks_for_merging": "[\\"CiRzYXJ1c19kYXRhX3NwZWMvc2FydXNfZGF0YV9zcGVjLlBhdGgSEQoPc2Vjb25kYXJ5X3RhYmxl\\", \\"CiRzYXJ1c19kYXRhX3NwZWMvc2FydXNfZGF0YV9zcGVjLlBhdGgSDwoNcHJpbWFyeV90YWJsZQ==\\"]", "merge_paths": "2"}}}, {"name": "primary_public_table", "type": {"name": "Struct", "struct": {"fields": [{"name": "id", "type": {"name": "Id", "id": {"base": "INT32", "unique": true}}}, {"name": "text", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8"}, "properties": {"text_char_set": "[50, 51, 52, 55, 65, 70, 73, 74, 76, 78, 79, 80, 81, 87, 89, 90]", "max_length": "8", "possible_values": "[\\"JPA2Z33I\\", \\"JAQLY7IO\\", \\"NFNZN2W4\\"]", "text_alphabet_name": "Simple", "min_length": "8", "possible_values_length": "3"}}}]}, "properties": {"merge_paths": "1", "sarus_is_public": "True"}}}, {"name": "secondary_public_table", "type": {"name": "Struct", "struct": {"fields": [{"name": "id", "type": {"name": "Id", "id": {"base": "INT32", "unique": true}}}, {"name": "text", "type": {"name": "Text UTF-8", "text": {"encoding": "UTF-8"}, "properties": {"text_alphabet_name": "Simple", "text_char_set": "[50, 51, 52, 55, 65, 70, 73, 74, 76, 78, 79, 80, 81, 87, 89, 90]", "possible_values": "[\\"JPA2Z33I\\", \\"JAQLY7IO\\", \\"NFNZN2W4\\"]", "possible_values_length": "3", "max_length": "8", "min_length": "8"}}}]}, "properties": {"merge_paths": "1", "sarus_is_public": "True"}}}]}, "properties": {"sarus_is_public": "False"}}}, {"name": "sarus_is_public", "type": {"name": "Boolean", "boolean": {}}}, {"name": "sarus_privacy_unit", "type": {"name": "Optional", "optional": {"type": {"name": "Id", "id": {"base": "STRING"}}}}}, {"name": "sarus_weights", "type": {"name": "Float64", "float": {"max": 1.7976931348623157e308}}}]}}, "properties": {"max_max_multiplicity": "10"}}'
-
-    # sarus_ds = Dataset.from_str(dataset, schema, size)
-
-    # query = 'SELECT * FROM primary_table'
-    # rel = Relation.from_query(query, sarus_ds)
-    # display_graph(rel.dot())
+    real_ds = Dataset.from_str(dataset, schema, "")
+    
+    query = 'SELECT COUNT(DISTINCT sarus_privacy_unit) FROM primary_table'
+    rel = Relation.from_query(query, real_ds)
+    display_graph(rel.dot())
 
     # tab_mapping = {
     #     ('Transformed_schema', 'primary_public_table'): ('Transformed_schema', 'st51_bicdlwoy', 'bgpqlcws'),
