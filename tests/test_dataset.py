@@ -90,11 +90,8 @@ def test_from_dp_compiled_queries():
     # display_graph(new_rel.dot())
 
 
-def test_from_database():
-    import sqlalchemy as sa
-    url = "postgresql+psycopg2://postgres:pyqrlew-db@localhost:5433/test_db"
-    engine = sa.create_engine(url)
-    ds =  Dataset.from_database('ds_name', engine, 'st51_bicdlwoy')
+def test_from_database(tables, engine):
+    ds =  Dataset.from_database('ds_name', engine, None)
     print(ds)
     print(ds.schema)
     paths_rels = ds.relations()
