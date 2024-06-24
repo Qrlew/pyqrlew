@@ -1,6 +1,6 @@
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::PyErr;
-use qrlew::{differential_privacy, relation, sql, rewriting};
+use qrlew::{differential_privacy, relation, rewriting, sql};
 use qrlew_sarus::{data_spec, protobuf};
 use std::{error, fmt, result};
 

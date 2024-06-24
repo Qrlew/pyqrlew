@@ -1,6 +1,6 @@
 """Module containing wrappers around rust objects and some utils"""
-from pyqrlew.typing import RelationWithDpEvent, PrivacyUnit, SyntheticData
-from .pyqrlew import _Dataset, _Relation, Dialect, Strategy
+from pyqrlew.typing import PrivacyUnit, SyntheticData, DpEvent
+from .pyqrlew import _Dataset, _Relation, _RelationWithDpEvent, Dialect, Strategy
 import typing as t 
 from sqlalchemy.engine import Engine
 
@@ -230,7 +230,7 @@ class Relation:
         max_multiplicity_share: t.Optional[float]=None,
         synthetic_data: t.Optional[SyntheticData]=None,
         strategy: t.Optional[Strategy]=None,
-    ) -> RelationWithDpEvent:
+    ) -> 'RelationWithDpEvent':
         """Returns as RelationWithDpEvent where it's relation propagates the privacy unit
         through the query. Check out more `here! <https://qrlew.readthedocs.io/en/latest/tutorials/rewrite_with_dp.html#rewritting-with-dp>`_
         
@@ -251,7 +251,7 @@ class Relation:
         Returns:
             RelationWithDpEvent: 
         """
-        return self._relation.rewrite_as_privacy_unit_preserving(
+        return RelationWithDpEvent(self._relation.rewrite_as_privacy_unit_preserving(
             dataset._dataset,
             privacy_unit,
             epsilon_delta,
@@ -259,7 +259,7 @@ class Relation:
             max_multiplicity_share,
             synthetic_data,
             strategy
-        )
+        ))
 
     def rewrite_with_differential_privacy(
         self,
@@ -269,7 +269,7 @@ class Relation:
         max_multiplicity: t.Optional[float]=None,
         max_multiplicity_share: t.Optional[float]=None,
         synthetic_data: t.Optional[SyntheticData]=None,
-    ) -> RelationWithDpEvent:
+    ) -> 'RelationWithDpEvent':
         """It transforms a Relation into its differentially private equivalent. Check out more `here! <https://qrlew.readthedocs.io/en/latest/tutorials/rewrite_with_dp.html#rewritting-with-dp>`_
 
         Args:
@@ -289,14 +289,14 @@ class Relation:
         Returns:
             RelationWithDpEvent: 
         """
-        return self._relation.rewrite_with_differential_privacy(
+        return RelationWithDpEvent(self._relation.rewrite_with_differential_privacy(
             dataset._dataset,
             privacy_unit,
             epsilon_delta,
             max_multiplicity,
             max_multiplicity_share,
             synthetic_data
-        )
+        ))
 
     def compose(self, relations: t.Iterable[t.Tuple[t.Iterable[str], 'Relation']]) -> 'Relation':
         """It composes itself with other relations. It substitute its Tables with the corresponding relation in relations
@@ -338,10 +338,29 @@ class Relation:
     def schema(self) -> str:
         "Returns a string representation of the Relation's schema."
         return self._relation.schema()
+    
+    def type(self) -> str:
+        "Returns a protobuf compatible string representation of the Relation's data type."
+        return self._relation.type_()
 
     def dot(self) -> str:
         "GraphViz representation of the `Relation`"
         return self._relation.dot()
+
+class RelationWithDpEvent:
+    """Object containing a differentially private (DP) or privacy unit
+    preserving (PUP) relation and the associated DpEvent."""
+
+    def __init__(self, relation_with_dpevent: _RelationWithDpEvent) -> None:
+        self.relation_with_dpevent = relation_with_dpevent
+
+    def relation(self) -> Relation:
+        """Returns the DP or PUP relation"""
+        return Relation(self.relation_with_dpevent.relation())
+    
+    def dp_event(self) -> DpEvent:
+        """Returns the DpEvent associated with the relation."""
+        return self.relation_with_dpevent.dp_event()
 
 
 def dataset_from_database(
@@ -404,7 +423,11 @@ def dataset_from_database(
         """Returns a Json representation compatible with [Protocol Buffers](https://protobuf.dev/reference/protobuf/google.protobuf/#google.protobuf.Struct)
         of the schema
         """
-        tables = {"fields": [table(metadata.tables[name]) for name in metadata.tables]}
+
+        tables_and_have_admin = [table(metadata.tables[name]) for name in metadata.tables]
+        have_admin = [table_and_has_admin[1] for table_and_has_admin in tables_and_have_admin]
+
+        tables = {"fields": [table_and_has_admin[0] for table_and_has_admin in tables_and_have_admin]}
 
         if schema_name is not None:
             tables = {
@@ -420,77 +443,129 @@ def dataset_from_database(
                 }],
             }
 
-        return {
-            '@type': 'sarus_data_spec/sarus_data_spec.Schema',
-            'uuid': generate_uuid().hex,
-            'dataset': dataset['uuid'],
-            'name': name,
-            'type': {
-                # Slugname
-                'name': name.lower(),
-                'struct': {
-                    'fields': [
-                        {
-                            'name': 'sarus_data',
-                            'type': {
-                                'name': 'Union',
-                                'union': tables,
-                                'properties': {
-                                    'public_fields': '[]',
-                                },
-                            },
-                        },
-                        {
-                            'name': 'sarus_weights',
-                            'type': {
-                                'name': 'Integer',
-                                'integer': {
-                                    'min': '-9223372036854775808',
-                                    'max': '9223372036854775807',
-                                    'base': 'INT64',
-                                    'possible_values': []
-                                },
-                                'properties': {}
-                            },
-                        },
-                        {
-                            'name': 'sarus_is_public',
-                            'type': {
-                                'name': 'Boolean',
-                                'boolean': {},
-                                'properties': {},
-                            },
-                        },
-                        {
-                            'name': 'sarus_protected_entity',
-                            'type': {
-                                'name': 'Id',
-                                'id': {
-                                    'base': 'STRING',
-                                    'unique': False,
-                                },
-                                'properties': {},
-                            },
-                        },
-                    ],
-                },
-                'properties': {}
-            },
-            'protected': {
-                'label': 'data',
-                'paths': [],
-                'properties': {},
-            },
-            'properties': {
-                'max_max_multiplicity': '1',
-                'foreign_keys': '',
-                'primary_keys': '',
+        sarus_is_public = {
+            "name": "sarus_is_public",
+            "type": {
+                "boolean": {},
+                "name": "Boolean",
+                "properties": {}
             }
         }
 
-    def table(tab: sa.Table) -> dict:
+        sarus_privacy_unit = {
+            "name": "sarus_privacy_unit",
+            "type": {
+                "name": "Optional",
+                "optional": {
+                "type": {
+                    "id": {
+                    "base": "STRING",
+                    "unique": False
+                    },
+                    "name": "Id",
+                    "properties": {}
+                }
+                },
+                "properties": {}
+            }
+        }
+
+        sarus_weights = {
+            "name": "sarus_weights",
+            "type": {
+                "float": {
+                "base": "FLOAT64",
+                "max": 1.7976931348623157e+308,
+                "min": 0.0,
+                "possible_values": []
+                },
+                "name": "Float64",
+                "properties": {}
+            }
+        }
+        if any(have_admin):
+            return {
+                '@type': 'sarus_data_spec/sarus_data_spec.Schema',
+                'uuid': generate_uuid().hex,
+                'dataset': dataset['uuid'],
+                'name': name,
+                'type': {
+                    # Slugname
+                    'name': name.lower(),
+                    'struct': {
+                        'fields': [
+                            {
+                                'name': 'sarus_data',
+                                'type': {
+                                    'name': 'Union',
+                                    'union': tables,
+                                    'properties': {
+                                        'public_fields': '[]',
+                                    },
+                                },
+                            },
+                            sarus_is_public,
+                            sarus_privacy_unit,
+                            sarus_weights,
+                        ],
+                    },
+                    'properties': {}
+                },
+                'privacy_unit': {
+                    'label': 'sarus_data',
+                    'paths': [],
+                    'properties': {},
+                },
+                'properties': {
+                    'max_max_multiplicity': '1',
+                    'foreign_keys': '',
+                    'primary_keys': '',
+                }
+            }
+        else:
+            return {
+                '@type': 'sarus_data_spec/sarus_data_spec.Schema',
+                'uuid': generate_uuid().hex,
+                'dataset': dataset['uuid'],
+                'name': name,
+                'type': {
+                    # Slugname
+                    'name': name.lower(),
+                    'struct': {
+                        'fields': [
+                            {
+                                'name': 'sarus_data',
+                                'type': {
+                                    'name': 'Union',
+                                    'union': tables,
+                                    'properties': {
+                                        'public_fields': '[]',
+                                    },
+                                },
+                            }
+                        ],
+                    },
+                    'properties': {}
+                },
+                'privacy_unit': {
+                    'label': 'sarus_data',
+                    'paths': [],
+                    'properties': {},
+                },
+                'properties': {
+                    'max_max_multiplicity': '1',
+                    'foreign_keys': '',
+                    'primary_keys': '',
+                }
+            }
+
+
+    def table(tab: sa.Table) -> t.Tuple[dict, bool]:
         min_max_possible_values = compute_min_max_possible_values(tab)
-        return {
+        admin_cols = ['sarus_weights', 'sarus_is_public', 'sarus_privacy_unit']
+        col_names = [col.name for col in tab.columns]
+        has_admin = [admin_col in col_names for admin_col in admin_cols]
+        return ({
             'name': tab.name,
             'type': {
                 'name': 'Struct',
@@ -502,11 +577,12 @@ def dataset_from_database(
                             max=t.cast(t.Optional[str], min_max_possible_values[col.name]["max"]),
                             possible_values=t.cast(t.List[str], min_max_possible_values[col.name]["possible_values"])
                         ) for col in tab.columns
+                        if col.name not in admin_cols
                     ],
                 },
                 'properties': {},
             }
-        }
+        }, all(has_admin))
 
     def compute_min_max_possible_values(tab: sa.Table) -> Dict[str, Dict[str, Union[t.Optional[str], List[str]]]]:
         """Send 3 SQL queries for loading the bounds"""
