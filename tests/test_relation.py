@@ -178,7 +178,6 @@ def test_compose(extract_dataset):
     ]
 
     new_ds = extract_dataset.from_queries(queries)
-    print(new_ds.schema)
     new_query = """SELECT age, marital_status, COUNT(*) AS count_all
         FROM genx
         GROUP BY age, marital_status
@@ -194,9 +193,14 @@ def test_with_filed(extract_dataset):
     query = "SELECT age AS age, COUNT(*) AS count_all FROM extract.census GROUP BY age"
     rel = Relation.from_query(query, extract_dataset)
     new_field_name = "custom_field"
-    new_field_expr = "cast(0 as boolean)"
+    new_field_expr = "false"
     new_rel = rel.with_field(name=new_field_name, expr=new_field_expr)
     assert new_rel.schema() == '{custom_field: bool{false}, age: int[20 90] (UNIQUE), count_all: int[0 199]}'
+
+    new_field_name = "custom_null_field"
+    new_field_expr = "NULL"
+    new_rel = new_rel.with_field(name=new_field_name, expr=new_field_expr)
+    assert new_rel.schema() == '{custom_null_field: option(any), custom_field: bool{false}, age: int[20 90] (UNIQUE), count_all: int[0 199]}'
     # display_graph(new_rel.dot())
 
 def test_extra_queries(tables, engine):

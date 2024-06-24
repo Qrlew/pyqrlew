@@ -58,8 +58,6 @@ def test_from_queries():
     ]
 
     new_ds = dataset.from_queries(queries)
-    # for _, rel in new_ds.relations():
-    #     display_graph(rel.dot())
     genx = new_ds.my_schema.genx.relation()
     print(genx.schema())
 
