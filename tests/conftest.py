@@ -38,9 +38,6 @@ def queries(queries_path) -> List[str]:
 def engine():
     database = PostgreSQL()
     return database.engine()
-    # url = "postgresql+psycopg2://postgres:pyqrlew-db@localhost:5433/test_db"
-    # engine = create_engine(url, echo=True)
-    # return engine
 
 
 @pytest.fixture(scope="session", autouse=True)
