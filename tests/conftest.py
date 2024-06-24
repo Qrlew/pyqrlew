@@ -1,6 +1,7 @@
 from pathlib import Path
 import string
 from typing import List
+from pyqrlew.io.postgresql import PostgreSQL
 import pytest
 from sqlalchemy import (
     Column,
@@ -35,9 +36,11 @@ def queries(queries_path) -> List[str]:
 
 @pytest.fixture(scope="session", autouse=True)
 def engine():
-    url = "postgresql+psycopg2://postgres:pyqrlew-db@localhost:5433/test_db"
-    engine = create_engine(url, echo=True)
-    return engine
+    database = PostgreSQL()
+    return database.engine()
+    # url = "postgresql+psycopg2://postgres:pyqrlew-db@localhost:5433/test_db"
+    # engine = create_engine(url, echo=True)
+    # return engine
 
 
 @pytest.fixture(scope="session", autouse=True)
