@@ -58,8 +58,8 @@ def test_from_queries():
     ]
 
     new_ds = dataset.from_queries(queries)
-    for _, rel in new_ds.relations():
-        display_graph(rel.dot())
+    # for _, rel in new_ds.relations():
+    #     display_graph(rel.dot())
     genx = new_ds.my_schema.genx.relation()
     print(genx.schema())
 
@@ -84,10 +84,10 @@ def test_from_dp_compiled_queries():
     )
     
     dprel = dprel_and_event.relation()
-    display_graph(dprel.dot())
+    # display_graph(dprel.dot())
 
     new_rel = Relation.from_query(dprel.to_query(), dataset)
-    display_graph(new_rel.dot())
+    # display_graph(new_rel.dot())
 
 
 def test_from_database():
@@ -100,7 +100,7 @@ def test_from_database():
     paths_rels = ds.relations()
     for path, rel in paths_rels:
         print(path)
-        display_graph(rel.dot())
+        # display_graph(rel.dot())
 
 
 def test_from_str():
@@ -613,15 +613,4 @@ def test_from_str():
     
     query = 'SELECT COUNT(DISTINCT sarus_privacy_unit) FROM primary_table'
     rel = Relation.from_query(query, real_ds)
-    display_graph(rel.dot())
-
-    # tab_mapping = {
-    #     ('Transformed_schema', 'primary_public_table'): ('Transformed_schema', 'st51_bicdlwoy', 'bgpqlcws'),
-    #     ('Transformed_schema', 'primary_table'): ('Transformed_schema', 'st51_bicdlwoy', 'qqnhlkqe')
-    # }
-    # real_relations_dict = {tuple(path): rel for (path, rel) in real_ds.relations()}
-    # # sarus_relations_dict = dict(sarus_ds.relations())
-    # renamed_relations = [(sarus_path, real_relations_dict[real_path]) for sarus_path, real_path in tab_mapping.items()]
-
-    # renamed = rel.compose(renamed_relations)
-    # display_graph(renamed.dot())
+    # display_graph(rel.dot())
