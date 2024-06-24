@@ -167,8 +167,6 @@ def test_rename_fields(extract_dataset):
 
 
 def test_compose(extract_dataset):
-    for path, rel in extract_dataset.relations():
-        display_graph(rel.dot())
     queries = [
         (("dataset_name", "my_schema", "boomers",), "SELECT * FROM extract.census WHERE age >= 60"),
         (("dataset_name", "my_schema", "genx",), "SELECT * FROM extract.census WHERE age >= 40 AND age < 60"),
@@ -187,34 +185,10 @@ def test_compose(extract_dataset):
         ORDER BY age, marital_status 
     """
     rel = Relation.from_query(new_query, new_ds)
-    display_graph(rel.dot())
+    # display_graph(rel.dot())
     composed = rel.compose(relations)
     assert composed.schema() == '{age: int[40 60], marital_status: str{Divorced, Married-civ-spouse, Married-spouse-absent, Never-married, None, Separated, Widowed}, count_all: int[0 199]}'
-    display_graph(composed.dot())
-
-
-def test_renaming(extract_dataset):
-    queries = [
-        (("dataset_name", "my_schema", "boomers",), "SELECT * FROM extract.census WHERE age >= 60"),
-        (("dataset_name", "my_schema", "genx",), "SELECT * FROM extract.census WHERE age >= 40 AND age < 60"),
-        (("dataset_name", "my_schema", "millenials",), "SELECT * FROM extract.census WHERE age >= 30 AND age < 40"),
-        (("dataset_name", "my_schema", "genz",), "SELECT * FROM extract.census WHERE age < 30"),
-    ]
-    relations = [
-        (path, Relation.from_query(query, extract_dataset)) for (path, query) in queries
-    ]
-
-    new_ds = extract_dataset.from_queries(queries)
-    new_query = """SELECT age, marital_status, COUNT(*) AS count_all
-        FROM genx
-        GROUP BY age, marital_status
-        ORDER BY age, marital_status 
-    """
-    rel = Relation.from_query(new_query, new_ds)
-    display_graph(rel.dot())
-    composed = rel.compose(relations)
-    assert composed.schema() == '{age: int[40 60], marital_status: str{Divorced, Married-civ-spouse, Married-spouse-absent, Never-married, None, Separated, Widowed}, count_all: int[0 199]}'
-    display_graph(composed.dot())
+    # display_graph(composed.dot())
 
 def test_with_filed(extract_dataset):
     query = "SELECT age AS age, COUNT(*) AS count_all FROM extract.census GROUP BY age"
@@ -225,7 +199,7 @@ def test_with_filed(extract_dataset):
     assert new_rel.schema() == '{custom_field: bool{false}, age: int[20 90] (UNIQUE), count_all: int[0 199]}'
     # display_graph(new_rel.dot())
 
-def test_some_queries(tables, engine):
+def test_extra_queries(tables, engine):
     ds = Dataset.from_database("my_db", engine, schema_name=None)
     print(ds.relations())
     QUERIES = [
@@ -260,7 +234,7 @@ def test_some_queries(tables, engine):
         rel = Relation.from_query(query, ds)
         query = rel.to_query()
         print(query)
-        display_graph(rel.dot())
+        # display_graph(rel.dot())
 
 
 def test_writing_and_rewriting_many_times(tables, engine):
@@ -277,4 +251,4 @@ def test_writing_and_rewriting_many_times(tables, engine):
         print(query)
         with engine.connect() as conn:
             conn.execute(sa.text(query))
-        display_graph(rel.dot())
+        # display_graph(rel.dot())
