@@ -312,11 +312,17 @@ impl Relation {
 
     pub fn compose(&self, relations: Vec<(Vec<String>, Relation)>) -> Result<Self> {
         let outer_relations = self.deref();
+        println!("outer_relations schema: {}", outer_relations.schema()); 
         let inner_relations: Hierarchy<Arc<qrlew::Relation>> = relations
             .into_iter()
-            .map(|(path, rel)| (Identifier::from(path), rel.0))
+            .map(|(path, rel)| {
+                let qrel = rel.0;
+                println!("inner rel path: {} schema: {}", path.join(", "), qrel.schema()); 
+                (Identifier::from(path), qrel)
+            })
             .collect();
         let composed = outer_relations.compose(&inner_relations);
+        println!("composed schema: {}", composed.schema()); 
         Ok(Relation::new(Arc::new(composed)))
     }
 
