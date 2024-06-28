@@ -21,7 +21,7 @@ use std::sync::Arc;
 ///     dataset (str): a string representation of the Dataset.
 ///     schema (str): a json compatible string representation of its schema.
 ///     size (str): a json compatible string representation of its table's size.
-pub struct Dataset(data_spec::Dataset);
+pub struct Dataset(Arc<data_spec::Dataset>);
 
 impl Deref for Dataset {
     type Target = data_spec::Dataset;
@@ -33,7 +33,7 @@ impl Deref for Dataset {
 
 impl From<Dataset> for data_spec::Dataset {
     fn from(value: Dataset) -> Self {
-        value.0
+        value.deref().clone()
     }
 }
 
@@ -41,9 +41,9 @@ impl From<Dataset> for data_spec::Dataset {
 impl Dataset {
     #[new]
     pub fn new(dataset: &str, schema: &str, size: &str) -> Result<Self> {
-        Ok(Dataset(data_spec::Dataset::parse_from_dataset_schema_size(
+        Ok(Dataset(Arc::new(data_spec::Dataset::parse_from_dataset_schema_size(
             dataset, schema, size,
-        )?))
+        )?)))
     }
     #[getter]
     pub fn schema(&self) -> Result<String> {
@@ -76,13 +76,13 @@ impl Dataset {
         min: f64,
         max: f64,
     ) -> Result<Self> {
-        Ok(Dataset(self.0.with_range(
+        Ok(Dataset(Arc::new(self.deref().with_range(
             schema_name,
             table_name,
             field_name,
             min,
             max,
-        )?))
+        )?)))
     }
 
     /// Returns a new Dataset with a defined possible values for a given text column.
@@ -101,12 +101,12 @@ impl Dataset {
         field_name: &str,
         possible_values: Vec<String>,
     ) -> Result<Self> {
-        Ok(Dataset(self.0.with_possible_values(
+        Ok(Dataset(Arc::new(self.deref().with_possible_values(
             schema_name,
             table_name,
             field_name,
             &possible_values,
-        )?))
+        )?)))
     }
 
     /// Returns a new Dataset with a constraint on given column.
@@ -125,12 +125,12 @@ impl Dataset {
         field_name: &str,
         constraint: Option<&str>,
     ) -> Result<Self> {
-        Ok(Dataset(self.0.with_constraint(
+        Ok(Dataset(Arc::new(self.deref().with_constraint(
             schema_name,
             table_name,
             field_name,
             constraint,
-        )?))
+        )?)))
     }
 
     /// Returns the Dataset's Relations and their corresponding path
@@ -237,7 +237,7 @@ impl Dataset {
             .collect();
 
         let ds: data_spec::Dataset = (&result_relations?).try_into()?;
-        Ok(Dataset(ds))
+        Ok(Dataset(Arc::new(ds)))
     }
 
     pub fn __str__(&self) -> String {
