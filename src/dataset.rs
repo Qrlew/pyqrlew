@@ -155,17 +155,23 @@ impl Dataset {
     /// Returns:
     ///     Relation:
     pub fn relation(&self, query: &str, dialect: Option<Dialect>) -> Result<Relation> {
+        println!("FROM RELATION");
         let dialect = dialect.unwrap_or(Dialect::PostgreSql);
         let relations = self.deref().relations();
         match dialect {
             Dialect::PostgreSql => {
                 let translator = PostgreSqlTranslator;
+                println!("PARSING THE QUERY");
                 let query = sql::relation::parse_with_dialect(query, translator.dialect())?;
+                println!("QUERY WITH RELATIONS");
                 let query_with_relations = query.with(&relations);
-                Ok(Relation::new(Arc::new(relation::Relation::try_from((
+                println!("CREATING THE RELATION");
+                let rel =relation::Relation::try_from((
                     query_with_relations,
                     translator,
-                ))?)))
+                ))?;
+                println!("DONE!");
+                Ok(Relation::new(Arc::new(rel)))
             }
             Dialect::MsSql => {
                 let translator = MsSqlTranslator;

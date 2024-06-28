@@ -101,6 +101,7 @@ impl Relation {
     /// Returns:
     ///     Relation:
     pub fn from_query(query: &str, dataset: &Dataset, dialect: Option<Dialect>) -> Result<Self> {
+        println!("FROM QUERY");
         Ok(dataset.relation(query, dialect)?)
     }
 
