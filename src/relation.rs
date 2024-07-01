@@ -104,7 +104,26 @@ impl Relation {
     ///     Relation:
     pub fn from_query(query: &str, dataset: &Dataset, dialect: Option<Dialect>) -> Result<Self> {
         println!("FROM QUERY");
-        Ok(dataset.relation(query, dialect)?)
+
+        let result = panic::catch_unwind(|| {
+            // Code that may panic
+            dataset.relation(query, dialect)
+        });
+        match result {
+            Ok(Ok(rel)) => Ok(rel),
+            Ok(Err(err)) => Err(Error::Other(format!("Error caught: {}", err))),
+            Err(e) => {
+                // Handle panic and convert to Python error
+                let panic_info = if let Some(s) = e.downcast_ref::<&str>() {
+                    s.to_string()
+                } else if let Some(s) = e.downcast_ref::<String>() {
+                    s.clone()
+                } else {
+                    "Unknown panic".to_string()
+                };
+                Err(Error::Other(format!("Panic caught: {}", panic_info)))
+            }
+        }
     }
 
     /// String representation of the `Relation` in the default dialect

@@ -207,7 +207,9 @@ class Relation:
         Returns:
             Relation:
         """
-        return Relation(_Relation.from_query(query, dataset._dataset, dialect))
+        print("REL FROM QUERY")
+        rel = _Relation.from_query(query, dataset._dataset, dialect)
+        return Relation(rel)
 
     def to_query(self, dialect: t.Optional[Dialect]=None) -> str:
         """Returns an SQL representation of the Relation.
