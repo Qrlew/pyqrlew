@@ -311,7 +311,9 @@ class Relation:
             Relation: 
         """
         converted_relations = [(path, rel._relation) for (path, rel) in relations]
-        return Relation(self._relation.compose(converted_relations))
+        print("COMPOSING")
+        composed = self._relation.compose(converted_relations)
+        return Relation(composed)
 
     def rename_fields(self, fields: t.Iterable[t.Tuple[str, str]])  -> 'Relation':
         """It renames fields in the Relation

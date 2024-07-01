@@ -24,7 +24,6 @@ fn set_panic_hook() {
     }));
 }
 
-
 /// A Python module implemented in Rust.
 #[pymodule]
 fn pyqrlew(_py: Python, m: &PyModule) -> PyResult<()> {

@@ -14,6 +14,7 @@ pub enum Error {
     DifferentialPrivacy(differential_privacy::Error),
     Rewriting(rewriting::Error),
     MissingKey(MissingKeyError),
+    Other(String),
 }
 
 impl fmt::Display for Error {
@@ -27,6 +28,7 @@ impl fmt::Display for Error {
             Error::DifferentialPrivacy(err) => write!(f, "Differential privacy error: {}", err),
             Error::Rewriting(err) => write!(f, "Rewriting error: {}", err),
             Error::MissingKey(err) => write!(f, "Missing key error: {}", err),
+            Error::Other(err) => write!(f, "Other error: {}", err),
         }
     }
 }
@@ -42,6 +44,7 @@ impl error::Error for Error {
             Error::DifferentialPrivacy(err) => Some(err),
             Error::Rewriting(err) => Some(err),
             Error::MissingKey(err) => Some(err),
+            Error::Other(_) => None,
         }
     }
 }
