@@ -307,6 +307,7 @@ impl Relation {
     ///
     /// Returns:
     ///     str:
+    #[pyo3(signature = (dialect=None))]
     pub fn to_query(&self, dialect: Option<Dialect>) -> String {
         let relation = &*(self.0);
         let dialect = dialect.unwrap_or(Dialect::PostgreSql);
@@ -333,45 +334,19 @@ impl Relation {
     }
 
     pub fn compose(&self, relations: Vec<(Vec<String>, Relation)>) -> Result<Self> {
-
-        let result = panic::catch_unwind(AssertUnwindSafe(|| {
-            // Code that may panic
-            let outer_relations = self.deref();
-            println!("outer_relations schema: {}", outer_relations.schema()); 
-            let inner_relations: Hierarchy<Arc<qrlew::Relation>> = relations
-            .into_iter()
-            .map(|(path, rel)| {
-                let qrel = rel.0;
-                println!("inner rel path: {} schema: {}", path.join(", "), qrel.schema()); 
-                (Identifier::from(path), qrel)
-            })
-            .collect();
-            let composed = outer_relations.compose(&inner_relations);
-            println!("composed schema: {}", composed.schema()); 
-            Relation::new(Arc::new(composed))
-        }));
-
-        match result {
-            Ok(rel) => Ok(rel),
-            Err(e) => {
-                // Handle panic and convert to Python error
-                let panic_info = if let Some(s) = e.downcast_ref::<&str>() {
-                    s.to_string()
-                } else if let Some(s) = e.downcast_ref::<String>() {
-                    s.clone()
-                } else {
-                    "Unknown panic".to_string()
-                };
-                Err(Error::Other(format!("Panic caught: {}", panic_info)))
-            }
-        }
-    }
-
-    pub fn with_field(&self, name: &str, expr: &str) -> Result<Self> {
-        let expr = parse_expr(expr)?;
-        Ok(Relation::new(Arc::new(
-            self.deref().clone().with_field(name, (&expr).try_into()?),
-        )))
+        let outer_relations = self.deref();
+        println!("outer_relations schema: {}", outer_relations.schema()); 
+        let inner_relations: Hierarchy<Arc<qrlew::Relation>> = relations
+        .into_iter()
+        .map(|(path, rel)| {
+            let qrel = rel.0;
+            println!("inner rel path: {} schema: {}", path.join(", "), qrel.schema()); 
+            (Identifier::from(path), qrel)
+        })
+        .collect();
+        let composed = outer_relations.compose(&inner_relations);
+        println!("composed schema: {}", composed.schema()); 
+        Ok(Relation::new(Arc::new(composed)))
     }
 }
 
