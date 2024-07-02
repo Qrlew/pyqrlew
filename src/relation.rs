@@ -2,7 +2,7 @@ use crate::{
     dataset::Dataset,
     dialect::Dialect,
     dp_event::RelationWithDpEvent,
-    error::{MissingKeyError, Result, Error},
+    error::{MissingKeyError, Result},
 };
 use pyo3::prelude::*;
 use qrlew::{
@@ -17,13 +17,11 @@ use qrlew::{
     hierarchy::Hierarchy,
     privacy_unit_tracking::{self, PrivacyUnit},
     relation::{self, Variant},
-    sql::parse_expr,
     synthetic_data::SyntheticData,
 };
 use qrlew_sarus::protobuf::{print_to_string, type_};
 use std::{collections::HashMap, ops::Deref, str, sync::Arc};
 
-use std::panic::{self, AssertUnwindSafe};
 
 /// A Relation is a Dataset transformed by a SQL query
 #[pyclass(name = "_Relation")]
@@ -74,8 +72,8 @@ impl<'a> From<PrivacyUnitType<'a>> for PrivacyUnit {
 /// An Enum for the privacy unit tracking propagation
 /// Soft will protect only when it does not affect the meaning of the original query and fail otherwise.
 /// Hard will protect at all cost. It will succeed most of the time.
-#[pyclass]
-#[derive(Clone)]
+#[pyclass(eq, eq_int)]
+#[derive(Clone, PartialEq)]
 pub enum Strategy {
     Soft,
     Hard,
@@ -102,28 +100,10 @@ impl Relation {
     ///
     /// Returns:
     ///     Relation:
+    #[pyo3(signature = (query, dataset, dialect=None))]
     pub fn from_query(query: &str, dataset: &Dataset, dialect: Option<Dialect>) -> Result<Self> {
         println!("FROM QUERY");
-
-        let result = panic::catch_unwind(|| {
-            // Code that may panic
-            dataset.relation(query, dialect)
-        });
-        match result {
-            Ok(Ok(rel)) => Ok(rel),
-            Ok(Err(err)) => Err(Error::Other(format!("Error caught: {}", err))),
-            Err(e) => {
-                // Handle panic and convert to Python error
-                let panic_info = if let Some(s) = e.downcast_ref::<&str>() {
-                    s.to_string()
-                } else if let Some(s) = e.downcast_ref::<String>() {
-                    s.clone()
-                } else {
-                    "Unknown panic".to_string()
-                };
-                Err(Error::Other(format!("Panic caught: {}", panic_info)))
-            }
-        }
+        Ok(dataset.relation(query, dialect)?)
     }
 
     /// String representation of the `Relation` in the default dialect
@@ -179,6 +159,7 @@ impl Relation {
     /// Returns:
     ///     RelationWithDpEvent:
     ///
+    #[pyo3(signature = (dataset, privacy_unit, epsilon_delta, max_multiplicity=None, max_multiplicity_share=None, synthetic_data=None, strategy=None))]
     pub fn rewrite_as_privacy_unit_preserving<'a>(
         &'a self,
         dataset: &'a Dataset,
@@ -250,6 +231,7 @@ impl Relation {
     /// Returns:
     ///     RelationWithDpEvent:
     ///
+    #[pyo3(signature = (dataset, privacy_unit, epsilon_delta, max_multiplicity=None, max_multiplicity_share=None, synthetic_data=None))]
     pub fn rewrite_with_differential_privacy<'a>(
         &'a self,
         dataset: &'a Dataset,
