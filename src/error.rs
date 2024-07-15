@@ -1,6 +1,6 @@
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::PyErr;
-use qrlew::{differential_privacy, relation, rewriting, sql, hierarchy};
+use qrlew::{differential_privacy, relation, rewriting, sql};
 use qrlew_sarus::{data_spec, protobuf};
 use std::{error, fmt, result};
 
@@ -55,12 +55,6 @@ impl From<differential_privacy::Error> for Error {
 
 impl From<rewriting::Error> for Error {
     fn from(err: rewriting::Error) -> Error {
-        Error(Box::new(err))
-    }
-}
-
-impl From<hierarchy::Error> for Error {
-    fn from(err: hierarchy::Error) -> Error {
         Error(Box::new(err))
     }
 }
