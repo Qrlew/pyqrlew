@@ -120,6 +120,7 @@ def test_rewrite_as_privacy_unit_preserving_hard(extract_dataset):
         )
         assert e_info == "UnreachableProperty: privacy_unit_preserving is unreachable"
 
+
 def test_rewrite_with_differential_privacy(extract_dataset):
     query = "SELECT age, COUNT(*) FROM extract.census GROUP BY age"
     rel = Relation.from_query(query, extract_dataset)
