@@ -9,7 +9,13 @@ use qrlew::{
     ast,
     data_type::DataTyped,
     dialect_translation::{
-        bigquery::BigQueryTranslator, mssql::MsSqlTranslator, postgresql::PostgreSqlTranslator,
+        bigquery::BigQueryTranslator,
+        mssql::MsSqlTranslator,
+        postgresql::PostgreSqlTranslator,
+        mysql::MySqlTranslator,
+        hive::HiveTranslator,
+        databricks::DatabricksTranslator,
+        redshiftsql::RedshiftSqlTranslator,
         RelationWithTranslator,
     },
     differential_privacy::DpParameters,
@@ -298,6 +304,18 @@ impl Relation {
             }
             Dialect::BigQuery => {
                 ast::Query::from(RelationWithTranslator(&relation, BigQueryTranslator)).to_string()
+            }
+            Dialect::MySql => {
+                ast::Query::from(RelationWithTranslator(&relation, MySqlTranslator)).to_string()
+            }
+            Dialect::Hive => {
+                ast::Query::from(RelationWithTranslator(&relation, HiveTranslator)).to_string()
+            }
+            Dialect::Databricks => {
+                ast::Query::from(RelationWithTranslator(&relation, DatabricksTranslator)).to_string()
+            }
+            Dialect::RedshiftSql => {
+                ast::Query::from(RelationWithTranslator(&relation, RedshiftSqlTranslator)).to_string()
             }
         }
     }

@@ -67,6 +67,10 @@ class Dialect(enum.Enum):
     PostgreSql=1
     MsSql=2
     BigQuery=3
+    MySql=4
+    Hive=5
+    Databricks=6
+    RedshiftSql=7
 
 class Strategy(enum.Enum):
     Soft=1

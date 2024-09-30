@@ -2,6 +2,8 @@ import tempfile
 import os
 import platform
 import subprocess
+import typing as t
+from .pyqrlew import Dialect
 
 MAGENTA_COLOR = '\033[35m'
 BLUE_COLOR = '\033[34m'
@@ -83,3 +85,18 @@ def display_graph(dot_string):
             subprocess.run(['xdg-open', html_path])
     finally:
         pass
+
+def tables_prefix(query: str, dialect: Dialect) -> t.List[str]:
+    """Util to extract the prefix of fully qualified table names from a query.
+    Only base tables are considered. If table names are quoted, the quoting
+    must be coherent with the dialect.
+
+    Args:
+        query (str):
+        dialect (Dialect): 
+
+    Returns:
+        t.List[str]: prefix of table names
+    """
+    from pyqrlew.pyqrlew import tables_prefix
+    return tables_prefix(query, dialect)
