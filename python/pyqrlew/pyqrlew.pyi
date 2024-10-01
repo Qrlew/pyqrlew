@@ -75,3 +75,6 @@ class Dialect(enum.Enum):
 class Strategy(enum.Enum):
     Soft=1
     Hard=2
+
+
+def tables_prefix(query: str, dialect: 'Dialect') -> t.List[str]: ...

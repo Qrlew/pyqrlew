@@ -10,7 +10,6 @@ crate-type = ["cdylib"]
 
 [dependencies]
 pyo3 = { version = "0.21", features = ["abi3-py38", "gil-refs"] }
-qrlew = { path = "/Users/andicuko/Documents/Projects/qrlew" }
-sqlparser = { features = ["visitor"] }
-qrlew-sarus = { path = "/Users/andicuko/Documents/Projects/sarus" }
+qrlew = "0.9.24"
+qrlew-sarus = "0.9.21"
 serde_json = "1.0"
