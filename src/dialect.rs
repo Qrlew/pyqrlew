@@ -7,4 +7,8 @@ pub enum Dialect {
     PostgreSql,
     MsSql,
     BigQuery,
+    MySql,
+    Hive,
+    Databricks,
+    RedshiftSql,
 }

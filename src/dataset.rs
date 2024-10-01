@@ -3,7 +3,13 @@ use pyo3::prelude::*;
 use qrlew::{
     builder::With,
     dialect_translation::{
-        bigquery::BigQueryTranslator, mssql::MsSqlTranslator, postgresql::PostgreSqlTranslator,
+        bigquery::BigQueryTranslator,
+        mssql::MsSqlTranslator,
+        postgresql::PostgreSqlTranslator,
+        mysql::MySqlTranslator,
+        hive::HiveTranslator,
+        databricks::DatabricksTranslator,
+        redshiftsql::RedshiftSqlTranslator,
         QueryToRelationTranslator,
     },
     hierarchy::Hierarchy,
@@ -185,6 +191,42 @@ impl Dataset {
                     translator,
                 ))?)))
             }
+            Dialect::MySql => {
+                let translator = MySqlTranslator;
+                let query = sql::relation::parse_with_dialect(query, translator.dialect())?;
+                let query_with_relations = query.with(&relations);
+                Ok(Relation::new(Arc::new(relation::Relation::try_from((
+                    query_with_relations,
+                    translator,
+                ))?)))
+            }
+            Dialect::Hive => {
+                let translator = HiveTranslator;
+                let query = sql::relation::parse_with_dialect(query, translator.dialect())?;
+                let query_with_relations = query.with(&relations);
+                Ok(Relation::new(Arc::new(relation::Relation::try_from((
+                    query_with_relations,
+                    translator,
+                ))?)))
+            }
+            Dialect::Databricks => {
+                let translator = DatabricksTranslator;
+                let query = sql::relation::parse_with_dialect(query, translator.dialect())?;
+                let query_with_relations = query.with(&relations);
+                Ok(Relation::new(Arc::new(relation::Relation::try_from((
+                    query_with_relations,
+                    translator,
+                ))?)))
+            }
+            Dialect::RedshiftSql => {
+                let translator = RedshiftSqlTranslator;
+                let query = sql::relation::parse_with_dialect(query, translator.dialect())?;
+                let query_with_relations = query.with(&relations);
+                Ok(Relation::new(Arc::new(relation::Relation::try_from((
+                    query_with_relations,
+                    translator,
+                ))?)))
+            }
         }
     }
 
@@ -222,6 +264,34 @@ impl Dataset {
                 }
                 Dialect::BigQuery => {
                     let translator = BigQueryTranslator;
+                    let parsed = sql::relation::parse_with_dialect(query, translator.dialect())?;
+                    let query_with_rel = parsed.with(&relations);
+                    let rel = relation::Relation::try_from((query_with_rel, translator))?;
+                    Ok((path.clone(), Arc::new(rel)))
+                }
+                Dialect::MySql => {
+                    let translator = MySqlTranslator;
+                    let parsed = sql::relation::parse_with_dialect(query, translator.dialect())?;
+                    let query_with_rel = parsed.with(&relations);
+                    let rel = relation::Relation::try_from((query_with_rel, translator))?;
+                    Ok((path.clone(), Arc::new(rel)))
+                }
+                Dialect::Hive => {
+                    let translator = HiveTranslator;
+                    let parsed = sql::relation::parse_with_dialect(query, translator.dialect())?;
+                    let query_with_rel = parsed.with(&relations);
+                    let rel = relation::Relation::try_from((query_with_rel, translator))?;
+                    Ok((path.clone(), Arc::new(rel)))
+                }
+                Dialect::Databricks => {
+                    let translator = DatabricksTranslator;
+                    let parsed = sql::relation::parse_with_dialect(query, translator.dialect())?;
+                    let query_with_rel = parsed.with(&relations);
+                    let rel = relation::Relation::try_from((query_with_rel, translator))?;
+                    Ok((path.clone(), Arc::new(rel)))
+                }
+                Dialect::RedshiftSql => {
+                    let translator = RedshiftSqlTranslator;
                     let parsed = sql::relation::parse_with_dialect(query, translator.dialect())?;
                     let query_with_rel = parsed.with(&relations);
                     let rel = relation::Relation::try_from((query_with_rel, translator))?;
