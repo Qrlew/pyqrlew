@@ -74,9 +74,10 @@ impl Dataset {
     ///     max (float): max range
     /// Returns:
     ///     Dataset:
+    #[pyo3(signature = (schema_name, table_name, field_name, min, max))]
     pub fn with_range(
         &self,
-        schema_name: &str,
+        schema_name: Option<&str>,
         table_name: &str,
         field_name: &str,
         min: f64,
@@ -100,9 +101,10 @@ impl Dataset {
     ///     possible_values (Sequence[str]): a sequence with wanted possible values
     /// Returns:
     ///     Dataset:
+    #[pyo3(signature = (schema_name, table_name, field_name, possible_values))]
     pub fn with_possible_values(
         &self,
-        schema_name: &str,
+        schema_name: Option<&str>,
         table_name: &str,
         field_name: &str,
         possible_values: Vec<String>,
@@ -124,9 +126,10 @@ impl Dataset {
     ///     constraint (Optional[str]):  Unique or PrimaryKey
     /// Returns:
     ///     Dataset:
+    #[pyo3(signature = (schema_name, table_name, field_name, constraint))]
     pub fn with_constraint(
         &self,
-        schema_name: &str,
+        schema_name: Option<&str>,
         table_name: &str,
         field_name: &str,
         constraint: Option<&str>,
