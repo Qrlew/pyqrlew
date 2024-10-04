@@ -1,4 +1,5 @@
 """Module containing wrappers around rust objects and some utils"""
+from collections import namedtuple
 from pyqrlew.typing import PrivacyUnit, SyntheticData, DpEvent
 from .pyqrlew import _Dataset, _Relation, _RelationWithDpEvent, Dialect, Strategy
 import typing as t 
@@ -89,8 +90,11 @@ class Dataset:
         """
         return dataset_from_database(name, engine, schema_name, ranges, possible_values_threshold)
 
-    def __getattr__(dataset: 'Dataset', schema: str) -> 'Schema':
-        return Schema(dataset, schema)
+    def __getattr__(dataset: 'Dataset', schema_or_table: str) -> t.Union['Schema', 'Table']:
+        if has_schema_name(json.loads(dataset.schema), schema_or_table):
+            return Schema(dataset, schema=schema_or_table)
+        else:
+            return Table(dataset, schema=None, table=schema_or_table)
 
     @property
     def schema(self) -> str:
@@ -100,7 +104,7 @@ class Dataset:
     def size(self) -> t.Optional[str]:
         return self._dataset.size
     
-    def with_range(self, schema_name: str, table_name: str, field_name: str, min: float, max: float) -> 'Dataset':
+    def with_range(self, schema_name: t.Optional[str], table_name: str, field_name: str, min: float, max: float) -> 'Dataset':
         """Returns a new Dataset with a defined range for a given numeric column. Check out more `here! <https://qrlew.readthedocs.io/en/latest/tutorials/getting_started.html#optionally-declare-value-ranges-and-unique-constraints>`_
 
         Args:
@@ -114,7 +118,7 @@ class Dataset:
         """
         return Dataset(self._dataset.with_range(schema_name, table_name, field_name, min, max))
     
-    def with_possible_values(self, schema_name: str, table_name: str, field_name: str, possible_values: t.Iterable[str]) -> 'Dataset':
+    def with_possible_values(self, schema_name: t.Optional[str], table_name: str, field_name: str, possible_values: t.Iterable[str]) -> 'Dataset':
         """Returns a new Dataset with a defined possible values for a given text column. Check out more `here! <https://qrlew.readthedocs.io/en/latest/tutorials/getting_started.html#optionally-declare-value-ranges-and-unique-constraints>`_
 
         Args:
@@ -127,7 +131,7 @@ class Dataset:
         """
         return Dataset(self._dataset.with_possible_values(schema_name, table_name, field_name, possible_values))
     
-    def with_constraint(self, schema_name: str, table_name: str, field_name: str, constraint: t.Optional[str]) -> 'Dataset':
+    def with_constraint(self, schema_name: t.Optional[str], table_name: str, field_name: str, constraint: t.Optional[str]) -> 'Dataset':
         """Returns a new Dataset with a constraint on given column. Check out more `here! <https://qrlew.readthedocs.io/en/latest/tutorials/getting_started.html#optionally-declare-value-ranges-and-unique-constraints>`_
         
         Args:
@@ -424,10 +428,10 @@ def dataset_from_database(
         of the schema
         """
 
-        tables_and_have_admin = [table(metadata.tables[name]) for name in metadata.tables]
-        have_admin = [table_and_has_admin[1] for table_and_has_admin in tables_and_have_admin]
+        tables_type = [table(metadata.tables[name]) for name in metadata.tables]
+        has_admin = any([tab.has_admin for tab in tables_type])
 
-        tables = {"fields": [table_and_has_admin[0] for table_and_has_admin in tables_and_have_admin]}
+        tables = {"fields": [tab.type_ for tab in tables_type]}
 
         if schema_name is not None:
             tables = {
@@ -483,7 +487,7 @@ def dataset_from_database(
                 "properties": {}
             }
         }
-        if any(have_admin):
+        if has_admin:
             return {
                 '@type': 'sarus_data_spec/sarus_data_spec.Schema',
                 'uuid': generate_uuid().hex,
@@ -529,43 +533,21 @@ def dataset_from_database(
                 'dataset': dataset['uuid'],
                 'name': name,
                 'type': {
-                    # Slugname
-                    'name': name.lower(),
-                    'struct': {
-                        'fields': [
-                            {
-                                'name': 'sarus_data',
-                                'type': {
-                                    'name': 'Union',
-                                    'union': tables,
-                                    'properties': {
-                                        'public_fields': '[]',
-                                    },
-                                },
-                            }
-                        ],
+                    'name': 'Union',
+                    'union': tables,
+                    'properties': {
+                        'public_fields': '[]',
                     },
-                    'properties': {}
                 },
-                'privacy_unit': {
-                    'label': 'sarus_data',
-                    'paths': [],
-                    'properties': {},
-                },
-                'properties': {
-                    'max_max_multiplicity': '1',
-                    'foreign_keys': '',
-                    'primary_keys': '',
-                }
             }
 
 
-    def table(tab: sa.Table) -> t.Tuple[dict, bool]:
+    def table(tab: sa.Table) -> TableType:
         min_max_possible_values = compute_min_max_possible_values(tab)
         admin_cols = ['sarus_weights', 'sarus_is_public', 'sarus_privacy_unit']
         col_names = [col.name for col in tab.columns]
         has_admin = [admin_col in col_names for admin_col in admin_cols]
-        return ({
+        type_ = {
             'name': tab.name,
             'type': {
                 'name': 'Struct',
@@ -582,7 +564,8 @@ def dataset_from_database(
                 },
                 'properties': {},
             }
-        }, all(has_admin))
+        }
+        return TableType(type_, all(has_admin))
 
     def compute_min_max_possible_values(tab: sa.Table) -> Dict[str, Dict[str, Union[t.Optional[str], List[str]]]]:
         """Send 3 SQL queries for loading the bounds"""
@@ -884,6 +867,26 @@ def dataset_from_database(
     return Dataset.from_str(json.dumps(dataset_dict), json.dumps(schema_dict), json.dumps(size_dict))
 
 
+def schema_data_type(schema_dict: dict) -> dict:
+    schema_type_ = schema_dict['type']
+    if "stuct" in schema_type_:
+        return schema_type_["struct"]["fields"][0]['type']
+    return schema_type_
+
+def has_schema_name(schema_dict: dict, schema_name: str) -> bool:
+    """It checks if the dataset schema has an sql schema called as schema_name."""
+    fields = schema_data_type(schema_dict)['union']['fields']
+    for field in fields:
+        if field["name"] == schema_name and "union" in field["type"]:
+            return True
+    return False
+
+
+@dataclass
+class TableType:
+    type_: dict
+    has_admin: bool
+
 
 # A method to get select a schema
 def schema(dataset: Dataset, schema: str) -> 'Schema':
@@ -901,7 +904,7 @@ class Schema:
 @dataclass
 class Table:
     dataset: Dataset
-    schema: str
+    schema: t.Optional[str]
     table: str
 
     def __getattr__(self, column: str) -> 'Column':
@@ -911,13 +914,19 @@ class Table:
         return next(
             rel
             for (path, rel) in self.dataset.relations()
-            if path[1]==self.schema and path[2]==self.table
+            if path[1:]==self.path()
         )
+    
+    def path(self) -> t.List[str]:
+        if self.schema:
+            return [self.schema, self.table]
+        else:
+            return [self.table]
 
 @dataclass
 class Column:
     dataset: Dataset
-    schema: str
+    schema: t.Optional[str]
     table: str
     column: str
 

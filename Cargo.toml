@@ -1,6 +1,6 @@
 [package]
 name = "pyqrlew"
-version = "0.9.24"
+version = "0.9.25"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -11,5 +11,5 @@ crate-type = ["cdylib"]
 [dependencies]
 pyo3 = { version = "0.21", features = ["abi3-py38", "gil-refs"] }
 qrlew = "0.9.24"
-qrlew-sarus = "0.9.21"
+qrlew-sarus = "0.9.24"
 serde_json = "1.0"

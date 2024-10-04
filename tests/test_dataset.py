@@ -16,6 +16,13 @@ def test_ranges():
     print(relation.schema())
     assert(relation.schema()=='{age: int[20 42]}')
 
+def test_ranges_with_ds_from_engine(tables, engine):
+    ds =  Dataset.from_database('ds_name', engine, None)
+    new_dataset = ds.primary_public_table.id.with_range(-10.0, 13.0)
+    relation = new_dataset.relation('SELECT id FROM primary_public_table')
+    assert(relation.schema()=='{id: int[-10 13]}')
+
+
 # pytest -s tests/test_dataset.py::test_possible_values
 def test_possible_values():
     """Test the consistency of results for queries stored in a file."""
@@ -26,6 +33,13 @@ def test_possible_values():
     print(relation.schema())
     assert(relation.schema()=='{workclass: str{Local-gov, Private}}')
 
+def test_possible_values_with_ds_from_engine(tables, engine):
+    """Test the consistency of results for queries stored in a file."""
+    ds =  Dataset.from_database('ds_name', engine, None)
+    new_dataset = ds.primary_public_table.text.with_possible_values(["A", "B", "C"])
+    relation = new_dataset.relation('SELECT "text" FROM primary_public_table')
+    assert(relation.schema()=='{text: str{A, B, C}}')
+
 # pytest -s tests/test_dataset.py::test_constraint
 def test_constraint():
     """Test the consistency of results for queries stored in a file."""
@@ -35,6 +49,12 @@ def test_constraint():
     relation = new_dataset.relation('SELECT age FROM extract.census')
     print(relation.schema())
     assert(relation.schema()=='{age: int[20 90] (UNIQUE)}')
+
+def test_constraint_with_ds_from_engine(tables, engine):
+    ds =  Dataset.from_database('ds_name', engine, None)
+    new_dataset = ds.primary_public_table.id.with_unique_constraint()
+    relation = new_dataset.relation('SELECT id FROM primary_public_table')
+    assert(relation.schema()=='{id: int (UNIQUE)}')
 
 # pytest -s tests/test_dataset.py::test_relation
 def test_relation():
