@@ -156,6 +156,8 @@ impl Relation {
     ///     max_multiplicity_share (Optional[float]): maximum number of rows per privacy unit in relative terms
     ///         w.r.t. the dataset size. The actual max_multiplicity used to bound the PU contribution will be
     ///         minimum(max_multiplicity, max_multiplicity_share*dataset.size).
+    ///     max_privacy_unit_groups (Optional[int]): maximum number of groups a privacy unit can contribute to.
+    ///         Is the Cu parameter in the [Wilson's](https://arxiv.org/abs/1909.01917) paper.
     ///     synthetic_data (Optional[Sequence[Tuple[Sequence[str],Sequence[str]]]]): Sequence of pairs
     ///         of original table path and its corresponding synthetic version. Each table must be specified.
     ///         (e.g.: (["retail_schema", "features"], ["retail_schema", "features_synthetic"])).
@@ -170,6 +172,7 @@ impl Relation {
         epsilon_delta: HashMap<&'a str, f64>,
         max_multiplicity: Option<f64>,
         max_multiplicity_share: Option<f64>,
+        max_privacy_unit_groups: Option<u64>,
         synthetic_data: Option<Vec<(Vec<&'a str>, Vec<&'a str>)>>,
         strategy: Option<Strategy>,
     ) -> Result<RelationWithDpEvent> {
@@ -202,6 +205,9 @@ impl Relation {
                 dp_parameters =
                     dp_parameters.with_privacy_unit_max_multiplicity_share(max_multiplicity_share);
             }
+            if let Some(max_privacy_unit_groups) = max_privacy_unit_groups {
+                dp_parameters = dp_parameters.with_max_privacy_unit_groups(max_privacy_unit_groups)
+            }
             dp_parameters
         };
         let relation_with_dp_event = relation.rewrite_as_privacy_unit_preserving(
@@ -227,6 +233,8 @@ impl Relation {
     ///     max_multiplicity_share (Optional[float]): maximum number of rows per privacy unit in relative terms
     ///         w.r.t. the dataset size. The actual max_multiplicity used to bound the PU contribution will be
     ///         minimum(max_multiplicity, max_multiplicity_share*dataset.size).
+    ///     max_privacy_unit_groups (Optional[int]): maximum number of groups a privacy unit can contribute to.
+    ///         Is the Cu parameter in the [Wilson's](https://arxiv.org/abs/1909.01917) paper.
     ///     synthetic_data (Optional[Sequence[Tuple[Sequence[str],Sequence[str]]]]): Sequence of pairs
     ///         of original table path and its corresponding synthetic version. Each table must be specified.
     ///         (e.g.: (["retail_schema", "features"], ["retail_schema", "features_synthetic"])).
@@ -241,6 +249,7 @@ impl Relation {
         epsilon_delta: HashMap<&'a str, f64>,
         max_multiplicity: Option<f64>,
         max_multiplicity_share: Option<f64>,
+        max_privacy_unit_groups: Option<u64>,
         synthetic_data: Option<Vec<(Vec<&'a str>, Vec<&'a str>)>>,
     ) -> Result<RelationWithDpEvent> {
         let relation = self.deref().clone();
@@ -272,6 +281,9 @@ impl Relation {
                 dp_parameters =
                     dp_parameters.with_privacy_unit_max_multiplicity_share(max_multiplicity_share);
             }
+            if let Some(max_privacy_unit_groups) = max_privacy_unit_groups {
+                dp_parameters = dp_parameters.with_max_privacy_unit_groups(max_privacy_unit_groups)
+            } 
             dp_parameters
         };
         let relation_with_dp_event = relation.rewrite_with_differential_privacy(
@@ -415,6 +427,7 @@ mod tests {
                     budget.clone(),
                     None,
                     None,
+                    None,
                     synthetic_data.clone(),
                 )
                 .unwrap();
@@ -431,6 +444,7 @@ mod tests {
                     &dataset,
                     privacy_unit.clone(),
                     budget.clone(),
+                    None,
                     None,
                     None,
                     None,

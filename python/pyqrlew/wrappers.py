@@ -232,6 +232,7 @@ class Relation:
         epsilon_delta: t.Dict[str, float],
         max_multiplicity: t.Optional[float]=None,
         max_multiplicity_share: t.Optional[float]=None,
+        max_privacy_unit_groups: t.Optional[int]=None,
         synthetic_data: t.Optional[SyntheticData]=None,
         strategy: t.Optional[Strategy]=None,
     ) -> 'RelationWithDpEvent':
@@ -261,6 +262,7 @@ class Relation:
             epsilon_delta,
             max_multiplicity,
             max_multiplicity_share,
+            max_privacy_unit_groups,
             synthetic_data,
             strategy
         ))
@@ -272,6 +274,7 @@ class Relation:
         epsilon_delta: t.Dict[str, float],
         max_multiplicity: t.Optional[float]=None,
         max_multiplicity_share: t.Optional[float]=None,
+        max_privacy_unit_groups: t.Optional[int]=None,
         synthetic_data: t.Optional[SyntheticData]=None,
     ) -> 'RelationWithDpEvent':
         """It transforms a Relation into its differentially private equivalent. Check out more `here! <https://qrlew.readthedocs.io/en/latest/tutorials/rewrite_with_dp.html#rewritting-with-dp>`_
@@ -299,6 +302,7 @@ class Relation:
             epsilon_delta,
             max_multiplicity,
             max_multiplicity_share,
+            max_privacy_unit_groups,
             synthetic_data
         ))
 

@@ -36,6 +36,7 @@ class _Relation:
         epsilon_delta: t.Dict[str, float],
         max_multiplicity: t.Optional[float]=None,
         max_multiplicity_share: t.Optional[float]=None,
+        max_privacy_unit_groups: t.Optional[int]=None,
         synthetic_data: t.Optional[SyntheticData]=None,
         strategy: t.Optional['Strategy']=None
     ) -> '_RelationWithDpEvent': ...
@@ -46,6 +47,7 @@ class _Relation:
         epsilon_delta: t.Dict[str, float],
         max_multiplicity: t.Optional[float]=None,
         max_multiplicity_share: t.Optional[float]=None,
+        max_privacy_unit_groups: t.Optional[int]=None,
         synthetic_data: t.Optional[SyntheticData]=None
     ) -> '_RelationWithDpEvent': ...
     def with_field(self, name: str, expr: str) -> '_Relation': ...
